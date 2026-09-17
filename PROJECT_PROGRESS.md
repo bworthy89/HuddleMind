@@ -3,7 +3,7 @@
 **Repository:** `bworthy89/HuddleMind`  
 **Current Phase:** Milestone 2 — Watch the Dynasty
 
-**Current Status:** 🟡 Creation/modification/rename handling verified; shared-helper checkpoint pending
+**Current Status:** 🟡 Missing-file recovery and main-loop cleanup verified; cleanup checkpoint pending
 
 **Last Updated:** 2026-09-17
 
@@ -78,7 +78,7 @@ The project owner wrote and ran save discovery incrementally. The cleaned-up scr
 
 ### Immediate next step
 
-Commit the creation/rename support and shared `queue_change` refactor. Discovery checkpoint `344df29` and basic watcher checkpoint `25f05a7` were pushed successfully according to owner output. Continue file-access recovery lessons afterward; filesystem notifications alone do not establish meaningful save-content changes.
+Commit the main-loop `finally` cleanup and its test record. Checkpoints `344df29`, `25f05a7`, and `8469844` were pushed successfully according to owner output. Continue broader file-access recovery lessons afterward; filesystem notifications alone do not establish meaningful save-content changes.
 
 ---
 
@@ -245,7 +245,9 @@ HuddleMind can find the configured CFB27 save directory and list candidate dynas
 
 `bridge/watch_dynasty.py` uses a handler class, a pending-event dictionary, `time.monotonic()`, and a lock shared with the main polling loop. It prints `st_mtime_ns` and `st_size` after a quiet period. The owner observed an in-game `DYNASTY-TULANENEW-AUTOSAVE` event with timestamp `1789668845088441100` and size `9646981` bytes. Tests are owner-run evidence, not an independent Codex runtime pass.
 
-An initial startup run emitted events for all 11 candidates; a later startup did not repeat that behavior. Cause unknown. No content-change filter or startup suppression was added. Creation, modification, and rename destinations now share `queue_change`. Tests verified an empty file, a temporary-name-to-dynasty rename, a matching-name directory being ignored, and the refactored create/modify/rename sequence (0 bytes, then 27 bytes, then unchanged size/timestamp under the new name). The owner confirmed debounce and a real in-game save again after refactoring; the latter confirmation had no pasted runtime output. Cross-directory moves have not been separately tested. Broader I/O-error recovery and confirmation that a file is ready to parse remain future work. `FileNotFoundError` is caught but that branch has not been exercised explicitly.
+An initial startup run emitted events for all 11 candidates; a later startup did not repeat that behavior. Cause unknown. No content-change filter or startup suppression was added. Creation, modification, and rename destinations now share `queue_change`. Tests verified an empty file, a temporary-name-to-dynasty rename, a matching-name directory being ignored, and the refactored create/modify/rename sequence (0 bytes, then 27 bytes, then unchanged size/timestamp under the new name). The owner confirmed debounce and a real in-game save again after refactoring; the latter confirmation had no pasted runtime output. Cross-directory moves have not been separately tested. Broader I/O-error recovery and confirmation that a file is ready to parse remain future work.
+
+`FileNotFoundError` recovery is verified with a file deleted during debounce, followed by owner-confirmed processing of a later event. Main-loop cleanup now runs in `finally`; owner output confirmed `Observer alive after cleanup: False` before an intentional `RuntimeError` traceback. The temporary error was removed, normal test-folder operation and Ctrl+C were confirmed again, and the OneDrive path was restored. This cleanup does not cover errors before the main-loop `try` block or all background-thread failures.
 
 `bridge/requirements.txt` records `watchdog==6.0.0`. The local `empty-save-test/` directory is ignored by Git and now contains test files; it must be emptied or replaced before reusing it for a zero-candidate discovery test.
 
@@ -491,7 +493,11 @@ The second-screen dashboard updates accurately enough to support live recommenda
 - Pushed basic watcher checkpoint `25f05a7`; added creation/rename handling and verified directory/nonmatching-name filters.
 - Refactored event callbacks through `queue_change`; restored an accidentally removed `process_pending_changes` method after an `AttributeError`.
 - Verified create/modify/rename metadata, repeated burst grouping, and owner-confirmed real-save operation after restoring the OneDrive path.
-- Next: commit this event-coverage checkpoint, then continue file-access recovery lessons.
+- Pushed event-coverage checkpoint `8469844`.
+- Verified `FileNotFoundError` handling by creating and deleting a unique test file within the debounce interval; the owner confirmed a later event was still processed.
+- Introduced `finally` around the main polling loop; verified Ctrl+C output and intentional `RuntimeError` cleanup with `Observer alive after cleanup: False` before the expected traceback.
+- Corrected a misplaced cleanup block inside the metadata loop. Removed the intentional error, restored normal operation, and confirmed another test event and clean Ctrl+C shutdown. Restored the OneDrive path and reviewed the final diff.
+- Next: commit the cleanup checkpoint, then continue broader file-access recovery lessons.
 
 ### Lesson notes template
 
@@ -589,7 +595,7 @@ No active product blockers.
 
 **Verified:** Python 3.13.5 virtual environment runs the bridge script on the Windows PC.
 
-**Pending:** commit creation/rename support and the shared-helper refactor. File-access recovery and meaningful-change detection remain unfinished. Checkpoints `344df29` and `25f05a7` were successfully pushed according to owner output.
+**Pending:** commit main-loop cleanup and the recovery test record. Broader file-access recovery and meaningful-change detection remain unfinished. Checkpoints `344df29`, `25f05a7`, and `8469844` were successfully pushed according to owner output.
 
 ---
 
@@ -656,8 +662,8 @@ No active product blockers.
 # 11. Next Session — Watch the Dynasty
 
 1. Review and commit the explicit checkpoint files; do not stage local test data.
-2. Test a pending file disappearing during the debounce interval in the test folder.
-3. Introduce file-access recovery and guaranteed observer cleanup in small lessons before relying on the watcher for parsing.
+2. Introduce recovery for file-access errors beyond a missing file using controlled test cases.
+3. Review remaining watcher lifecycle and cross-directory event coverage before relying on the watcher for parsing.
 4. Gather more evidence before adding metadata/content-change filtering; startup activity did not reproduce.
 
 Continue the learning-first workflow: the owner writes small Python increments, runs them, and shares output before the next step.

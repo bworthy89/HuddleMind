@@ -79,6 +79,7 @@ try:
         handler.process_pending_changes()
         time.sleep(0.1)
 except KeyboardInterrupt:
+    print("Stopping watcher...")
+finally:
     observer.stop()
-
-observer.join()
+    observer.join()
