@@ -1,9 +1,9 @@
 # HuddleMind — Project Progress & Learning Tracker
 
 **Repository:** `bworthy89/HuddleMind`  
-**Current Phase:** Milestone 0 — Foundation  
+**Current Phase:** Milestone 1 — Find the Dynasty (foundation Git verification pending)  
 **Current Status:** 🟡 In Progress  
-**Last Updated:** 2026-09-16
+**Last Updated:** 2026-09-17
 
 ---
 
@@ -47,7 +47,7 @@ Update it whenever we:
 - ✅ Initial repository structure
 - ✅ `.gitignore`
 - ✅ Secrets / `.env` rules documented
-- ✅ Python target selected: **3.12**
+- ✅ Original Python target selected: **3.12**; **3.13.5** verified for current standard-library lessons
 - ✅ Dependency approach selected: built-in `venv` + `pip`
 - ✅ Development setup documented
 - ✅ Initial web-app folder strategy documented
@@ -55,24 +55,28 @@ Update it whenever we:
 - ✅ First development workflow documented
 - ✅ Bridge learning-first rules documented
 
-### Still to do on the development PC
+### Development PC setup
 
-- ⬜ Clone/pull the current repository
-- ⬜ Confirm Python 3.12 is installed
-- ⬜ Create `.venv`
-- ⬜ Activate `.venv`
-- ⬜ Verify `python --version`
-- ⬜ Confirm Git is working from the repo
+- ✅ Local project folder opened on the Windows gaming PC
+- ✅ Python **3.13.5** confirmed using `python --version`
+- ✅ Created and activated `.venv`
+- ✅ Verified `sys.executable` points to the project's `.venv\Scripts\python.exe`
+- ✅ Ran `bridge/find_dynasty.py` through VS Code and directly with the virtual-environment interpreter
+- ⬜ Confirm Git is working from the repo and the checkout is current; no `git status` or pull output has been reviewed
+
+The Windows `py` launcher was unavailable, but `python` resolved to an installed interpreter. Python 3.13.5 is accepted for these standard-library lessons; compatibility with future dependencies has not yet been verified. The original setup guide still specifies 3.12.
 
 ### Exit criteria
 
-Milestone 0 is complete when the development PC can clone the repository, activate a Python 3.12 virtual environment, and is ready to run the first bridge script.
+Foundation setup is complete when the local Git checkout is verified and the project virtual environment can run the first bridge script. Python execution is verified; Git verification remains pending.
+
+### Current progress — Lesson 1
+
+The project owner wrote and ran save discovery incrementally. It finds four dynasty candidates, prints modification times, collects paths in a list, and selects the most recently modified candidate without changing game files.
 
 ### Immediate next step
 
-**Lesson 1 — Find the Dynasty**
-
-We will create the first Python file together. The project owner will type the instructional Python code while each concept is explained and tested.
+Test the missing-folder guard already introduced in the lesson. Its implementation and output have not yet been confirmed. Then restore the real path, test the empty-result case, and refactor discovery into a reusable function.
 
 ---
 
@@ -122,7 +126,7 @@ A feature is not fully complete until relevant documentation is updated.
 | Milestone | Goal | Status |
 |---|---|---:|
 | 0 | Foundation | 🟡 |
-| 1 | Find the Dynasty | ⬜ |
+| 1 | Find the Dynasty | 🟡 |
 | 2 | Watch the Dynasty | ⬜ |
 | 3 | Understand the Dynasty | ⬜ |
 | 4 | Local Memory | ⬜ |
@@ -140,39 +144,63 @@ A feature is not fully complete until relevant documentation is updated.
 
 ## Milestone 1 — Find the Dynasty
 
-**Status:** ⬜ Not Started
+**Status:** 🟡 In Progress
 
 **Goal:** Use Python to reliably locate CFB27 dynasty save files without modifying them.
 
 ### Python learning objectives
 
-- ⬜ What a Python script is
-- ⬜ `import`
-- ⬜ Variables
-- ⬜ Strings
-- ⬜ `pathlib.Path`
-- ⬜ Objects and methods
-- ⬜ Boolean values
-- ⬜ `if` statements
-- ⬜ Loops
-- ⬜ Lists
+- ✅ What a Python script is
+- ✅ `import`
+- ✅ Variables
+- ✅ Strings
+- ✅ `pathlib.Path`
+- ✅ Objects and methods
+- ✅ Boolean values
+- ✅ `if` statements
+- ✅ Loops
+- ✅ Lists
 - ⬜ Functions
-- ⬜ Basic error handling
+- 🟡 Basic error handling — debugged name, syntax, and path-type errors; missing-folder guard test pending
 
 ### Tasks
 
-- ⬜ Create the first bridge Python file
-- ⬜ Print the Windows user's home directory
-- ⬜ Build candidate paths
-- ⬜ Verify the actual CFB27 folder layout
-- ⬜ Locate the save directory
-- ⬜ List files inside it
-- ⬜ Identify likely dynasty files
-- ⬜ Print file names and modification times
+- ✅ Create the first bridge Python file
+- ✅ Print the Windows user's home directory
+- ✅ Build candidate paths
+- ✅ Verify the actual CFB27 folder layout
+- ✅ Locate the save directory
+- ✅ List files inside it
+- ✅ Identify likely dynasty files
+- ✅ Print file names and modification times
 - ⬜ Refactor discovery into a reusable function
-- ⬜ Add useful missing-folder errors
-- ⬜ Test with a real CFB27 dynasty
-- ⬜ Document the verified save layout
+- 🟡 Add useful missing-folder errors — guard explained; implementation and test output pending
+- ✅ Test discovery against existing local dynasty save candidates (filenames and metadata only; contents not parsed)
+- ✅ Collect four candidate paths using a list and `append()`
+- ✅ Select the most recently modified candidate using timestamp comparisons
+- ⬜ Verify empty-result handling with a directory containing no dynasty candidates
+- ✅ Document the verified save layout
+
+### Verified save layout and observations
+
+On the gaming PC, the observed directory is:
+
+```text
+%USERPROFILE%\Documents\EA SPORTS College Football 27\saves
+```
+
+The dynasty entries are **files without extensions**, not folders. Candidate filtering uses `item.is_file() and item.name.startswith("DYNASTY-")`. The observed `PROFILE-COLLEGE` file is excluded.
+
+| Candidate | Observed modification time (PC local time) |
+|---|---|
+| DYNASTY-JUL10-09h45m31-AUTOSAVE | 2026-07-10 12:12:30.139416 |
+| DYNASTY-JUL18-04h38m26-AUTOSAVE | 2026-07-18 16:40:05.929124 |
+| DYNASTY-TULANE | 2026-07-18 16:44:31.609134 |
+| DYNASTY-TULANE-AUTOSAVE | 2026-07-18 16:44:10.746379 |
+
+The script correctly selected **DYNASTY-TULANE** as most recently modified. This is a metadata comparison, not proof that it is the active in-game dynasty. No save parsing or file watching has been implemented during this lesson.
+
+Evidence comes from the owner's pasted Windows execution output. The complete current script and its Git commit/push status have not been independently reviewed.
 
 ### Exit criteria
 
@@ -410,8 +438,8 @@ The second-screen dashboard updates accurately enough to support live recommenda
 
 | Lesson | Topic | Status | What I can now explain / do |
 |---|---|---:|---|
-| 01 | Paths and files | ⬜ | Not started |
-| 02 | Conditions, loops, and functions | ⬜ | Not started |
+| 01 | Paths and files | 🟡 | Built paths, distinguished files from folders, discovered dynasty candidates, displayed timestamps; missing-folder test pending |
+| 02 | Conditions, loops, and functions | 🟡 | Practiced conditions, loops, lists, and newest-file selection; functions not started |
 | 03 | File watching and events | ⬜ | Not started |
 | 04 | JSON and dictionaries | ⬜ | Not started |
 | 05 | Type hints and Pydantic | ⬜ | Not started |
@@ -421,6 +449,18 @@ The second-screen dashboard updates accurately enough to support live recommenda
 | 09 | Computer vision fundamentals | ⬜ | Not started |
 | 10 | Statistics and scoring models | ⬜ | Not started |
 | 11 | ML fundamentals, if justified | ⬜ | Not started |
+
+### Session notes — 2026-09-16–17
+
+- Built `bridge/find_dynasty.py` incrementally on the Windows gaming PC; the owner typed the instructional Python.
+- Practiced imports, variables, strings, `Path.home()`, path joining with `/`, `exists()`, `is_file()`, `is_dir()`, `iterdir()`, and `.name`.
+- Practiced indentation, `if/else`, `and`, `startswith()`, loops, empty lists, `append()`, `len()`, zero-based indexing, list truthiness, and `>` comparisons.
+- Read metadata with `stat().st_mtime` and converted timestamps using `datetime.fromtimestamp()`.
+- Fixed a `NameError` by defining `game_folder` before using it.
+- Fixed a `SyntaxError` by separating `print()` arguments with a comma.
+- Investigated `NotADirectoryError`: direct filesystem checks confirmed the dynasty save was a file. Corrected reversed File/Folder labels in an `is_file()` branch.
+- Introduced `not save_folder.is_dir()` and `raise SystemExit` for a missing-folder guard; the owner has not yet supplied the test result.
+- Next: verify missing-folder and empty-result behavior, then introduce functions and return values.
 
 ### Lesson notes template
 
@@ -491,7 +531,7 @@ Live play ranking begins with explicit scoring/statistical logic. LLMs can expla
 
 **Accepted:** 2026-09-16
 
-Use Python 3.12, built-in `venv`, and `pip` initially. Add more advanced dependency tooling only when it solves a real problem.
+Originally selected Python 3.12, built-in `venv`, and `pip`. During the first lesson, Python **3.13.5** was available on the gaming PC and was verified inside the project virtual environment. Continue with 3.13.5 for the standard-library lessons; revisit compatibility before adding third-party dependencies. Add more advanced dependency tooling only when it solves a real problem.
 
 ---
 
@@ -499,7 +539,7 @@ Use Python 3.12, built-in `venv`, and `pip` initially. Add more advanced depende
 
 | Question | Status | Notes |
 |---|---:|---|
-| Exact CFB27 dynasty save location/naming on this PC | ⬜ | Verify in Lesson 1 |
+| Exact CFB27 dynasty save location/naming on this PC | ✅ | Observed Documents/EA SPORTS College Football 27/saves; extensionless DYNASTY- files; see Milestone 1 |
 | Best current CFB27 parser foundation | ⬜ | Evaluate before Milestone 3 |
 | Which dynasty entities are reliably available | ⬜ | Validate against real save |
 | Recruiting data completeness | ⬜ | Validate |
@@ -516,7 +556,9 @@ Use Python 3.12, built-in `venv`, and `pip` initially. Add more advanced depende
 
 No active product blockers.
 
-**Local setup pending:** the Python 3.12 virtual environment still needs to be created and verified on the development PC.
+**Verified:** Python 3.13.5 virtual environment runs the bridge script on the Windows PC.
+
+**Pending verification:** local Git status/current checkout, missing-folder guard, empty-result behavior, and eventual commit/push of the learning script.
 
 ---
 
@@ -549,6 +591,14 @@ No active product blockers.
 
 # 10. Change Log
 
+## 2026-09-17
+
+- Recorded verified Windows Python 3.13.5 virtual environment and successful script execution.
+- Updated Milestone 1 and learning objectives from observed lesson output.
+- Documented the verified save path, extensionless dynasty files, four candidates, and newest-file selection.
+- Recorded debugging lessons and the pending missing-folder test.
+- Preserved Git verification, function refactoring, and untested cases as unfinished.
+
 ## 2026-09-16
 
 ### Added / established
@@ -568,36 +618,14 @@ No active product blockers.
 
 ---
 
-# 11. Next Session — Lesson 1
+# 11. Next Session — Continue Find the Dynasty
 
-## Find the Dynasty
+1. Confirm the missing-folder guard is before discovery. Temporarily use `saves-test-missing`, run the script, and verify a clear message without a traceback.
+2. Restore `saves` and rerun discovery to confirm the four candidates still appear.
+3. Test the no-candidates branch using a separate empty test directory without changing game files.
+4. Introduce `def`, parameters, and `return`; refactor discovery into a small reusable function together.
+5. Review the complete script and remove obsolete exploratory output.
+6. Check local `git status`, synchronize the tracker safely, and commit the working lesson script when ready. Its current remote status is unverified.
+7. Update the learning log with confirmed test results before starting file watching.
 
-### Before writing Python
-
-On the Windows development PC:
-
-1. Clone/pull `bworthy89/HuddleMind`.
-2. Open a terminal in the repo.
-3. Confirm Python 3.12.
-4. Create `.venv`.
-5. Activate `.venv`.
-
-### Then we write the first Python ourselves
-
-We will start with only enough code to answer:
-
-> What is this Windows user's home directory?
-
-Then we will build from that result toward discovering the actual CFB27 save location.
-
-### First concepts
-
-- `import`
-- Variables
-- `pathlib`
-- `Path.home()`
-- Objects
-- Methods
-- Printing/debugging values
-
-We will not jump directly to a completed save watcher.
+Continue the learning-first workflow: the owner writes small Python increments, runs them, and shares output before the next step.
