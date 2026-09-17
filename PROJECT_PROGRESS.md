@@ -9,16 +9,14 @@
 
 ## How to Use This File
 
-This is the living project tracker for HuddleMind.
+This is HuddleMind's living roadmap, learning log, decision record, and short-term task tracker.
 
 Update it whenever we:
 
-- Finish a task
-- Start a new task
+- Finish or start a task
 - Change architecture
 - Learn an important Python concept
-- Hit a blocker
-- Make a product decision
+- Hit or clear a blocker
 - Discover something important about College Football 27
 - Add or remove scope
 
@@ -35,18 +33,46 @@ Update it whenever we:
 
 # 1. Current Focus
 
-## Active milestone
+## Milestone 0 — Foundation
 
-### Milestone 0 — Foundation
+**Goal:** Establish the repo, documentation, development rules, and a verified local Python environment before feature code begins.
 
-**Goal:** Establish the project, documentation, development rules, and environment before writing feature code.
+### Completed
 
-Current priority:
+- ✅ Project named **HuddleMind**
+- ✅ GitHub repository created
+- ✅ `PRD.md`
+- ✅ `PROJECT_PROGRESS.md`
+- ✅ Full project `README.md`
+- ✅ Initial repository structure
+- ✅ `.gitignore`
+- ✅ Secrets / `.env` rules documented
+- ✅ Python target selected: **3.12**
+- ✅ Dependency approach selected: built-in `venv` + `pip`
+- ✅ Development setup documented
+- ✅ Initial web-app folder strategy documented
+- ✅ Architecture diagram and data flow documented
+- ✅ First development workflow documented
+- ✅ Bridge learning-first rules documented
 
-1. Finalize project documentation.
-2. Establish repo structure.
-3. Set up the Python development environment.
-4. Begin Lesson 1: locating the CFB27 save directory with Python.
+### Still to do on the development PC
+
+- ⬜ Clone/pull the current repository
+- ⬜ Confirm Python 3.12 is installed
+- ⬜ Create `.venv`
+- ⬜ Activate `.venv`
+- ⬜ Verify `python --version`
+- ⬜ Confirm Git is working from the repo
+
+### Exit criteria
+
+Milestone 0 is complete when the development PC can clone the repository, activate a Python 3.12 virtual environment, and is ready to run the first bridge script.
+
+### Immediate next step
+
+**Lesson 1 — Find the Dynasty**
+
+We will create the first Python file together. The project owner will type the instructional Python code while each concept is explained and tested.
 
 ---
 
@@ -58,81 +84,70 @@ HuddleMind is a learning-first Python project.
 
 For Python work:
 
-- The user writes the instructional Python code.
-- Each concept is explained before or while it is introduced.
-- Features are built in small steps that can be run and understood.
-- Debugging is done together.
-- Finished large Python implementations are not dropped in by default.
-- Boilerplate may be provided when it has little learning value.
-- The user may explicitly ask for a complete implementation at any time.
-- New Python concepts should be recorded in the Learning Log below.
+- The project owner writes instructional Python code.
+- Explain each new concept as it appears.
+- Build in small runnable increments.
+- Inspect output after each meaningful step.
+- Debug together rather than replacing code blindly.
+- Do not drop large finished implementations by default.
+- Boilerplate may be supplied when it has little learning value.
+- The project owner can explicitly ask for a full implementation at any time.
+- Update the learning log after meaningful lessons.
 
 ## Development rule
 
-Prefer the smallest working version first.
-
-Before adding abstraction, ask:
-
-> Do we have enough repetition or complexity to justify this yet?
+Prefer the smallest working version first. Add abstraction only after there is a real reason for it.
 
 ## Game integration rule
 
 Start read-only.
 
-Prefer:
+Preferred order:
 
 1. Save/data reading
 2. File watching
 3. Screen observation
 4. Computer vision
-5. HuddleMind-owned history
-
-Avoid invasive integration unless later evidence proves it is necessary.
+5. HuddleMind-owned historical data
+6. Deeper integration only if a proven requirement cannot otherwise be met
 
 ## Documentation rule
 
-A feature is not fully complete until its relevant documentation is updated.
+A feature is not fully complete until relevant documentation is updated.
 
 ---
 
-# 3. Milestone Tracker
+# 3. Milestone Overview
 
-## Milestone 0 — Foundation
-
-**Status:** 🟡 In Progress
-
-- ✅ Select project name: **HuddleMind**
-- ✅ Create GitHub repository
-- ✅ Create `PRD.md`
-- ✅ Create `PROJECT_PROGRESS.md`
-- ⬜ Create project `README.md`
-- ⬜ Define initial repository structure
-- ⬜ Create `.gitignore`
-- ⬜ Establish secrets / `.env` rules
-- ⬜ Select supported Python version
-- ⬜ Create Python virtual environment
-- ⬜ Add dependency-management approach
-- ⬜ Add development setup instructions
-- ⬜ Decide initial web-app folder structure
-- ⬜ Create architecture diagram in docs
-- ⬜ Document first development workflow
-
-### Exit criteria
-
-Milestone 0 is complete when a fresh machine can clone the repository and follow documented steps to reach a working development environment.
+| Milestone | Goal | Status |
+|---|---|---:|
+| 0 | Foundation | 🟡 |
+| 1 | Find the Dynasty | ⬜ |
+| 2 | Watch the Dynasty | ⬜ |
+| 3 | Understand the Dynasty | ⬜ |
+| 4 | Local Memory | ⬜ |
+| 5 | Cloud Bridge | ⬜ |
+| 6 | Web Headquarters | ⬜ |
+| 7 | Dynasty Brain | ⬜ |
+| 8 | Observe the Game | ⬜ |
+| 9 | Offensive Coordinator v1 | ⬜ |
+| 10 | Adaptive Coordinator | ⬜ |
+| 11 | Defensive Coordinator | ⬜ |
 
 ---
+
+# 4. Milestone Details
 
 ## Milestone 1 — Find the Dynasty
 
 **Status:** ⬜ Not Started
 
-**Goal:** Use Python to reliably locate CFB27 dynasty save files.
+**Goal:** Use Python to reliably locate CFB27 dynasty save files without modifying them.
 
 ### Python learning objectives
 
-- ⬜ What Python scripts are
-- ⬜ Imports
+- ⬜ What a Python script is
+- ⬜ `import`
 - ⬜ Variables
 - ⬜ Strings
 - ⬜ `pathlib.Path`
@@ -146,377 +161,257 @@ Milestone 0 is complete when a fresh machine can clone the repository and follow
 
 ### Tasks
 
-- ⬜ Create the bridge Python project
-- ⬜ Print the user's home directory
-- ⬜ Build the expected Documents path
-- ⬜ Locate the CFB27 save folder
-- ⬜ Check whether the folder exists
-- ⬜ List files inside the folder
+- ⬜ Create the first bridge Python file
+- ⬜ Print the Windows user's home directory
+- ⬜ Build candidate paths
+- ⬜ Verify the actual CFB27 folder layout
+- ⬜ Locate the save directory
+- ⬜ List files inside it
 - ⬜ Identify likely dynasty files
-- ⬜ Print file names and modification timestamps
-- ⬜ Turn file discovery into a reusable function
-- ⬜ Add useful error messages
-- ⬜ Test with a real CFB27 dynasty save
-- ⬜ Document the discovered save layout
+- ⬜ Print file names and modification times
+- ⬜ Refactor discovery into a reusable function
+- ⬜ Add useful missing-folder errors
+- ⬜ Test with a real CFB27 dynasty
+- ⬜ Document the verified save layout
 
 ### Exit criteria
 
-Given the user's Windows machine, HuddleMind can find the configured CFB27 save directory and list candidate dynasty saves without modifying them.
+HuddleMind can find the configured CFB27 save directory and list candidate dynasty saves without modifying them.
 
 ---
 
 ## Milestone 2 — Watch the Dynasty
 
-**Status:** ⬜ Not Started
+**Goal:** Detect meaningful changes to the active dynasty.
 
-**Goal:** Detect when the selected dynasty changes.
+### Learning topics
 
-### Python learning objectives
+- Packages and `pip`
+- Filesystem events
+- Classes
+- Callbacks
+- Modules
+- Logging
+- Timestamps
+- Long-running processes
 
-- ⬜ Installing packages
-- ⬜ `pip`
-- ⬜ Virtual environments
-- ⬜ Classes
-- ⬜ Events / callbacks
-- ⬜ Modules
-- ⬜ Logging
-- ⬜ Timestamps
-- ⬜ Long-running Python processes
+### Core tasks
 
-### Tasks
-
-- ⬜ Install and understand `watchdog`
-- ⬜ Watch the save directory
-- ⬜ Detect file changes
-- ⬜ Filter unrelated file-system events
-- ⬜ Add structured logging
-- ⬜ Associate a changed file with a dynasty
-- ⬜ Avoid duplicate rapid-fire events
-- ⬜ Create bridge start/stop behavior
-- ⬜ Record detected events locally
-- ⬜ Test while advancing a real dynasty
-
-### Exit criteria
-
-HuddleMind reports a clean, meaningful event when the active dynasty save changes.
+- Add `watchdog`
+- Watch the verified save directory
+- Filter unrelated events
+- Debounce duplicate events
+- Log meaningful dynasty changes
+- Test by advancing a real dynasty
 
 ---
 
 ## Milestone 3 — Understand the Dynasty
 
-**Status:** ⬜ Not Started
+**Goal:** Convert CFB27 data into HuddleMind-owned models.
 
-**Goal:** Convert real CFB27 dynasty data into HuddleMind-owned data models.
+### Learning topics
 
-### Python learning objectives
+- Dictionaries
+- JSON
+- Type hints
+- Pydantic
+- Data validation
+- Adapters
+- Unit-test fundamentals
 
-- ⬜ Dictionaries
-- ⬜ JSON
-- ⬜ Data validation
-- ⬜ Type hints
-- ⬜ Pydantic models
-- ⬜ Parsing external data
-- ⬜ Adapter pattern at a beginner-friendly level
-- ⬜ Unit testing fundamentals
+### Core tasks
 
-### Tasks
-
-- ⬜ Evaluate current CFB27 parser options
-- ⬜ Pick initial parser strategy
-- ⬜ Parse program identity
-- ⬜ Parse roster
-- ⬜ Parse schedule
-- ⬜ Parse game results
-- ⬜ Parse injuries when available
-- ⬜ Parse depth chart when available
-- ⬜ Parse recruiting when available
-- ⬜ Define HuddleMind player model
-- ⬜ Define HuddleMind program model
-- ⬜ Define HuddleMind season/week models
-- ⬜ Define source-to-HuddleMind adapter
-- ⬜ Validate data against the actual game UI
-- ⬜ Add parser tests with sanitized fixtures
-
-### Exit criteria
-
-HuddleMind can read useful dynasty information and represent it using models that do not depend directly on the parser's internal schema.
+- Evaluate the current parser options
+- Parse program identity, roster, schedule, results, depth, injuries, and recruiting where available
+- Define HuddleMind-owned models
+- Validate parsed data against the game UI
+- Add sanitized test fixtures
 
 ---
 
 ## Milestone 4 — Local Memory
 
-**Status:** ⬜ Not Started
+**Goal:** Preserve useful history independently from the current CFB27 save.
 
-**Goal:** Preserve HuddleMind history independently of the CFB27 save.
+### Learning topics
 
-### Python learning objectives
+- SQL
+- SQLite
+- Tables and relationships
+- Primary/foreign keys
+- CRUD
+- Migration concepts
 
-- ⬜ Databases
-- ⬜ SQL fundamentals
-- ⬜ SQLite
-- ⬜ Tables / rows / columns
-- ⬜ Primary keys
-- ⬜ Foreign keys
-- ⬜ CRUD operations
-- ⬜ Database migrations conceptually
+### Core tasks
 
-### Tasks
-
-- ⬜ Create local SQLite database
-- ⬜ Store dynasty identity
-- ⬜ Store sync snapshots / observations
-- ⬜ Store players
-- ⬜ Store schedule / results
-- ⬜ Store recruiting observations
-- ⬜ Store recommendation history
-- ⬜ Preserve historical changes
-- ⬜ Add database backup / reset development workflow
-
-### Exit criteria
-
-Restarting HuddleMind does not erase previously collected HuddleMind history.
+- Store dynasty identity and observations
+- Preserve roster/recruiting/game history
+- Store recommendation history
+- Survive bridge restarts without losing HuddleMind history
 
 ---
 
 ## Milestone 5 — Cloud Bridge
 
-**Status:** ⬜ Not Started
+**Goal:** Synchronize normalized HuddleMind events to the cloud.
 
-**Goal:** Synchronize normalized dynasty information to the web platform.
+### Learning topics
 
-### Python learning objectives
+- Client/server architecture
+- HTTP
+- REST
+- JSON requests
+- Authentication basics
+- Environment variables
+- Retry/error handling
+- Async concepts where useful
 
-- ⬜ Client/server architecture
-- ⬜ HTTP
-- ⬜ REST concepts
-- ⬜ JSON requests
-- ⬜ Authentication basics
-- ⬜ Environment variables
-- ⬜ API errors
-- ⬜ Retries
-- ⬜ Async concepts where useful
+### Core tasks
 
-### Tasks
-
-- ⬜ Create backend project
-- ⬜ Configure development database
-- ⬜ Create authentication model
-- ⬜ Define bridge registration flow
-- ⬜ Define dynasty synchronization API
-- ⬜ Define normalized event schema
-- ⬜ Send first event from Python bridge
-- ⬜ Receive and store event in cloud
-- ⬜ Add retry handling
-- ⬜ Add local offline queue
-- ⬜ Display bridge online/offline state
-- ⬜ Secure credentials
-
-### Exit criteria
-
-A real update from the CFB27 PC appears in HuddleMind's cloud database without manually uploading a save through the website.
+- Define bridge registration/authentication
+- Define normalized event schema
+- Send first real bridge event
+- Store it in the cloud
+- Add retry/offline queue behavior
+- Show bridge online/offline status
 
 ---
 
 ## Milestone 6 — Web Headquarters
 
-**Status:** ⬜ Not Started
+**Goal:** View HuddleMind from a phone or another PC.
 
-**Goal:** View the dynasty from a phone or another computer.
+### Planned stack
 
-### Web learning / implementation topics
+- Next.js
+- TypeScript
+- Tailwind CSS
+- Responsive/mobile-first UI
 
-- ⬜ Next.js project setup
-- ⬜ TypeScript basics as needed
-- ⬜ Responsive layout
-- ⬜ Authentication
-- ⬜ Data fetching
-- ⬜ Realtime updates
+### Core tasks
 
-### Tasks
-
-- ⬜ Create web application
-- ⬜ Login
-- ⬜ Dynasty selector
-- ⬜ Program dashboard
-- ⬜ Roster page
-- ⬜ Schedule page
-- ⬜ Recruiting page
-- ⬜ Sync status
-- ⬜ Mobile layout
-- ⬜ Test from phone
-- ⬜ Test from secondary PC
-
-### Exit criteria
-
-The user can open HuddleMind on a phone or second PC and see current synchronized dynasty information.
+- Authentication
+- Dynasty selector
+- Program dashboard
+- Roster
+- Schedule
+- Recruiting
+- Sync status
+- Phone and secondary-PC testing
 
 ---
 
 ## Milestone 7 — Dynasty Brain
 
-**Status:** ⬜ Not Started
+**Goal:** Turn data into proactive program recommendations.
 
-**Goal:** Move from displaying data to generating useful recommendations.
+### Core tasks
 
-### Python learning objectives
-
-- ⬜ Derived values
-- ⬜ Sorting / ranking
-- ⬜ Rule engines
-- ⬜ Scoring models
-- ⬜ Basic statistics
-- ⬜ Separating business rules from UI
-
-### Tasks
-
-- ⬜ Position-depth scoring
-- ⬜ Future roster projection
-- ⬜ Recruiting-need scoring
-- ⬜ Recruiting movement alerts
-- ⬜ Injury-impact alerts
-- ⬜ Development alerts
-- ⬜ Recommended action model
-- ⬜ Recommendation explanations
-- ⬜ Weekly staff report
-- ⬜ Recommendation history
-- ⬜ User feedback on recommendations
-
-### Exit criteria
-
-HuddleMind proactively identifies at least several useful dynasty actions and can explain the data behind them.
+- Position-depth scoring
+- Future roster projection
+- Recruiting-need scoring
+- Recruiting movement alerts
+- Injury/development alerts
+- Weekly staff report
+- Recommendation explanations
+- Recommendation history and feedback
 
 ---
 
 ## Milestone 8 — Observe the Game
 
-**Status:** ⬜ Not Started
+**Goal:** Reliably understand core live-game state.
 
-**Goal:** Reliably understand the core live-game situation from the CFB27 window.
+### Learning topics
 
-### Python learning objectives
+- Screen capture
+- Image arrays
+- OpenCV
+- Regions of interest
+- OCR concepts
+- Confidence thresholds
+- State machines
 
-- ⬜ Image arrays
-- ⬜ Screen capture
-- ⬜ OpenCV basics
-- ⬜ Cropping / regions of interest
-- ⬜ Template matching
-- ⬜ OCR concepts
-- ⬜ Confidence thresholds
-- ⬜ State machines
+### Core state
 
-### Tasks
-
-- ⬜ Detect CFB27 window
-- ⬜ Capture frames efficiently
-- ⬜ Identify scoreboard region
-- ⬜ Detect score
-- ⬜ Detect quarter
-- ⬜ Detect clock
-- ⬜ Detect down
-- ⬜ Detect distance
-- ⬜ Detect field position
-- ⬜ Detect possession
-- ⬜ Add confidence values
-- ⬜ Require multiple-frame confirmation
-- ⬜ Stream game state to backend
-- ⬜ Show live game page on phone
+- Score
+- Quarter
+- Clock
+- Down
+- Distance
+- Field position
+- Possession
 
 ### Exit criteria
 
-While playing, HuddleMind's second-screen dashboard updates the core game situation accurately enough for live recommendations.
+The second-screen dashboard updates accurately enough to support live recommendations.
 
 ---
 
 ## Milestone 9 — Offensive Coordinator v1
 
-**Status:** ⬜ Not Started
+**Goal:** Recommend useful offensive plays quickly enough for live use.
 
-**Goal:** Recommend useful offensive play calls in real time.
+### Learning topics
 
-### Python learning objectives
+- Weighted scoring
+- Ranking algorithms
+- Basic statistics
+- Historical aggregation
+- Performance measurement
 
-- ⬜ Weighted scoring
-- ⬜ Ranking algorithms
-- ⬜ Feature engineering basics
-- ⬜ Probability vs score
-- ⬜ Historical aggregation
-- ⬜ Performance measurement
+### Core tasks
 
-### Tasks
-
-- ⬜ Establish playbook data source
-- ⬜ Normalize formations
-- ⬜ Normalize plays
-- ⬜ Tag concepts
-- ⬜ Build candidate-play filter
-- ⬜ Define situation-fit score
-- ⬜ Define clock-strategy score
-- ⬜ Define field-position score
-- ⬜ Add user historical-success score
-- ⬜ Add opponent tendency score
-- ⬜ Add predictability penalty
-- ⬜ Return top three plays
-- ⬜ Add explanation factors
-- ⬜ Show recommendations on live web page
-- ⬜ Measure recommendation outcome
-
-### Exit criteria
-
-HuddleMind supplies three ranked play recommendations quickly enough to use during normal play calling and explains the main factors behind the ranking.
+- Establish playbook source
+- Normalize plays/formations/concepts
+- Filter candidate plays
+- Score situation fit
+- Add clock/field-position logic
+- Add user historical success
+- Add opponent tendencies
+- Add predictability penalty
+- Return top three recommendations with explanations
+- Track recommendation outcomes
 
 ---
 
 ## Milestone 10 — Adaptive Coordinator
 
-**Status:** ⬜ Not Started
+**Goal:** Personalize live recommendations from accumulated history.
 
-**Goal:** Personalize recommendations using accumulated game history.
+### Core tasks
 
-### Tasks
-
-- ⬜ Track user formation tendencies
-- ⬜ Track user concept tendencies
-- ⬜ Track success by situation
-- ⬜ Track opponent behavior during current game
-- ⬜ Track opponent historical behavior when available
-- ⬜ Adjust scores as the game evolves
-- ⬜ Detect overused concepts
-- ⬜ Detect tendency-breaking opportunities
-- ⬜ Compare recommended vs actual results
-- ⬜ Tune weights from real evidence
+- User formation/concept tendencies
+- Success by situation
+- Current-game opponent tendencies
+- Tendency-breaking opportunities
+- Adaptive weights based on evidence
 
 ---
 
 ## Milestone 11 — Defensive Coordinator
 
-**Status:** ⬜ Not Started
+**Goal:** Add defensive recommendations using opponent behavior.
 
-**Goal:** Recommend defensive responses using opponent tendencies and live situation.
+### Core tasks
 
-### Tasks
-
-- ⬜ Track opponent personnel
-- ⬜ Track opponent formations
-- ⬜ Track run/pass tendencies
-- ⬜ Track target tendencies
-- ⬜ Track QB scramble tendency
-- ⬜ Define defensive-call representation
-- ⬜ Build defensive scoring model
-- ⬜ Recommend top defensive calls
-- ⬜ Evaluate results
+- Personnel/formation tendency tracking
+- Run/pass tendency
+- Target distribution
+- QB scramble behavior
+- Defensive-call model
+- Ranked defensive recommendations
+- Outcome evaluation
 
 ---
 
-# 4. Learning Log
-
-Use this section to record concepts after we actually use them.
-
-## Python
+# 5. Learning Log
 
 | Lesson | Topic | Status | What I can now explain / do |
 |---|---|---:|---|
 | 01 | Paths and files | ⬜ | Not started |
-| 02 | Loops, conditions, and functions | ⬜ | Not started |
+| 02 | Conditions, loops, and functions | ⬜ | Not started |
 | 03 | File watching and events | ⬜ | Not started |
 | 04 | JSON and dictionaries | ⬜ | Not started |
 | 05 | Type hints and Pydantic | ⬜ | Not started |
@@ -537,7 +432,7 @@ Feature:
 
 What we built:
 
-New Python concepts:
+New concepts:
 
 What I understand now:
 
@@ -554,215 +449,101 @@ Next lesson:
 
 ---
 
-# 5. Architecture Decisions
+# 6. Architecture Decisions
 
-Record decisions here so we remember *why* something was chosen.
+## ADR-001 — Web-first product
 
-## ADR-001 — HuddleMind is web-first
+**Accepted:** 2026-09-16
 
-**Status:** Accepted  
-**Date:** 2026-09-16
+The main HuddleMind interface is a responsive web application. A lightweight Windows bridge runs on the CFB27 PC.
 
-### Decision
+## ADR-002 — Python powers the bridge
 
-The primary HuddleMind interface will be a responsive web application accessible from a phone or another PC.
+**Accepted:** 2026-09-16
 
-A lightweight Windows bridge will run on the PC hosting College Football 27.
-
-### Why
-
-- The user wants dynasty information on a phone / second screen.
-- Only the gaming PC needs direct access to local CFB27 data.
-- One web app avoids maintaining separate mobile and desktop UIs early in development.
-
----
-
-## ADR-002 — Python powers the Windows bridge
-
-**Status:** Accepted  
-**Date:** 2026-09-16
-
-### Decision
-
-Python will be used for the local CFB27 bridge, data processing, computer vision, analytics, and recommendation logic where practical.
-
-### Why
-
-- Excellent file-system and data tooling.
-- Strong computer-vision ecosystem.
-- Good fit for analytics and future ML.
-- The project doubles as a hands-on Python learning project.
-
----
+Python handles local CFB27 integration, data processing, computer vision, analytics, and recommendation logic where practical.
 
 ## ADR-003 — Python is taught, not merely generated
 
-**Status:** Accepted  
-**Date:** 2026-09-16
+**Accepted:** 2026-09-16
 
-### Decision
-
-Instructional Python code will be developed incrementally by the user with guided explanations.
-
-### Why
-
-The explicit project goal includes improving the user's Python skills, not just producing HuddleMind as quickly as possible.
-
----
+Instructional Python code is developed incrementally by the project owner with guided explanation and debugging.
 
 ## ADR-004 — CFB27 integration starts read-only
 
-**Status:** Accepted  
-**Date:** 2026-09-16
+**Accepted:** 2026-09-16
 
-### Decision
+Initial versions observe saves/data and game visuals without modifying original dynasty saves or injecting into the game process.
 
-The first HuddleMind versions will observe saves and game visuals without modifying the CFB27 process or save files.
+## ADR-005 — Normalize before cloud sync
 
-### Why
+**Accepted:** 2026-09-16
 
-- Lower risk to dynasty saves.
-- Less fragile across game patches.
-- Easier to debug.
-- Sufficient to prove the main product loop.
+The bridge converts CFB27-specific information into HuddleMind-owned models/events before synchronization.
 
----
+## ADR-006 — Fast deterministic live engine first
 
-## ADR-005 — Normalize data before cloud sync
+**Accepted:** 2026-09-16
 
-**Status:** Accepted  
-**Date:** 2026-09-16
+Live play ranking begins with explicit scoring/statistical logic. LLMs can explain recommendations but do not sit in the time-critical path.
 
-### Decision
+## ADR-007 — Beginner-transparent Python environment
 
-The bridge will convert CFB27-specific data into HuddleMind-owned models/events before synchronization.
+**Accepted:** 2026-09-16
 
-### Why
-
-- Keeps the web app independent from CFB27 internals.
-- Makes parser changes easier to isolate.
-- Preserves the possibility of adapting HuddleMind to future CFB releases.
-- Avoids making raw save files the cloud API contract.
+Use Python 3.12, built-in `venv`, and `pip` initially. Add more advanced dependency tooling only when it solves a real problem.
 
 ---
 
-## ADR-006 — Live play calls use a fast deterministic engine first
-
-**Status:** Accepted  
-**Date:** 2026-09-16
-
-### Decision
-
-Live play ranking will initially use explicit scoring/statistical logic. LLMs may explain recommendations but should not sit in the time-critical decision path.
-
-### Why
-
-- Predictable latency
-- Easier debugging
-- Easier evaluation
-- Works offline more gracefully
-- Recommendation factors remain understandable
-
----
-
-# 6. Research / Unknowns Log
-
-These are questions we need evidence for before locking architecture around them.
+# 7. Research / Unknowns
 
 | Question | Status | Notes |
 |---|---:|---|
-| Exact current CFB27 dynasty save location and naming behavior | ⬜ | Verify on user's PC |
+| Exact CFB27 dynasty save location/naming on this PC | ⬜ | Verify in Lesson 1 |
 | Best current CFB27 parser foundation | ⬜ | Evaluate before Milestone 3 |
-| Which dynasty tables/entities are reliably available | ⬜ | Validate against real save |
+| Which dynasty entities are reliably available | ⬜ | Validate against real save |
 | Recruiting data completeness | ⬜ | Validate |
-| Facilities / staff data availability | ⬜ | Validate |
+| Facilities/staff data completeness | ⬜ | Validate |
 | Reliable playbook extraction method | ⬜ | Needed before live coordinator |
-| Whether selected plays can be detected visually | ⬜ | Prototype later |
-| Most reliable scoreboard OCR/detection approach | ⬜ | Prototype in Milestone 8 |
-| Whether game UI scale changes affect recognition | ⬜ | Test multiple resolutions |
-| Supabase vs alternate backend after prototype | ⬜ | Keep architecture portable |
+| Can selected plays be detected visually? | ⬜ | Prototype later |
+| Best scoreboard recognition approach | ⬜ | Milestone 8 |
+| UI scale/resolution impact on recognition | ⬜ | Test later |
+| Final Supabase/backend responsibility split | ⬜ | Decide after local bridge prototype |
 
 ---
 
-# 7. Blockers
+# 8. Blockers
 
-No active blockers.
+No active product blockers.
 
-When a blocker appears, record:
-
-```text
-### Blocker — Short title
-
-Status:
-Date found:
-Milestone:
-
-Problem:
-
-What we tried:
-
-Evidence:
-
-Next experiment:
-
-Resolution:
-```
-
----
-
-# 8. Bugs / Technical Debt
-
-None recorded yet.
-
-Use:
-
-```text
-### BUG-001 — Short title
-
-Status:
-Severity:
-Found in:
-
-Expected:
-
-Actual:
-
-Steps to reproduce:
-
-Cause:
-
-Fix:
-```
+**Local setup pending:** the Python 3.12 virtual environment still needs to be created and verified on the development PC.
 
 ---
 
 # 9. Product Backlog
 
-Ideas that are valuable but should not distract from the current milestone.
-
 - ⬜ PWA install experience
 - ⬜ Push notifications for important dynasty alerts
 - ⬜ Voice coordinator mode
-- ⬜ Apple Watch / wearable glance view
 - ⬜ Compare seasons
 - ⬜ Compare multiple dynasties
 - ⬜ Recruiting class grading
 - ⬜ Scheme-fit ratings
 - ⬜ Player-development projections
-- ⬜ Transfer / departure risk modeling if data allows
+- ⬜ Transfer/departure risk modeling if data allows
 - ⬜ Automated opponent scouting report
-- ⬜ Drive-by-drive game summary
-- ⬜ Halftime AI adjustments report
+- ⬜ Drive-by-drive summary
+- ⬜ Halftime adjustment report
 - ⬜ Postgame coordinator grade
 - ⬜ Fourth-down decision model
 - ⬜ Clock-management assistant
 - ⬜ Two-minute drill mode
-- ⬜ Red-zone specialist recommendations
+- ⬜ Red-zone recommendations
 - ⬜ Tendency heatmaps
 - ⬜ Historical coaching profile
 - ⬜ Ask HuddleMind conversational assistant
 - ⬜ Local-model support
-- ⬜ Export season report
+- ⬜ Exportable season report
 
 ---
 
@@ -770,42 +551,53 @@ Ideas that are valuable but should not distract from the current milestone.
 
 ## 2026-09-16
 
-### Added
+### Added / established
 
 - Selected **HuddleMind** as the project name.
-- Defined web-first architecture.
-- Defined Windows Python bridge concept.
-- Added product PRD.
-- Added project / learning progress tracker.
+- Created product PRD and progress tracker.
+- Expanded root project README.
+- Added initial `bridge/`, `web/`, and `docs/` structure.
+- Added `.gitignore` covering Python, Node, secrets, local databases, captures, logs, and editor files.
+- Added architecture documentation and Mermaid system diagram.
+- Added local development/setup guide.
+- Selected Python 3.12 + `venv` + `pip` for the initial bridge environment.
+- Established secrets and local-game-data rules.
 - Established Python learning-first development rule.
 - Established read-only-first CFB27 integration strategy.
 - Established fast-brain / deep-brain recommendation split.
 
 ---
 
-# 11. Next Session
+# 11. Next Session — Lesson 1
 
-## Lesson 1 — Find the Dynasty
+## Find the Dynasty
 
-### Objective
+### Before writing Python
 
-Write the first HuddleMind Python code ourselves and use it to locate the College Football 27 save directory.
+On the Windows development PC:
 
-### We will learn
+1. Clone/pull `bworthy89/HuddleMind`.
+2. Open a terminal in the repo.
+3. Confirm Python 3.12.
+4. Create `.venv`.
+5. Activate `.venv`.
 
-- What `import` means
+### Then we write the first Python ourselves
+
+We will start with only enough code to answer:
+
+> What is this Windows user's home directory?
+
+Then we will build from that result toward discovering the actual CFB27 save location.
+
+### First concepts
+
+- `import`
 - Variables
-- Strings
 - `pathlib`
 - `Path.home()`
-- Joining paths
-- Checking whether a directory exists
-- Printing useful debugging information
+- Objects
+- Methods
+- Printing/debugging values
 
-### Target result
-
-A tiny Python program that can answer:
-
-> Where does HuddleMind expect CFB27 saves to live, and does that directory exist on this PC?
-
-We will build from there instead of jumping directly to a completed save watcher.
+We will not jump directly to a completed save watcher.
