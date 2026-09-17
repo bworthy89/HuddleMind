@@ -13,9 +13,9 @@ The project has two major goals:
 
 **Phase:** Milestone 1 — Find the Dynasty
 
-**Status:** Complete; lesson commit pending, file watching next
+**Status:** Discovery lesson pushed; basic debounced watcher verified, checkpoint pending
 
-The first Python script discovers dynasty candidates, displays modification times, and selects the newest candidate. The owner verified normal, missing-folder, and empty-folder behavior. Save parsing, file watching, cloud integration, and the web app remain future work.
+The discovery script lists dynasty candidates and selects the newest by modification time. The basic watcher filters modification events, debounces per file, and prints metadata. Owner-run checks cover discovery edge cases, controlled event bursts, clean shutdown, and an actual in-game save in OneDrive Documents. Save parsing, broader watcher reliability, cloud integration, and the web app remain future work.
 
 See [`PROJECT_PROGRESS.md`](./PROJECT_PROGRESS.md) for the live roadmap and learning tracker.
 

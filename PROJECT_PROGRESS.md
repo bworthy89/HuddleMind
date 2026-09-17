@@ -1,9 +1,9 @@
 # HuddleMind — Project Progress & Learning Tracker
 
 **Repository:** `bworthy89/HuddleMind`  
-**Current Phase:** Milestone 1 complete — prepare lesson commit, then Milestone 2
+**Current Phase:** Milestone 2 — Watch the Dynasty
 
-**Current Status:** ✅ Save discovery verified; commit/push pending
+**Current Status:** 🟡 Basic debounced watcher verified; checkpoint commit pending
 
 **Last Updated:** 2026-09-17
 
@@ -64,7 +64,7 @@ Update it whenever we:
 - ✅ Created and activated `.venv`
 - ✅ Verified `sys.executable` points to the project's `.venv\Scripts\python.exe`
 - ✅ Ran `bridge/find_dynasty.py` through VS Code and directly with the virtual-environment interpreter
-- ✅ Local Git verified: on `main`, matching the locally recorded `origin/main` (0 ahead / 0 behind). No fetch performed; current GitHub state remains unverified.
+- ✅ Local Git verified; owner output confirms lesson commit `344df29` and successful push to GitHub `main` (`49ba170..344df29`).
 
 The Windows `py` launcher was unavailable, but `python` resolved to an installed interpreter. Python 3.13.5 is accepted for these standard-library lessons; compatibility with future dependencies has not yet been verified. The original setup guide still specifies 3.12.
 
@@ -78,7 +78,7 @@ The project owner wrote and ran save discovery incrementally. The cleaned-up scr
 
 ### Immediate next step
 
-Review and commit the lesson script and documentation, then begin Milestone 2 with packages, `pip`, and file watching. The script is currently untracked; no commit or push has been made in this session.
+Commit the verified watcher, OneDrive path correction, dependency record, and documentation. Discovery checkpoint `344df29` was already pushed. Continue watcher reliability work afterward; modification notifications alone do not establish meaningful save-content changes.
 
 ---
 
@@ -129,7 +129,7 @@ A feature is not fully complete until relevant documentation is updated.
 |---|---|---:|
 | 0 | Foundation | ✅ |
 | 1 | Find the Dynasty | ✅ |
-| 2 | Watch the Dynasty | ⬜ |
+| 2 | Watch the Dynasty | 🟡 |
 | 3 | Understand the Dynasty | ⬜ |
 | 4 | Local Memory | ⬜ |
 | 5 | Cloud Bridge | ⬜ |
@@ -146,7 +146,7 @@ A feature is not fully complete until relevant documentation is updated.
 
 ## Milestone 1 — Find the Dynasty
 
-**Status:** ✅ Complete (lesson commit/push pending)
+**Status:** ✅ Complete (lesson checkpoint `344df29` pushed)
 
 **Goal:** Use Python to reliably locate CFB27 dynasty save files without modifying them.
 
@@ -189,8 +189,10 @@ A feature is not fully complete until relevant documentation is updated.
 On the gaming PC, the observed directory is:
 
 ```text
-%USERPROFILE%\Documents\EA SPORTS College Football 27\saves
+C:\Users\bwort\OneDrive\Documents\EA SPORTS College Football 27\saves
 ```
+
+The original lesson assumed `%USERPROFILE%\Documents`; the owner subsequently identified OneDrive Documents. Both paths initially showed the same 11 candidates and timestamps. After a normal in-game save, the OneDrive path showed `DYNASTY-TULANENEW-AUTOSAVE` changing from **2026-09-15 19:50:08.465125** to **2026-09-17 09:03:54.998445**, confirming fresh save visibility there. Whether the two paths are linked or separate copies remains unverified. The script now uses the explicit OneDrive path.
 
 The dynasty entries are **files without extensions**, not folders. Candidate filtering uses `item.is_file() and item.name.startswith("DYNASTY-")`. The observed `PROFILE-COLLEGE` file is excluded.
 
@@ -205,7 +207,7 @@ Initial lesson snapshot (superseded by the latest run below):
 
 The initial run selected **DYNASTY-TULANE**. The latest cleaned-up run found **11 candidates** and selected **DYNASTY-TULANENEW-AUTOSAVE**, modified **2026-09-15 19:50:08.465125**. The prefix filter also includes `DYNASTY-TULANE-AUTOSAVE - Copy`; these are filename candidates, not validated save contents. Newest modification time is not proof of the active in-game dynasty. No save parsing or file watching has been implemented.
 
-Runtime evidence comes from the owner's pasted Windows execution output. Codex reviewed the complete saved script and local Git status: `bridge/find_dynasty.py` remains untracked. Codex's own interpreter launch returned access denied, so no independent runtime pass is claimed.
+Runtime evidence comes from the owner's pasted Windows execution output. Codex reviewed the saved script, including the OneDrive path correction. The original lesson script was committed and pushed as `344df29`; the path correction remains a local change. Codex's own interpreter launch returned access denied, so no independent runtime pass is claimed.
 
 ### Exit criteria
 
@@ -230,12 +232,21 @@ HuddleMind can find the configured CFB27 save directory and list candidate dynas
 
 ### Core tasks
 
-- Add `watchdog`
-- Watch the verified save directory
-- Filter unrelated events
-- Debounce duplicate events
-- Log meaningful dynasty changes
-- Test by advancing a real dynasty
+- ✅ Install `watchdog` — owner output confirms version 6.0.0 and successful import
+- ✅ Observe modification events at the verified OneDrive save directory
+- 🟡 Filter directory events and non-`DYNASTY-` filenames in code; matching-file behavior verified, explicit negative-test result not separately recorded
+- ✅ Debounce per file after one second of quiet; two five-write test bursts each produced one message
+- 🟡 Print event metadata; determining meaningful content changes remains unfinished
+- 🟡 Actual in-game save detected; advancing a dynasty week has not been tested
+- ✅ Repeated saves, idle operation after the fix, and clean Ctrl+C shutdown verified by owner
+
+### Watcher checkpoint evidence and limitations
+
+`bridge/watch_dynasty.py` uses a handler class, a pending-event dictionary, `time.monotonic()`, and a lock shared with the main polling loop. It prints `st_mtime_ns` and `st_size` after a quiet period. The owner observed an in-game `DYNASTY-TULANENEW-AUTOSAVE` event with timestamp `1789668845088441100` and size `9646981` bytes. Tests are owner-run evidence, not an independent Codex runtime pass.
+
+An initial startup run emitted events for all 11 candidates; a later startup did not repeat that behavior. Cause unknown. No content-change filter or startup suppression was added. Only modification events are handled; creation/rename events, broader I/O-error recovery, and confirmation that a file is ready to parse remain future work. `FileNotFoundError` is caught but that branch has not been exercised explicitly.
+
+`bridge/requirements.txt` records `watchdog==6.0.0`. The local `empty-save-test/` directory is ignored by Git and now contains test files; it must be emptied or replaced before reusing it for a zero-candidate discovery test.
 
 ---
 
@@ -445,7 +456,7 @@ The second-screen dashboard updates accurately enough to support live recommenda
 |---|---|---:|---|
 | 01 | Paths and files | ✅ | Built paths, discovered candidates, displayed timestamps, and verified missing-folder handling |
 | 02 | Conditions, loops, and functions | ✅ | Used conditions, loops, lists, parameters, and return values; verified discovery and empty results after refactoring |
-| 03 | File watching and events | ⬜ | Not started |
+| 03 | File watching and events | 🟡 | Built handler/observer, filtering, locked dictionary, quiet-period debounce, metadata output, and Ctrl+C shutdown; reliability work remains |
 | 04 | JSON and dictionaries | ⬜ | Not started |
 | 05 | Type hints and Pydantic | ⬜ | Not started |
 | 06 | SQLite and SQL | ⬜ | Not started |
@@ -470,7 +481,13 @@ The second-screen dashboard updates accurately enough to support live recommenda
 - Fixed case-sensitive `startswith("Dynasty-")` to match `DYNASTY-` filenames.
 - Moved `return` outside the loop so every item is checked and empty directories return `[]`.
 - Removed exploratory prints and the unused hard-coded save path; restored the real directory and confirmed 11 candidates with newest-save selection.
-- Next: commit the lesson checkpoint, then learn packages and file watching.
+- Committed and pushed lesson checkpoint `344df29`; installed and imported `watchdog` 6.0.0.
+- Corrected the configured path to OneDrive Documents; a controlled in-game save produced a fresh autosave timestamp at that path.
+- Built the watcher incrementally; learned classes, inheritance, `self`, callbacks, dictionaries, locks, polling, and elapsed-time comparisons.
+- Debugged a missing dictionary assignment and indentation errors around `try`/`except` and the metadata loop; verified idle operation and actual save output afterward.
+- Verified two separate event bursts produce one message each and Ctrl+C returns cleanly to PowerShell.
+- Startup events across all candidates did not repeat on a later launch; no cause or filtering rule is claimed.
+- Next: commit the watcher checkpoint, then continue reliability checks.
 
 ### Lesson notes template
 
@@ -549,7 +566,7 @@ Originally selected Python 3.12, built-in `venv`, and `pip`. During the first le
 
 | Question | Status | Notes |
 |---|---:|---|
-| Exact CFB27 dynasty save location/naming on this PC | ✅ | Observed Documents/EA SPORTS College Football 27/saves; extensionless DYNASTY- files; see Milestone 1 |
+| Exact CFB27 dynasty save location/naming on this PC | ✅ | OneDrive Documents/EA SPORTS College Football 27/saves; fresh autosave observed after in-game save; see Milestone 1 |
 | Best current CFB27 parser foundation | ⬜ | Evaluate before Milestone 3 |
 | Which dynasty entities are reliably available | ⬜ | Validate against real save |
 | Recruiting data completeness | ⬜ | Validate |
@@ -568,7 +585,7 @@ No active product blockers.
 
 **Verified:** Python 3.13.5 virtual environment runs the bridge script on the Windows PC.
 
-**Pending:** commit/push of the learning script and documentation, and fresh verification of remote state. Local Git status, missing-folder handling, and empty-result handling have been checked.
+**Pending:** commit the OneDrive path correction, verified watcher, dependency record, and documentation. Further event coverage and meaningful-change detection remain unfinished. Lesson checkpoint `344df29` was successfully pushed according to owner output.
 
 ---
 
@@ -609,7 +626,9 @@ No active product blockers.
 - Completed missing-folder and empty-folder checks using owner-supplied execution output.
 - Reviewed the function refactor and cleaned-up script; recorded capitalization and return-indentation debugging lessons.
 - Recorded the latest 11-candidate run and newest save; marked Foundation and Find the Dynasty complete.
-- Verified local Git; kept remote freshness and lesson commit/push explicitly pending.
+- Verified local Git and recorded owner-confirmed commit/push of `344df29`.
+- Recorded `watchdog` 6.0.0 installation/import and the OneDrive save-path correction, validated by a fresh in-game autosave timestamp.
+- Recorded the verified watcher checkpoint, burst tests, clean shutdown, metadata output, and unresolved startup-event behavior; added the dependency record and ignored local test files.
 
 ## 2026-09-16
 
@@ -630,11 +649,11 @@ No active product blockers.
 
 ---
 
-# 11. Next Session — Commit Checkpoint and Start Watch the Dynasty
+# 11. Next Session — Watch the Dynasty
 
-1. Review the documentation diff and untracked `bridge/find_dynasty.py`; stage the explicit lesson files and commit the checkpoint.
-2. Fetch to check remote freshness before synchronizing/pushing; avoid overwriting unrelated work.
-3. Begin Milestone 2 by explaining packages, `pip`, and installing into the project virtual environment.
-4. Introduce file watching in small runnable increments; keep original game saves read-only.
+1. Review and commit the explicit checkpoint files; do not stage local test data.
+2. Explicitly verify unrelated files and directory events remain silent in the test folder.
+3. Investigate creation/rename event coverage and file-access recovery in small lessons before relying on the watcher for parsing.
+4. Gather more evidence before adding metadata/content-change filtering; startup activity did not reproduce.
 
 Continue the learning-first workflow: the owner writes small Python increments, runs them, and shares output before the next step.

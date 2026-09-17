@@ -10,12 +10,7 @@ def find_dynasty_files(save_folder):
 
     return dynasty_files
 
-home_folder = Path.home()
-
-documents_folder = home_folder / "Documents"
-
-game_folder = documents_folder / "EA SPORTS College Football 27"
-save_folder = game_folder / "saves"
+save_folder = Path(r"C:\Users\bwort\OneDrive\Documents\EA SPORTS College Football 27\saves")
 
 print("Save folder:", save_folder)
 

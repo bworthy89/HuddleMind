@@ -72,6 +72,21 @@ Initial environment tooling:
 
 See [`../docs/DEVELOPMENT.md`](../docs/DEVELOPMENT.md) for setup instructions.
 
-## Important Constraint
+## Watcher checkpoint
+
+Install the recorded dependency from the repository root using the active virtual environment:
+
+```powershell
+python -m pip install -r bridge/requirements.txt
+python bridge/watch_dynasty.py
+```
+
+Both scripts currently use this PC's explicit OneDrive save path. Adjust it before running on another machine. The watcher handles modification events for `DYNASTY-` filenames, ignores directory events, and groups events per path after one second of quiet. It prints modification time in nanoseconds and size in bytes. Ctrl+C stops it.
+
+Owner-run checks verified repeated test-file saves, two separate five-write bursts producing one message each, idle operation after the indentation fix, clean Ctrl+C shutdown, and an actual in-game autosave at the OneDrive path. An initial startup burst did not repeat; its cause remains unknown. Events and metadata do not prove a content change or that a save is ready to parse. Creation/rename handling and broader file-access recovery are not implemented.
+
+For controlled tests, create `empty-save-test` in the repository root and temporarily point `watch_folder` there. The directory is ignored by Git. Use ordinary test files there; restore the real path after testing.
+
+## Save safety
 
 Normal bridge operation is read-first. Do not write to or overwrite original CFB27 dynasty files as part of the MVP.

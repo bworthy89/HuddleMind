@@ -55,6 +55,7 @@ Thumbs.db
 desktop.ini
 
 # Temporary files
+/empty-save-test/
 *.tmp
 *.temp
 *.bak
