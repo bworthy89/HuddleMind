@@ -11,18 +11,26 @@ class SaveEventHandler(FileSystemEventHandler):
         self.pending_changes = {}
         self.pending_lock = Lock()
 
-
-    def on_modified(self, event):
-        if event.is_directory:
-            return
-
-        changed_file = Path(event.src_path)
+    def queue_change(self, file_path):
+        changed_file = Path(file_path)
 
         if not changed_file.name.startswith("DYNASTY-"):
             return
 
         with self.pending_lock:
             self.pending_changes[changed_file] = time.monotonic()
+
+    def on_created(self, event):
+        if not event.is_directory:
+                self.queue_change(event.src_path)
+
+    def on_modified(self, event):
+        if not event.is_directory:
+            self.queue_change(event.src_path)
+
+    def on_moved(self, event):
+        if not event.is_directory:
+            self.queue_change(event.dest_path)
 
     def process_pending_changes(self):
         now = time.monotonic()
@@ -40,15 +48,14 @@ class SaveEventHandler(FileSystemEventHandler):
             try:
                 details = file_path.stat()
             except FileNotFoundError:
-                    print("File disappeared before checking:", file_path.name)
-                    continue
+                print("File disappeared before checking:", file_path.name)
+                continue
 
             print(
                 "File event:", file_path.name,
                 "| Modified:", details.st_mtime_ns,
                 "| Bytes:", details.st_size,
             )
-
 
 watch_folder = Path(
     r"C:\Users\bwort\OneDrive\Documents\EA SPORTS College Football 27\saves"

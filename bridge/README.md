@@ -81,9 +81,9 @@ python -m pip install -r bridge/requirements.txt
 python bridge/watch_dynasty.py
 ```
 
-Both scripts currently use this PC's explicit OneDrive save path. Adjust it before running on another machine. The watcher handles modification events for `DYNASTY-` filenames, ignores directory events, and groups events per path after one second of quiet. It prints modification time in nanoseconds and size in bytes. Ctrl+C stops it.
+Both scripts currently use this PC's explicit OneDrive save path. Adjust it before running on another machine. The watcher handles creation, modification, and rename destinations for `DYNASTY-` filenames through a shared queue helper, ignores directory events, and groups events per path after one second of quiet. It prints modification time in nanoseconds and size in bytes. Ctrl+C stops it.
 
-Owner-run checks verified repeated test-file saves, two separate five-write bursts producing one message each, idle operation after the indentation fix, clean Ctrl+C shutdown, and an actual in-game autosave at the OneDrive path. An initial startup burst did not repeat; its cause remains unknown. Events and metadata do not prove a content change or that a save is ready to parse. Creation/rename handling and broader file-access recovery are not implemented.
+Owner-run checks verified repeated saves, burst grouping, idle operation, clean Ctrl+C shutdown, and an actual in-game autosave. Further checks verified creation, rename destinations, temporary-name filtering, and directory filtering. Create/modify/rename and debounce tests passed after the shared-helper refactor; the owner also confirmed another real-save check. An initial startup burst did not repeat; its cause remains unknown. Events and metadata do not prove a content change or that a save is ready to parse. Broader file-access recovery and cross-directory move testing remain unfinished.
 
 For controlled tests, create `empty-save-test` in the repository root and temporarily point `watch_folder` there. The directory is ignored by Git. Use ordinary test files there; restore the real path after testing.
 
