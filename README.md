@@ -1,1 +1,98 @@
 # HuddleMind
+
+HuddleMind is an AI-powered companion platform for **College Football 27 on PC**. A lightweight Windows bridge observes dynasty and live-game information, converts it into HuddleMind-owned data, and syncs it to a responsive web app that can be viewed from a phone, tablet, laptop, or second PC.
+
+The project has two major goals:
+
+1. **Dynasty Intelligence** — help with recruiting, roster construction, depth, injuries, development, staff/facilities decisions, opponent preparation, and other long-term program decisions.
+2. **Live Coordinator** — provide fast, context-aware play-call suggestions based on the current game situation, the user's history, and opponent tendencies.
+
+> HuddleMind is being built as both a real product and a hands-on Python learning project. Python features are developed step by step so the code is understood, not merely generated.
+
+## Current Status
+
+**Phase:** Milestone 0 — Foundation  
+**Status:** In progress
+
+The initial documentation and repository structure are being established before feature code begins.
+
+See [`PROJECT_PROGRESS.md`](./PROJECT_PROGRESS.md) for the live roadmap and learning tracker.
+
+## Architecture
+
+```text
+College Football 27 (Gaming PC)
+            |
+            v
+HuddleMind Windows Bridge
+Python / read-first integration
+            |
+            | normalized HTTPS / realtime events
+            v
+HuddleMind Cloud
+Database + API + realtime + AI services
+            |
+            v
+HuddleMind Web App
+Phone / tablet / browser / second PC
+```
+
+The bridge is the only component that needs local access to College Football 27. The web app is the primary user interface.
+
+For the full design, see [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md).
+
+## Repository Structure
+
+```text
+HuddleMind/
+├── bridge/                 # Windows bridge; Python learning-first development
+├── web/                    # Responsive web application
+├── docs/                   # Architecture and development documentation
+├── PRD.md                  # Product requirements
+├── PROJECT_PROGRESS.md     # Roadmap, learning log, decisions, backlog
+├── .gitignore
+└── README.md
+```
+
+Additional folders will be added only when the project actually needs them.
+
+## Development Principles
+
+- **Read first.** Observe CFB27 before considering invasive integration.
+- **Normalize game data.** The web app should depend on HuddleMind models, not raw CFB27 internals.
+- **Fast brain + deep brain.** Live play calling uses fast deterministic/statistical logic; AI models handle deeper analysis and explanations.
+- **Explain recommendations.** HuddleMind should show why it recommended an action.
+- **Learn the user.** Recommendations should become more personalized as history accumulates.
+- **Build small.** Create the smallest useful working version before adding abstraction.
+- **Learn Python by building.** Instructional Python code is written incrementally by the project owner with guided explanation.
+
+## Python Environment
+
+The bridge targets **Python 3.12**.
+
+For the first learning stages, HuddleMind uses Python's built-in `venv` plus `pip`. This keeps the environment transparent while the fundamentals are being learned. More advanced tooling can be introduced later if it solves a real project problem.
+
+Local setup instructions live in [`docs/DEVELOPMENT.md`](./docs/DEVELOPMENT.md).
+
+## First Development Milestone
+
+The first real coding milestone is intentionally small:
+
+> Use Python to locate the College Football 27 save directory and identify candidate dynasty saves without modifying anything.
+
+This teaches the foundation we will later use for save watching, parsing, synchronization, and the live bridge.
+
+See [`bridge/README.md`](./bridge/README.md).
+
+## Product Documentation
+
+- [`PRD.md`](./PRD.md) — product requirements and long-term vision
+- [`PROJECT_PROGRESS.md`](./PROJECT_PROGRESS.md) — milestones, learning progress, decisions, blockers, and backlog
+- [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) — technical architecture and data flow
+- [`docs/DEVELOPMENT.md`](./docs/DEVELOPMENT.md) — development workflow and local setup
+
+## Project Scope Notes
+
+The MVP is focused on **offline/read-first College Football 27 PC dynasty workflows**. HuddleMind should not modify original dynasty saves during normal operation.
+
+Game-specific assumptions are treated as research questions until verified against the user's actual installation and save data.
