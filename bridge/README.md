@@ -18,7 +18,7 @@ The bridge is also the main Python learning area for HuddleMind.
 
 Instructional Python code should be written by the project owner in small steps with explanation and debugging along the way.
 
-For that reason, this directory intentionally contains **no finished Python implementation yet**.
+The first lesson script, `find_dynasty.py`, was written incrementally by the owner. It discovers `DYNASTY-` candidate files, displays timestamps, and selects the newest file without modifying saves. Normal, missing-folder, and empty-folder behavior have been verified through owner-supplied execution output.
 
 ## First Lesson
 
@@ -63,7 +63,7 @@ Lesson 11 ML only if real data justifies it
 
 ## Environment
 
-Target Python version: **3.12**
+Current lesson environment: **Python 3.13.5** (original target: 3.12; dependency compatibility will be checked before adding packages).
 
 Initial environment tooling:
 

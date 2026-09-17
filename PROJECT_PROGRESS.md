@@ -1,8 +1,10 @@
 # HuddleMind — Project Progress & Learning Tracker
 
 **Repository:** `bworthy89/HuddleMind`  
-**Current Phase:** Milestone 1 — Find the Dynasty (foundation Git verification pending)  
-**Current Status:** 🟡 In Progress  
+**Current Phase:** Milestone 1 complete — prepare lesson commit, then Milestone 2
+
+**Current Status:** ✅ Save discovery verified; commit/push pending
+
 **Last Updated:** 2026-09-17
 
 ---
@@ -62,21 +64,21 @@ Update it whenever we:
 - ✅ Created and activated `.venv`
 - ✅ Verified `sys.executable` points to the project's `.venv\Scripts\python.exe`
 - ✅ Ran `bridge/find_dynasty.py` through VS Code and directly with the virtual-environment interpreter
-- ⬜ Confirm Git is working from the repo and the checkout is current; no `git status` or pull output has been reviewed
+- ✅ Local Git verified: on `main`, matching the locally recorded `origin/main` (0 ahead / 0 behind). No fetch performed; current GitHub state remains unverified.
 
 The Windows `py` launcher was unavailable, but `python` resolved to an installed interpreter. Python 3.13.5 is accepted for these standard-library lessons; compatibility with future dependencies has not yet been verified. The original setup guide still specifies 3.12.
 
 ### Exit criteria
 
-Foundation setup is complete when the local Git checkout is verified and the project virtual environment can run the first bridge script. Python execution is verified; Git verification remains pending.
+Foundation setup is complete: local Git works and the project virtual environment runs the first bridge script. Remote freshness remains unverified until a fetch.
 
 ### Current progress — Lesson 1
 
-The project owner wrote and ran save discovery incrementally. It finds four dynasty candidates, prints modification times, collects paths in a list, and selects the most recently modified candidate without changing game files.
+The project owner wrote and ran save discovery incrementally. The cleaned-up script uses `find_dynasty_files(save_folder)`, prints modification times, and selects the newest candidate without changing game files. The latest run found 11 candidates and selected `DYNASTY-TULANENEW-AUTOSAVE`. Missing-folder and empty-folder cases passed; the empty-folder case was repeated after the function refactor.
 
 ### Immediate next step
 
-Test the missing-folder guard already introduced in the lesson. Its implementation and output have not yet been confirmed. Then restore the real path, test the empty-result case, and refactor discovery into a reusable function.
+Review and commit the lesson script and documentation, then begin Milestone 2 with packages, `pip`, and file watching. The script is currently untracked; no commit or push has been made in this session.
 
 ---
 
@@ -125,8 +127,8 @@ A feature is not fully complete until relevant documentation is updated.
 
 | Milestone | Goal | Status |
 |---|---|---:|
-| 0 | Foundation | 🟡 |
-| 1 | Find the Dynasty | 🟡 |
+| 0 | Foundation | ✅ |
+| 1 | Find the Dynasty | ✅ |
 | 2 | Watch the Dynasty | ⬜ |
 | 3 | Understand the Dynasty | ⬜ |
 | 4 | Local Memory | ⬜ |
@@ -144,7 +146,7 @@ A feature is not fully complete until relevant documentation is updated.
 
 ## Milestone 1 — Find the Dynasty
 
-**Status:** 🟡 In Progress
+**Status:** ✅ Complete (lesson commit/push pending)
 
 **Goal:** Use Python to reliably locate CFB27 dynasty save files without modifying them.
 
@@ -160,8 +162,8 @@ A feature is not fully complete until relevant documentation is updated.
 - ✅ `if` statements
 - ✅ Loops
 - ✅ Lists
-- ⬜ Functions
-- 🟡 Basic error handling — debugged name, syntax, and path-type errors; missing-folder guard test pending
+- ✅ Functions — `def`, parameters, calls, and return values
+- ✅ Basic error handling — missing-folder guard tested; name, syntax, path-type, capitalization, and indentation bugs debugged
 
 ### Tasks
 
@@ -173,12 +175,13 @@ A feature is not fully complete until relevant documentation is updated.
 - ✅ List files inside it
 - ✅ Identify likely dynasty files
 - ✅ Print file names and modification times
-- ⬜ Refactor discovery into a reusable function
-- 🟡 Add useful missing-folder errors — guard explained; implementation and test output pending
+- ✅ Refactor discovery into a reusable function
+- ✅ Add useful missing-folder errors — clear message and clean exit verified by owner output
 - ✅ Test discovery against existing local dynasty save candidates (filenames and metadata only; contents not parsed)
-- ✅ Collect four candidate paths using a list and `append()`
+- ✅ Collect candidate paths using a list and `append()` — latest run found 11
 - ✅ Select the most recently modified candidate using timestamp comparisons
-- ⬜ Verify empty-result handling with a directory containing no dynasty candidates
+- ✅ Verify empty-result handling with a directory containing no dynasty candidates, including after refactoring
+- ✅ Remove obsolete exploratory output and restore the real save path
 - ✅ Document the verified save layout
 
 ### Verified save layout and observations
@@ -191,6 +194,8 @@ On the gaming PC, the observed directory is:
 
 The dynasty entries are **files without extensions**, not folders. Candidate filtering uses `item.is_file() and item.name.startswith("DYNASTY-")`. The observed `PROFILE-COLLEGE` file is excluded.
 
+Initial lesson snapshot (superseded by the latest run below):
+
 | Candidate | Observed modification time (PC local time) |
 |---|---|
 | DYNASTY-JUL10-09h45m31-AUTOSAVE | 2026-07-10 12:12:30.139416 |
@@ -198,9 +203,9 @@ The dynasty entries are **files without extensions**, not folders. Candidate fil
 | DYNASTY-TULANE | 2026-07-18 16:44:31.609134 |
 | DYNASTY-TULANE-AUTOSAVE | 2026-07-18 16:44:10.746379 |
 
-The script correctly selected **DYNASTY-TULANE** as most recently modified. This is a metadata comparison, not proof that it is the active in-game dynasty. No save parsing or file watching has been implemented during this lesson.
+The initial run selected **DYNASTY-TULANE**. The latest cleaned-up run found **11 candidates** and selected **DYNASTY-TULANENEW-AUTOSAVE**, modified **2026-09-15 19:50:08.465125**. The prefix filter also includes `DYNASTY-TULANE-AUTOSAVE - Copy`; these are filename candidates, not validated save contents. Newest modification time is not proof of the active in-game dynasty. No save parsing or file watching has been implemented.
 
-Evidence comes from the owner's pasted Windows execution output. The complete current script and its Git commit/push status have not been independently reviewed.
+Runtime evidence comes from the owner's pasted Windows execution output. Codex reviewed the complete saved script and local Git status: `bridge/find_dynasty.py` remains untracked. Codex's own interpreter launch returned access denied, so no independent runtime pass is claimed.
 
 ### Exit criteria
 
@@ -438,8 +443,8 @@ The second-screen dashboard updates accurately enough to support live recommenda
 
 | Lesson | Topic | Status | What I can now explain / do |
 |---|---|---:|---|
-| 01 | Paths and files | 🟡 | Built paths, distinguished files from folders, discovered dynasty candidates, displayed timestamps; missing-folder test pending |
-| 02 | Conditions, loops, and functions | 🟡 | Practiced conditions, loops, lists, and newest-file selection; functions not started |
+| 01 | Paths and files | ✅ | Built paths, discovered candidates, displayed timestamps, and verified missing-folder handling |
+| 02 | Conditions, loops, and functions | ✅ | Used conditions, loops, lists, parameters, and return values; verified discovery and empty results after refactoring |
 | 03 | File watching and events | ⬜ | Not started |
 | 04 | JSON and dictionaries | ⬜ | Not started |
 | 05 | Type hints and Pydantic | ⬜ | Not started |
@@ -459,8 +464,13 @@ The second-screen dashboard updates accurately enough to support live recommenda
 - Fixed a `NameError` by defining `game_folder` before using it.
 - Fixed a `SyntaxError` by separating `print()` arguments with a comma.
 - Investigated `NotADirectoryError`: direct filesystem checks confirmed the dynasty save was a file. Corrected reversed File/Folder labels in an `is_file()` branch.
-- Introduced `not save_folder.is_dir()` and `raise SystemExit` for a missing-folder guard; the owner has not yet supplied the test result.
-- Next: verify missing-folder and empty-result behavior, then introduce functions and return values.
+- Implemented `not save_folder.is_dir()` and `raise SystemExit`; missing-folder output confirmed a clear message with no traceback.
+- Tested an existing empty directory before and after refactoring; both runs reported zero candidates and no saves.
+- Introduced `def`, parameters, function calls, and `return`; separated discovery from timestamp display.
+- Fixed case-sensitive `startswith("Dynasty-")` to match `DYNASTY-` filenames.
+- Moved `return` outside the loop so every item is checked and empty directories return `[]`.
+- Removed exploratory prints and the unused hard-coded save path; restored the real directory and confirmed 11 candidates with newest-save selection.
+- Next: commit the lesson checkpoint, then learn packages and file watching.
 
 ### Lesson notes template
 
@@ -558,7 +568,7 @@ No active product blockers.
 
 **Verified:** Python 3.13.5 virtual environment runs the bridge script on the Windows PC.
 
-**Pending verification:** local Git status/current checkout, missing-folder guard, empty-result behavior, and eventual commit/push of the learning script.
+**Pending:** commit/push of the learning script and documentation, and fresh verification of remote state. Local Git status, missing-folder handling, and empty-result handling have been checked.
 
 ---
 
@@ -596,8 +606,10 @@ No active product blockers.
 - Recorded verified Windows Python 3.13.5 virtual environment and successful script execution.
 - Updated Milestone 1 and learning objectives from observed lesson output.
 - Documented the verified save path, extensionless dynasty files, four candidates, and newest-file selection.
-- Recorded debugging lessons and the pending missing-folder test.
-- Preserved Git verification, function refactoring, and untested cases as unfinished.
+- Completed missing-folder and empty-folder checks using owner-supplied execution output.
+- Reviewed the function refactor and cleaned-up script; recorded capitalization and return-indentation debugging lessons.
+- Recorded the latest 11-candidate run and newest save; marked Foundation and Find the Dynasty complete.
+- Verified local Git; kept remote freshness and lesson commit/push explicitly pending.
 
 ## 2026-09-16
 
@@ -618,14 +630,11 @@ No active product blockers.
 
 ---
 
-# 11. Next Session — Continue Find the Dynasty
+# 11. Next Session — Commit Checkpoint and Start Watch the Dynasty
 
-1. Confirm the missing-folder guard is before discovery. Temporarily use `saves-test-missing`, run the script, and verify a clear message without a traceback.
-2. Restore `saves` and rerun discovery to confirm the four candidates still appear.
-3. Test the no-candidates branch using a separate empty test directory without changing game files.
-4. Introduce `def`, parameters, and `return`; refactor discovery into a small reusable function together.
-5. Review the complete script and remove obsolete exploratory output.
-6. Check local `git status`, synchronize the tracker safely, and commit the working lesson script when ready. Its current remote status is unverified.
-7. Update the learning log with confirmed test results before starting file watching.
+1. Review the documentation diff and untracked `bridge/find_dynasty.py`; stage the explicit lesson files and commit the checkpoint.
+2. Fetch to check remote freshness before synchronizing/pushing; avoid overwriting unrelated work.
+3. Begin Milestone 2 by explaining packages, `pip`, and installing into the project virtual environment.
+4. Introduce file watching in small runnable increments; keep original game saves read-only.
 
 Continue the learning-first workflow: the owner writes small Python increments, runs them, and shares output before the next step.

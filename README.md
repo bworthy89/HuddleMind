@@ -11,10 +11,11 @@ The project has two major goals:
 
 ## Current Status
 
-**Phase:** Milestone 0 — Foundation  
-**Status:** In progress
+**Phase:** Milestone 1 — Find the Dynasty
 
-The initial documentation and repository structure are being established before feature code begins.
+**Status:** Complete; lesson commit pending, file watching next
+
+The first Python script discovers dynasty candidates, displays modification times, and selects the newest candidate. The owner verified normal, missing-folder, and empty-folder behavior. Save parsing, file watching, cloud integration, and the web app remain future work.
 
 See [`PROJECT_PROGRESS.md`](./PROJECT_PROGRESS.md) for the live roadmap and learning tracker.
 
@@ -68,7 +69,7 @@ Additional folders will be added only when the project actually needs them.
 
 ## Python Environment
 
-The bridge targets **Python 3.12**.
+The original Python target was **3.12**; the current standard-library lessons run in a verified **Python 3.13.5** virtual environment. Check compatibility before adding third-party dependencies.
 
 For the first learning stages, HuddleMind uses Python's built-in `venv` plus `pip`. This keeps the environment transparent while the fundamentals are being learned. More advanced tooling can be introduced later if it solves a real project problem.
 
