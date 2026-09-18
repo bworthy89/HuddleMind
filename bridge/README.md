@@ -89,7 +89,9 @@ For controlled tests, create `empty-save-test` in the repository root and tempor
 
 ## Read-only header inspector
 
-Run `python bridge/inspect_save.py` from the project root while the game is not actively saving. The script currently points to this PC's OneDrive `DYNASTY-TULANENEW-AUTOSAVE`; adjust that assignment for another file. It reads 64 bytes, rejects short or wrong-signature inputs, prints hex rows, and decodes the database-name field and timestamp. The observed identifier is `College-27-RL4-9192662`; the timestamp's timezone is unknown.
+Run `python bridge/inspect_save.py` from the project root while the game is not actively saving. The script currently points to this PC's OneDrive `DYNASTY-TULANENEW-AUTOSAVE`; adjust that assignment for another file. It reads an 82-byte header, checks length and signature, and decodes the database-name field, timestamp, schema version, and proposed chunk size. The observed identifier is `College-27-RL4-9192662`, schema is **833.0**, and timestamp timezone is unknown.
+
+It reads the proposed chunk and decompresses it in memory with a 64 MiB output cap, checking complete stream consumption and the `FrTk` signature. Owner output verified 5,864,926 compressed bytes at offset 82 yielding 31,165,754 bytes with no trailing or unprocessed input. No output file is written. Error branches for the expanded chunk inspection have not yet been tested with negative fixtures. Reads reopen the live save; consistent snapshots remain future work.
 
 Offsets follow [community CFB27 format research](https://github.com/eric-levinson/cfb27-dynasty-modding/blob/main/docs/save-format.md), with fields checked against owner output. The reference uses a different RL1 identifier. This is an initial inspector, not a full save validator or dynasty parser; malformed text/date values and read failures are not yet handled. Owner-run tests verified the real save, a three-byte input, a 64-byte wrong-signature input, and restoration of the real path. Test fixtures stay in the ignored local test directory.
 

@@ -3,7 +3,7 @@
 **Repository:** `bworthy89/HuddleMind`  
 **Current Phase:** Milestone 3 — Understand the Dynasty (header inspection)
 
-**Current Status:** 🟡 First read-only header inspection verified; checkpoint pending. Week-advance test deferred by owner.
+**Current Status:** 🟡 Schema 833.0 chunk decompression verified; checkpoint pending. Week-advance test deferred by owner.
 
 **Last Updated:** 2026-09-18
 
@@ -78,7 +78,7 @@ The project owner wrote and ran save discovery incrementally. The cleaned-up scr
 
 ### Immediate next step
 
-Commit the first header inspector and documentation. Metadata error-handling checkpoint `146e774` was pushed successfully according to owner output. The owner deferred the week-advance test and moved to read-only save inspection; Milestone 2 remains incomplete. Next, validate additional header fields incrementally against this save before attempting payload parsing.
+Commit the expanded inspector and decompression evidence. Header-inspection checkpoint `5931dcd` was pushed successfully according to owner output. Next, inspect the decompressed database header incrementally; table layout and field mappings for schema 833.0 are not established. The week-advance test remains deferred and Milestone 2 incomplete.
 
 ---
 
@@ -259,7 +259,7 @@ An initial startup run emitted events for all 11 candidates; a later startup did
 
 **Status:** 🟡 Header inspection started; no dynasty entities or compressed payload parsed.
 
-### First header-inspection checkpoint — 2026-09-18
+### First header-inspection checkpoint — 2026-09-18 (pushed as `5931dcd`)
 
 The owner wrote `bridge/inspect_save.py` incrementally. It opens the configured autosave in `rb` mode, reads only 64 bytes, checks minimum length and the `FBCHUNKS` signature, and displays hex rows. It decodes a null-padded ASCII field at bytes 34–61 and six little-endian two-byte timestamp components at bytes 22–33, then constructs a timezone-naive `datetime`.
 
@@ -272,7 +272,22 @@ Owner-supplied output confirms:
 - A 64-byte `X` fixture passed the length check and was rejected for signature `b'XXXXXXXX'`.
 - Real OneDrive autosave path restored; successful decoding repeated after both negative tests.
 
-Field interpretation follows [community CFB27 format research](https://github.com/eric-levinson/cfb27-dynasty-modding/blob/main/docs/save-format.md), accessed 2026-09-18. Its sample identifier is `College-27-RL1-9039126`, differing from this save's RL4 identifier; do not assume all remaining layout details match. The database-name field is not a team name. Header checks do not validate the entire save, and malformed ASCII/date fields or read failures are not yet handled. No write, decompression, roster parsing, or parser dependency was added. Runtime evidence is owner-provided; Codex reviewed the saved source.
+Field interpretation follows [community CFB27 format research](https://github.com/eric-levinson/cfb27-dynasty-modding/blob/main/docs/save-format.md), accessed 2026-09-18. Its sample identifier is `College-27-RL1-9039126`, differing from this save's RL4 identifier; do not assume all remaining layout details match. The database-name field is not a team name. Header checks do not validate the entire save, and malformed ASCII/date fields or read failures are not yet handled. The initial checkpoint did not decompress data; the subsequent checkpoint below does. Runtime evidence is owner-provided; Codex reviewed the saved source.
+
+### Schema and decompression checkpoint — 2026-09-18
+
+The inspector now reads an 82-byte header. Four-byte little-endian fields at offsets 62 and 66 report schema **833.0**, unlike the reference schema **809.0**. The field at offset 74 reports **5,864,926** compressed bytes starting at offset **82**, ending exclusively at **5,865,008**, within the 9,646,981-byte file. The prefix at offset 82 is `78 9c`, consistent with zlib.
+
+The owner added exact-length reading, a chunk-range guard, and in-memory decompression using the standard-library `zlib.decompressobj()` with a **64 MiB output cap** (an inspection limit, not a format maximum). Final owner output confirmed:
+
+- Decompressed length: **31,165,754 bytes**.
+- `eof`: **True**; `unused_data`: **0 bytes**; `unconsumed_tail`: **0 bytes**.
+- Prefix: `b'FrTk\x00\x00\x00\x80\x00\x00\x00\x04\x00\x00\x00\x01'`.
+- Explicit complete-stream, trailing/unprocessed-input, and `FrTk` signature checks passed.
+
+This verifies one complete zlib stream exactly occupying the proposed chunk range in this sample. It does not validate the whole save or establish schema 833.0 table/field mappings. No decompressed file was written and no roster entities have been parsed. The new rejection branches (invalid range, short chunk, corrupt/incomplete stream, trailing data, unexpected database signature) are implemented but have not been exercised with negative fixtures. Earlier short/wrong-signature tests used the previous 64-byte header version; do not claim they were rerun after expanding to 82 bytes.
+
+API references checked: [Python zlib documentation](https://docs.python.org/3/library/zlib.html) and [RFC 1950](https://www.rfc-editor.org/info/rfc1950/). Reads currently reopen the live save for separate stages; inspect while the game is not saving. Consistent snapshots, broader I/O handling, and table parsing remain unfinished.
 
 ### Learning topics
 
@@ -527,7 +542,9 @@ The second-screen dashboard updates accurately enough to support live recommenda
 - Pushed metadata error-handling checkpoint `146e774`; owner deferred the week-advance test.
 - Began binary inspection: learned `rb`, bounded reads, byte slices, hex output, null-terminated ASCII decoding, little-endian integers, and `datetime` construction.
 - Verified real-header decoding and short-file/wrong-signature rejection, then restored and reran the real save. See Milestone 3 for values and source attribution.
-- Next: commit the header-inspection checkpoint and continue validating the format incrementally.
+- Pushed header-inspection checkpoint `5931dcd`.
+- Learned `seek`, four-byte little-endian decoding, chunk bounds, bounded zlib decompression, stream completion, and trailing/unprocessed input checks. Verified schema 833.0 and a complete stream yielding a `FrTk` prefix; see the decompression checkpoint above.
+- Next: commit decompression evidence, then inspect the database header before interpreting tables.
 
 ### Lesson notes template
 
@@ -625,7 +642,7 @@ No active product blockers.
 
 **Verified:** Python 3.13.5 virtual environment runs the bridge script on the Windows PC.
 
-**Pending:** commit the first header-inspection script and lesson record. Week-advance testing is deferred by owner. Watcher retries, meaningful-change detection, and full save parsing remain unfinished. Checkpoints through `146e774` were successfully pushed according to owner output.
+**Pending:** commit the schema/decompression checkpoint. Week-advance testing is deferred by owner. Watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `5931dcd` were successfully pushed according to owner output.
 
 ---
 
@@ -660,6 +677,7 @@ No active product blockers.
 
 ## 2026-09-18
 
+- Verified schema 833.0, exact chunk bounds, and complete bounded decompression to 31,165,754 bytes beginning with `FrTk`; recorded remaining validation limits.
 - Started Milestone 3 after the owner deferred week-advance testing; recorded read-only header decoding and both guard tests.
 - Recorded metadata error-handling checkpoint `146e774` as pushed.
 - Added report-and-skip handling for metadata OSError failures; recorded simulated permission-error recovery and restored normal operation.
@@ -699,7 +717,7 @@ No active product blockers.
 # 11. Next Session — Understand the Dynasty
 
 1. Review and commit the explicit checkpoint files; do not stage local test data.
-2. Continue small read-only header lessons; validate further offsets and lengths against this RL4 save before payload parsing.
+2. Inspect the decompressed database header in small read-only lessons; validate schema 833.0 layout before interpreting tables or roster fields.
 3. Add appropriate handling for malformed decoded fields as inspection becomes reusable.
 4. Keep week-advance testing deferred until the owner resumes it. Watcher retry, lifecycle, cross-directory events, and meaningful-change filtering remain separate unfinished work.
 
