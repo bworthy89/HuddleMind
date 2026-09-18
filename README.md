@@ -11,13 +11,15 @@ The project has two major goals:
 
 ## Current Status
 
-**Phase:** Milestone 1 — Find the Dynasty
+**Phase:** Milestone 3 — Understand the Dynasty
 
-**Status:** Basic watcher pushed; creation/rename support and shared-helper refactor verified, checkpoint pending
+**Status:** Watcher checkpoints pushed; initial read-only header inspection verified. Week-advance test deferred.
 
 The discovery script lists dynasty candidates and selects the newest by modification time. The watcher filters creation, modification, and rename events, debounces per file, and prints metadata. Owner-run checks cover discovery edge cases, event types and filters, controlled bursts, clean shutdown, and an actual in-game save in OneDrive Documents. Save parsing, broader watcher reliability, cloud integration, and the web app remain future work.
 
 See [`PROJECT_PROGRESS.md`](./PROJECT_PROGRESS.md) for the live roadmap and learning tracker.
+
+`bridge/inspect_save.py` reads a 64-byte header, checks length and signature, and decodes the database-name field and a timestamp with no assumed timezone. Real-save and invalid-header checks passed through owner-run tests. It does not yet parse dynasty entities or validate the full save format.
 
 ## Architecture
 

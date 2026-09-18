@@ -1,9 +1,9 @@
 # HuddleMind — Project Progress & Learning Tracker
 
 **Repository:** `bworthy89/HuddleMind`  
-**Current Phase:** Milestone 2 — Watch the Dynasty
+**Current Phase:** Milestone 3 — Understand the Dynasty (header inspection)
 
-**Current Status:** 🟡 Metadata OSError handling verified; error-handling checkpoint pending
+**Current Status:** 🟡 First read-only header inspection verified; checkpoint pending. Week-advance test deferred by owner.
 
 **Last Updated:** 2026-09-18
 
@@ -78,7 +78,7 @@ The project owner wrote and ran save discovery incrementally. The cleaned-up scr
 
 ### Immediate next step
 
-Commit the metadata `OSError` handler and its test record. Checkpoints `344df29`, `25f05a7`, `8469844`, and `c1156fb` were pushed successfully according to owner output. The new handler reports and skips a failed metadata read; it does not retry automatically. Filesystem notifications alone do not establish meaningful save-content changes.
+Commit the first header inspector and documentation. Metadata error-handling checkpoint `146e774` was pushed successfully according to owner output. The owner deferred the week-advance test and moved to read-only save inspection; Milestone 2 remains incomplete. Next, validate additional header fields incrementally against this save before attempting payload parsing.
 
 ---
 
@@ -130,7 +130,7 @@ A feature is not fully complete until relevant documentation is updated.
 | 0 | Foundation | ✅ |
 | 1 | Find the Dynasty | ✅ |
 | 2 | Watch the Dynasty | 🟡 |
-| 3 | Understand the Dynasty | ⬜ |
+| 3 | Understand the Dynasty | 🟡 |
 | 4 | Local Memory | ⬜ |
 | 5 | Cloud Bridge | ⬜ |
 | 6 | Web Headquarters | ⬜ |
@@ -238,7 +238,7 @@ HuddleMind can find the configured CFB27 save directory and list candidate dynas
 - ✅ Handle creation and rename destinations through shared `queue_change`; create/modify/rename tests and post-refactor debounce passed
 - ✅ Debounce per file after one second of quiet; two five-write test bursts each produced one message
 - 🟡 Print event metadata; determining meaningful content changes remains unfinished
-- 🟡 Actual in-game save detected; advancing a dynasty week has not been tested
+- ⏸ Actual in-game save detected; week-advance test explicitly deferred by owner
 - ✅ Repeated saves, idle operation after the fix, and clean Ctrl+C shutdown verified by owner
 
 ### Watcher checkpoint evidence and limitations
@@ -256,6 +256,23 @@ An initial startup run emitted events for all 11 candidates; a later startup did
 ## Milestone 3 — Understand the Dynasty
 
 **Goal:** Convert CFB27 data into HuddleMind-owned models.
+
+**Status:** 🟡 Header inspection started; no dynasty entities or compressed payload parsed.
+
+### First header-inspection checkpoint — 2026-09-18
+
+The owner wrote `bridge/inspect_save.py` incrementally. It opens the configured autosave in `rb` mode, reads only 64 bytes, checks minimum length and the `FBCHUNKS` signature, and displays hex rows. It decodes a null-padded ASCII field at bytes 34–61 and six little-endian two-byte timestamp components at bytes 22–33, then constructs a timezone-naive `datetime`.
+
+Owner-supplied output confirms:
+
+- File size: 9,646,981 bytes; signature: `FBCHUNKS`.
+- Database-name field: `College-27-RL4-9192662`.
+- Header timestamp: `2026-09-18 09:03:38`; timezone unverified and distinct from filesystem modification metadata.
+- Three-byte `ABC` fixture rejected by the short-file guard, without a traceback.
+- A 64-byte `X` fixture passed the length check and was rejected for signature `b'XXXXXXXX'`.
+- Real OneDrive autosave path restored; successful decoding repeated after both negative tests.
+
+Field interpretation follows [community CFB27 format research](https://github.com/eric-levinson/cfb27-dynasty-modding/blob/main/docs/save-format.md), accessed 2026-09-18. Its sample identifier is `College-27-RL1-9039126`, differing from this save's RL4 identifier; do not assume all remaining layout details match. The database-name field is not a team name. Header checks do not validate the entire save, and malformed ASCII/date fields or read failures are not yet handled. No write, decompression, roster parsing, or parser dependency was added. Runtime evidence is owner-provided; Codex reviewed the saved source.
 
 ### Learning topics
 
@@ -507,7 +524,10 @@ The second-screen dashboard updates accurately enough to support live recommenda
 - Corrected an accidentally duplicated/nested metadata loop and removed an unnecessary `from dbm import error` import. Reviewed the final diff: only the OSError handler remains as a functional change.
 - Restored the OneDrive path; the owner confirmed a final real-save event and clean shutdown after the structural corrections. This confirmation had no pasted runtime output.
 - Failed metadata reads are reported and skipped. Automatic retry, file-readiness detection, and meaningful content-change detection remain unimplemented.
-- Next: commit the error-handling checkpoint, then review remaining watcher scope before starting parsing.
+- Pushed metadata error-handling checkpoint `146e774`; owner deferred the week-advance test.
+- Began binary inspection: learned `rb`, bounded reads, byte slices, hex output, null-terminated ASCII decoding, little-endian integers, and `datetime` construction.
+- Verified real-header decoding and short-file/wrong-signature rejection, then restored and reran the real save. See Milestone 3 for values and source attribution.
+- Next: commit the header-inspection checkpoint and continue validating the format incrementally.
 
 ### Lesson notes template
 
@@ -605,7 +625,7 @@ No active product blockers.
 
 **Verified:** Python 3.13.5 virtual environment runs the bridge script on the Windows PC.
 
-**Pending:** commit metadata error handling and the lesson record. Retry behavior and meaningful-change detection remain unfinished. Checkpoints `344df29`, `25f05a7`, `8469844`, and `c1156fb` were successfully pushed according to owner output.
+**Pending:** commit the first header-inspection script and lesson record. Week-advance testing is deferred by owner. Watcher retries, meaningful-change detection, and full save parsing remain unfinished. Checkpoints through `146e774` were successfully pushed according to owner output.
 
 ---
 
@@ -640,6 +660,8 @@ No active product blockers.
 
 ## 2026-09-18
 
+- Started Milestone 3 after the owner deferred week-advance testing; recorded read-only header decoding and both guard tests.
+- Recorded metadata error-handling checkpoint `146e774` as pushed.
 - Added report-and-skip handling for metadata OSError failures; recorded simulated permission-error recovery and restored normal operation.
 - Recorded cleanup checkpoint `c1156fb` as pushed and the remaining limits around retries and meaningful changes.
 
@@ -674,11 +696,11 @@ No active product blockers.
 
 ---
 
-# 11. Next Session — Watch the Dynasty
+# 11. Next Session — Understand the Dynasty
 
 1. Review and commit the explicit checkpoint files; do not stage local test data.
-2. Review whether bounded retry is needed for failed metadata reads; current handling reports and skips them.
-3. Review remaining watcher lifecycle and cross-directory event coverage before relying on the watcher for parsing.
-4. Gather more evidence before adding metadata/content-change filtering; startup activity did not reproduce.
+2. Continue small read-only header lessons; validate further offsets and lengths against this RL4 save before payload parsing.
+3. Add appropriate handling for malformed decoded fields as inspection becomes reusable.
+4. Keep week-advance testing deferred until the owner resumes it. Watcher retry, lifecycle, cross-directory events, and meaningful-change filtering remain separate unfinished work.
 
 Continue the learning-first workflow: the owner writes small Python increments, runs them, and shares output before the next step.
