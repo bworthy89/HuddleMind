@@ -3,9 +3,9 @@
 **Repository:** `bworthy89/HuddleMind`  
 **Current Phase:** Milestone 2 — Watch the Dynasty
 
-**Current Status:** 🟡 Missing-file recovery and main-loop cleanup verified; cleanup checkpoint pending
+**Current Status:** 🟡 Metadata OSError handling verified; error-handling checkpoint pending
 
-**Last Updated:** 2026-09-17
+**Last Updated:** 2026-09-18
 
 ---
 
@@ -78,7 +78,7 @@ The project owner wrote and ran save discovery incrementally. The cleaned-up scr
 
 ### Immediate next step
 
-Commit the main-loop `finally` cleanup and its test record. Checkpoints `344df29`, `25f05a7`, and `8469844` were pushed successfully according to owner output. Continue broader file-access recovery lessons afterward; filesystem notifications alone do not establish meaningful save-content changes.
+Commit the metadata `OSError` handler and its test record. Checkpoints `344df29`, `25f05a7`, `8469844`, and `c1156fb` were pushed successfully according to owner output. The new handler reports and skips a failed metadata read; it does not retry automatically. Filesystem notifications alone do not establish meaningful save-content changes.
 
 ---
 
@@ -497,7 +497,17 @@ The second-screen dashboard updates accurately enough to support live recommenda
 - Verified `FileNotFoundError` handling by creating and deleting a unique test file within the debounce interval; the owner confirmed a later event was still processed.
 - Introduced `finally` around the main polling loop; verified Ctrl+C output and intentional `RuntimeError` cleanup with `Observer alive after cleanup: False` before the expected traceback.
 - Corrected a misplaced cleanup block inside the metadata loop. Removed the intentional error, restored normal operation, and confirmed another test event and clean Ctrl+C shutdown. Restored the OneDrive path and reviewed the final diff.
-- Next: commit the cleanup checkpoint, then continue broader file-access recovery lessons.
+- Pushed cleanup checkpoint `c1156fb`.
+
+### Session notes — 2026-09-18
+
+- Added `except OSError as error` after the more specific `FileNotFoundError` handler. Learned exception ordering and binding an exception to a variable without an import.
+- A temporary `PermissionError` for one test filename produced the expected diagnostic; another file still produced a normal event. This verifies simulated error handling, not an actual Windows permission-denial scenario.
+- Removed the injection and verified normal metadata output for `DYNASTY-ERROR-TEST.txt` (45 bytes).
+- Corrected an accidentally duplicated/nested metadata loop and removed an unnecessary `from dbm import error` import. Reviewed the final diff: only the OSError handler remains as a functional change.
+- Restored the OneDrive path; the owner confirmed a final real-save event and clean shutdown after the structural corrections. This confirmation had no pasted runtime output.
+- Failed metadata reads are reported and skipped. Automatic retry, file-readiness detection, and meaningful content-change detection remain unimplemented.
+- Next: commit the error-handling checkpoint, then review remaining watcher scope before starting parsing.
 
 ### Lesson notes template
 
@@ -595,7 +605,7 @@ No active product blockers.
 
 **Verified:** Python 3.13.5 virtual environment runs the bridge script on the Windows PC.
 
-**Pending:** commit main-loop cleanup and the recovery test record. Broader file-access recovery and meaningful-change detection remain unfinished. Checkpoints `344df29`, `25f05a7`, and `8469844` were successfully pushed according to owner output.
+**Pending:** commit metadata error handling and the lesson record. Retry behavior and meaningful-change detection remain unfinished. Checkpoints `344df29`, `25f05a7`, `8469844`, and `c1156fb` were successfully pushed according to owner output.
 
 ---
 
@@ -627,6 +637,11 @@ No active product blockers.
 ---
 
 # 10. Change Log
+
+## 2026-09-18
+
+- Added report-and-skip handling for metadata OSError failures; recorded simulated permission-error recovery and restored normal operation.
+- Recorded cleanup checkpoint `c1156fb` as pushed and the remaining limits around retries and meaningful changes.
 
 ## 2026-09-17
 
@@ -662,7 +677,7 @@ No active product blockers.
 # 11. Next Session — Watch the Dynasty
 
 1. Review and commit the explicit checkpoint files; do not stage local test data.
-2. Introduce recovery for file-access errors beyond a missing file using controlled test cases.
+2. Review whether bounded retry is needed for failed metadata reads; current handling reports and skips them.
 3. Review remaining watcher lifecycle and cross-directory event coverage before relying on the watcher for parsing.
 4. Gather more evidence before adding metadata/content-change filtering; startup activity did not reproduce.
 

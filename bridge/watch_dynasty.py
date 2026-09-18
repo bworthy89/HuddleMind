@@ -50,6 +50,10 @@ class SaveEventHandler(FileSystemEventHandler):
             except FileNotFoundError:
                 print("File disappeared before checking:", file_path.name)
                 continue
+            except OSError as error:
+                print("Could not read file metadata:", file_path.name)
+                print("Reason:", error)
+                continue
 
             print(
                 "File event:", file_path.name,
