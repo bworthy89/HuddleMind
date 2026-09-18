@@ -3,7 +3,7 @@
 **Repository:** `bworthy89/HuddleMind`  
 **Current Phase:** Milestone 3 — Understand the Dynasty (header inspection)
 
-**Current Status:** 🟡 Initial database tables and candidate references inspected; checkpoint pending. Week-advance test deferred by owner.
+**Current Status:** 🟡 Reusable integer and table-summary helpers verified; refactor checkpoint pending. Week-advance test deferred by owner.
 
 **Last Updated:** 2026-09-18
 
@@ -78,7 +78,7 @@ The project owner wrote and ran save discovery incrementally. The cleaned-up scr
 
 ### Immediate next step
 
-Commit the initial table/reference inspection evidence. Decompression checkpoint `64f8143` was pushed successfully according to owner output. Next, refactor repeated header-reading logic in small lessons before following more records. The outer schema is 833.0 and inner schema is 833.1; field semantics remain unverified. The week-advance test remains deferred and Milestone 2 incomplete.
+Commit the helper refactor and validation record. Table-inspection checkpoint `5446e85` was pushed successfully according to owner output. Repeated OverallPercentage and Spline header reads now use `read_table_summary`; inner schema reads use `read_u32_be`. Next, exercise the table-summary rejection paths before extending record decoding. The outer schema is 833.0 and inner schema is 833.1; field semantics remain unverified. The week-advance test remains deferred and Milestone 2 incomplete.
 
 ---
 
@@ -289,7 +289,7 @@ This verifies one complete zlib stream exactly occupying the proposed chunk rang
 
 API references checked: [Python zlib documentation](https://docs.python.org/3/library/zlib.html) and [RFC 1950](https://www.rfc-editor.org/info/rfc1950/). Reads currently reopen the live save for separate stages; inspect while the game is not saving. Consistent snapshots, broader I/O handling, and table parsing remain unfinished.
 
-### Initial database table/reference inspection — 2026-09-18
+### Initial database table/reference inspection — 2026-09-18 (pushed as `5446e85`)
 
 Owner-run output and incremental source review established the following observations; offsets below are relative to the decompressed database:
 
@@ -303,6 +303,19 @@ Owner-run output and incremental source review established the following observa
 Layout references were read from the primary [FranchiseFile implementation](https://github.com/bep713/madden-franchise/blob/master/src/FranchiseFile.js), [reference utilities](https://github.com/bep713/madden-franchise/blob/master/src/services/utilService.js), [table header parser](https://github.com/bep713/madden-franchise/blob/master/src/strategies/common/header/m20/M20TableHeaderStrategy.js), and [field-offset parser](https://github.com/bep713/madden-franchise/blob/master/src/FranchiseFileTable.js). These sources guided the user's Python implementation; no parser package was installed. Descriptor interpretation for this two-field table does not establish a general field decoder.
 
 Limits: scans accept the first matching SPBF candidate, omit alternative table markers, and do not prove all table boundaries, unique IDs, or row occupancy. Bounds checks mostly use the entire decompressed buffer rather than independently verified table extents. Target row contents, schema field names/types, and roster entities remain unparsed. Repeated top-level code should be consolidated incrementally while preserving the known outputs. No new negative-fixture tests or independent Codex runtime pass are claimed.
+
+### Helper refactor checkpoint — 2026-09-18
+
+The owner added `read_u32_be(data, offset)` with an exact four-byte bounds check and `read_table_summary(data, table_start)` returning a dictionary. The table helper checks SPBF/BSFT markers, accounts for variable store-name length, and returns name, ID, store length, record-header position, count, capacity, record words, and field count. Both OverallPercentage and Spline now use it instead of duplicated record-header reads.
+
+Owner output confirms preserved summaries:
+
+- OverallPercentage: ID 4097, store length 0, record-header offset 12,768, count/capacity 22, record words 2, fields 2.
+- Spline: ID 5176, store length 21, record-header offset 22,009,409, count/capacity 22, record words 2, fields 3. Eight-byte records do not imply the same two-field layout as OverallPercentage.
+- Inner/outer schemas and OverallPercentage raw pairs `(678428672, 16)`, `(678428673, 7)`, `(678428674, 12)` remained unchanged.
+- In-memory helper tests: `00 00 03 41` at offset 0 returned 833; offsets -1 and 1 each raised the expected ValueError. Temporary test code was removed; the owner confirmed the final run completed normally afterward. Codex reviewed the final diff and confirmed removal.
+
+The table-summary helper's rejection branches have not yet been exercised with negative fixtures. It remains specific to the inspected SPBF/BSFT layout and does not validate complete table extents, record occupancy, or semantic fields. Helper ValueErrors currently propagate to the caller rather than printing the earlier inline SystemExit messages. No automated test suite or independent Codex runtime pass is claimed.
 
 ### Learning topics
 
@@ -562,7 +575,10 @@ The second-screen dashboard updates accurately enough to support live recommenda
 - Pushed decompression checkpoint `64f8143`.
 - Practiced big-endian decoding, absolute/relative offsets, `divmod`, reference bit allocation, `find`, `break`, `None`, and field descriptors. Inspected OverallPercentage raw rows and a candidate link to Spline, preserving uncertainty about semantics and row occupancy.
 - Fixed a missing comma in a multiline print and restored the raw-record layout guard's `raise SystemExit`.
-- Next: commit table-inspection evidence, then refactor repeated parsing steps before expanding the inspector.
+- Pushed table-inspection checkpoint `5446e85`.
+- Introduced bounded integer reads, reusable table-summary parsing, and dictionaries as multi-value function results; replaced duplicate OverallPercentage/Spline record-header sections.
+- Verified unchanged metadata/raw rows and valid/invalid integer-helper offsets; removed temporary test code and confirmed normal operation again.
+- Next: commit the helper refactor, then test table-summary rejection paths before expanding inspection.
 
 ### Lesson notes template
 
@@ -660,7 +676,7 @@ No active product blockers.
 
 **Verified:** Python 3.13.5 virtual environment runs the bridge script on the Windows PC.
 
-**Pending:** commit initial table/reference inspection. Week-advance testing is deferred by owner. Watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `64f8143` were successfully pushed according to owner output.
+**Pending:** commit the helper refactor and validation record. Week-advance testing is deferred by owner. Table-summary negative tests, watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `5446e85` were successfully pushed according to owner output.
 
 ---
 
@@ -695,6 +711,7 @@ No active product blockers.
 
 ## 2026-09-18
 
+- Refactored integer/table-header reads into reusable functions, verified preserved outputs and integer bounds checks, and recorded `5446e85` as pushed.
 - Recorded inner/outer schema difference, asset-reference samples, OverallPercentage layout/raw rows, and a capacity-checked Spline target candidate. Decompression checkpoint `64f8143` was pushed.
 - Verified schema 833.0, exact chunk bounds, and complete bounded decompression to 31,165,754 bytes beginning with `FrTk`; recorded remaining validation limits.
 - Started Milestone 3 after the owner deferred week-advance testing; recorded read-only header decoding and both guard tests.
@@ -736,7 +753,7 @@ No active product blockers.
 # 11. Next Session — Understand the Dynasty
 
 1. Review and commit the explicit checkpoint files; do not stage local test data.
-2. Refactor repeated table-header reads into a small reusable function; preserve the observed OverallPercentage and Spline metadata as comparison points.
+2. Exercise table-summary bounds and marker rejection using in-memory fixtures; preserve known OverallPercentage and Spline outputs.
 3. Add appropriate handling for malformed decoded fields as inspection becomes reusable.
 4. Keep week-advance testing deferred until the owner resumes it. Watcher retry, lifecycle, cross-directory events, and meaningful-change filtering remain separate unfinished work.
 

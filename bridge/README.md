@@ -99,6 +99,8 @@ Offsets follow [community CFB27 format research](https://github.com/eric-levinso
 
 The inspector also displays the decompressed header, inner schema 833.1 (outer 833.0), sample asset-reference entries, and SPBF table candidates. Owner output confirms an unnamed ID-4096 candidate, `OverallPercentage` ID 4097 with 22 eight-byte records and two descriptors, and candidate references from its first three rows to `Spline` ID 5176. The Spline BSFT check and capacity check pass, but no target records or semantic field meanings have been decoded. Searches currently use SPBF only and accept the first ID match. This is an exploratory script, not a complete table index or general field decoder.
 
+Integer reads and repeated record-header inspection now use `read_u32_be` and `read_table_summary`. The latter returns a dictionary and checks SPBF/BSFT markers plus buffer bounds. Owner-run comparisons preserved both table summaries and raw OverallPercentage rows; integer-helper negative/short reads were rejected. Spline has 21 store-name bytes and three fields, while OverallPercentage has zero and two. Table-summary rejection branches remain untested; exceptions propagate to the caller.
+
 ## Save safety
 
 Normal bridge operation is read-first. Do not write to or overwrite original CFB27 dynasty files as part of the MVP.

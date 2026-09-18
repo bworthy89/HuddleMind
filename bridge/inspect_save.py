@@ -2,6 +2,43 @@ from pathlib import Path
 from datetime import datetime
 import zlib
 
+def read_u32_be(data, offset):
+    if offset < 0 or offset + 4 > len(data):
+        raise ValueError("Four-byte read is outside the available data.")
+
+    return int.from_bytes(data[offset:offset + 4], byteorder="big")
+
+def read_table_summary(data, table_start):
+    if table_start < 0 or table_start + 168 > len(data):
+        raise ValueError("Table header is outside the available data.")
+
+    if data[table_start + 148:table_start + 152] != b"SPBF":
+        raise ValueError("Expected an SPBF table marker.")
+
+    name_bytes = data[table_start:table_start + 128]
+    name = name_bytes.split(b"\x00", 1)[0].decode("ascii")
+    table_id = read_u32_be(data, table_start + 128)
+    store_length = read_u32_be(data, table_start + 164)
+
+    record_header = table_start + 168 + store_length
+
+    if record_header + 56 > len(data):
+        raise ValueError("Record header is outside the available data.")
+
+    if data[record_header + 32:record_header + 36] != b"BSFT":
+        raise ValueError("Expected a BSFT record-section marker.")
+
+    return {
+        "name": name,
+        "table_id": table_id,
+        "store_length": store_length,
+        "record_header_start": record_header,
+        "record_count": read_u32_be(data, record_header + 8),
+        "record_capacity": read_u32_be(data, record_header + 48),
+        "record_words": read_u32_be(data, record_header + 44),
+        "field_count": read_u32_be(data, record_header + 52),
+    }
+
 
 
 save_file = Path(
@@ -136,12 +173,8 @@ print("As big-endian:", big_endian_value)
 print("As little-endian:", little_endian_value)
 print("Matches outer schema major:", big_endian_value == schema_major)
 
-inner_schema_major = int.from_bytes(
-    database_header[44:48], byteorder="big"
-)
-inner_schema_minor = int.from_bytes(
-    database_header[40:44], byteorder="big"
-)
+inner_schema_major = read_u32_be(database_header, 44)
+inner_schema_minor = read_u32_be(database_header, 40)
 
 print("Outer schema:", schema_major, schema_minor)
 print("Inner schema:", inner_schema_major, inner_schema_minor)
@@ -249,58 +282,19 @@ print("Next candidate table start:", next_table_start)
 print("Next candidate name:", repr(next_name))
 print("Next candidate table ID:", next_table_id)
 
-if next_table_start + 168 > len(unpacked_data):
-    print("Candidate header is incomplete.")
-    raise SystemExit
+overall_summary = read_table_summary(unpacked_data, next_table_start)
 
-store_length = int.from_bytes(
-    unpacked_data[next_table_start + 164:next_table_start + 168],
-    byteorder="big",
-)
-
-record_header_start = next_table_start + 168 + store_length
-
-if record_header_start + 52 > len(unpacked_data):
-    print("Candidate record header extends beyond the database.")
-    raise SystemExit
-
-record_count = int.from_bytes(
-    unpacked_data[record_header_start + 8:record_header_start + 12],
-    byteorder="big",
-)
-record_capacity = int.from_bytes(
-    unpacked_data[record_header_start + 48:record_header_start + 52],
-    byteorder="big",
-)
+store_length = overall_summary["store_length"]
+record_header_start = overall_summary["record_header_start"]
+record_count = overall_summary["record_count"]
+record_capacity = overall_summary["record_capacity"]
+record_words = overall_summary["record_words"]
+field_count = overall_summary["field_count"]
+record_size = record_words * 4
 
 print("Candidate store-name length:", store_length)
 print("Candidate record count:", record_count)
 print("Candidate record capacity:", record_capacity)
-
-if record_header_start + 56 > len(unpacked_data):
-    print("Candidate record metadata is incomplete.")
-    raise SystemExit
-
-record_marker = unpacked_data[
-    record_header_start + 32:record_header_start + 36
-]
-
-if record_marker != b"BSFT":
-    print("Unexpected record-section marker:", record_marker)
-    raise SystemExit
-
-record_words = int.from_bytes(
-    unpacked_data[record_header_start + 44:record_header_start + 48],
-    byteorder="big",
-)
-field_count = int.from_bytes(
-    unpacked_data[record_header_start + 52:record_header_start + 56],
-    byteorder="big",
-)
-
-record_size = record_words * 4
-
-print("Record-section marker:", record_marker)
 print("Candidate record words:", record_words)
 print("Candidate record size:", record_size, "bytes")
 print("Candidate field count:", field_count)
@@ -407,38 +401,16 @@ else:
 if target_table_start is None:
     raise SystemExit
 
-if target_table_start + 168 > len(unpacked_data):
-    print("Target table header is incomplete.")
-    raise SystemExit
+spline_summary = read_table_summary(unpacked_data, target_table_start)
 
-target_store_length = int.from_bytes(
-    unpacked_data[target_table_start + 164:target_table_start + 168],
-    byteorder="big",
-)
-target_record_header = target_table_start + 168 + target_store_length
-
-if target_record_header + 52 > len(unpacked_data):
-    print("Target record header extends beyond the database.")
-    raise SystemExit
-
-target_marker = unpacked_data[
-    target_record_header + 32:target_record_header + 36
-]
-
-if target_marker != b"BSFT":
-    print("Unexpected target record marker:", target_marker)
-    raise SystemExit
-
-target_record_count = int.from_bytes(
-    unpacked_data[target_record_header + 8:target_record_header + 12],
-    byteorder="big",
-)
-target_capacity = int.from_bytes(
-    unpacked_data[target_record_header + 48:target_record_header + 52],
-    byteorder="big"
+print("Target table name:", spline_summary["name"])
+print("Target table ID:", spline_summary["table_id"])
+print("Target record count:", spline_summary["record_count"])
+print("Target record capacity:", spline_summary["record_capacity"])
+print(
+    "Rows 0–2 fit declared capacity:",
+    spline_summary["record_capacity"] >= 3,
 )
 
-print("Target record marker:", target_marker)
-print("Target record count:", target_record_count)
-print("Target record capacity:", target_capacity)
-print("Rows 0–2 fit declared capacity:", target_capacity >= 3)
+print("Overall summary:", overall_summary)
+print("Spline summary:", spline_summary)
