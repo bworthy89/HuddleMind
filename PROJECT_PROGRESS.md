@@ -3,7 +3,7 @@
 **Repository:** `bworthy89/HuddleMind`  
 **Current Phase:** Milestone 3 — Understand the Dynasty (header inspection)
 
-**Current Status:** 🟡 Schema 833.0 chunk decompression verified; checkpoint pending. Week-advance test deferred by owner.
+**Current Status:** 🟡 Initial database tables and candidate references inspected; checkpoint pending. Week-advance test deferred by owner.
 
 **Last Updated:** 2026-09-18
 
@@ -78,7 +78,7 @@ The project owner wrote and ran save discovery incrementally. The cleaned-up scr
 
 ### Immediate next step
 
-Commit the expanded inspector and decompression evidence. Header-inspection checkpoint `5931dcd` was pushed successfully according to owner output. Next, inspect the decompressed database header incrementally; table layout and field mappings for schema 833.0 are not established. The week-advance test remains deferred and Milestone 2 incomplete.
+Commit the initial table/reference inspection evidence. Decompression checkpoint `64f8143` was pushed successfully according to owner output. Next, refactor repeated header-reading logic in small lessons before following more records. The outer schema is 833.0 and inner schema is 833.1; field semantics remain unverified. The week-advance test remains deferred and Milestone 2 incomplete.
 
 ---
 
@@ -274,7 +274,7 @@ Owner-supplied output confirms:
 
 Field interpretation follows [community CFB27 format research](https://github.com/eric-levinson/cfb27-dynasty-modding/blob/main/docs/save-format.md), accessed 2026-09-18. Its sample identifier is `College-27-RL1-9039126`, differing from this save's RL4 identifier; do not assume all remaining layout details match. The database-name field is not a team name. Header checks do not validate the entire save, and malformed ASCII/date fields or read failures are not yet handled. The initial checkpoint did not decompress data; the subsequent checkpoint below does. Runtime evidence is owner-provided; Codex reviewed the saved source.
 
-### Schema and decompression checkpoint — 2026-09-18
+### Schema and decompression checkpoint — 2026-09-18 (pushed as `64f8143`)
 
 The inspector now reads an 82-byte header. Four-byte little-endian fields at offsets 62 and 66 report schema **833.0**, unlike the reference schema **809.0**. The field at offset 74 reports **5,864,926** compressed bytes starting at offset **82**, ending exclusively at **5,865,008**, within the 9,646,981-byte file. The prefix at offset 82 is `78 9c`, consistent with zlib.
 
@@ -288,6 +288,21 @@ The owner added exact-length reading, a chunk-range guard, and in-memory decompr
 This verifies one complete zlib stream exactly occupying the proposed chunk range in this sample. It does not validate the whole save or establish schema 833.0 table/field mappings. No decompressed file was written and no roster entities have been parsed. The new rejection branches (invalid range, short chunk, corrupt/incomplete stream, trailing data, unexpected database signature) are implemented but have not been exercised with negative fixtures. Earlier short/wrong-signature tests used the previous 64-byte header version; do not claim they were rerun after expanding to 82 bytes.
 
 API references checked: [Python zlib documentation](https://docs.python.org/3/library/zlib.html) and [RFC 1950](https://www.rfc-editor.org/info/rfc1950/). Reads currently reopen the live save for separate stages; inspect while the game is not saving. Consistent snapshots, broader I/O handling, and table parsing remain unfinished.
+
+### Initial database table/reference inspection — 2026-09-18
+
+Owner-run output and incremental source review established the following observations; offsets below are relative to the decompressed database:
+
+- Inner schema fields decode big-endian: major 833 at offset 44, minor 1 at offset 40. Outer schema remains 833.0; the minor-version difference is unresolved. Offset 48 also contains 833 but remains unlabeled.
+- Candidate asset-reference area: offset 128, 1,519 eight-byte entries, exclusive end 12,280. The first five references split into table/row pairs `(4318, 0)`, `(6303, 7)`, `(4149, 0)`, `(6351, 0)`, `(6351, 1)` using a 15-bit table ID and 17-bit row number. These targets have not been followed.
+- First SPBF marker: 12,428. Subtracting 148 gives candidate table start 12,280, ID 4096. All 128 name bytes are zero; purpose unknown.
+- Next SPBF marker: 12,748; table start 12,600; name `OverallPercentage`; ID 4097. Store-name length is 0; BSFT marker check passed; declared record count/capacity are both 22. Record width is two four-byte words (8 bytes) with two field descriptors.
+- OverallPercentage descriptor range is `[12832, 12840)`; descriptor values are bit offsets 0 and 32. Candidate record area is `[12840, 13016)`. First three rows as raw unsigned 32-bit pairs: `(678428672, 16)`, `(678428673, 7)`, `(678428674, 12)`.
+- Splitting the first raw field as a reference gives table 5176, rows 0–2. An SPBF-only scan found candidate table 5176 named `Spline` at offset 22,009,220. Its BSFT marker check passed, and count/capacity are both 22. Rows 0–2 fit declared capacity, but occupancy and record meanings have not been verified. The second OverallPercentage field is not yet established as a percentage.
+
+Layout references were read from the primary [FranchiseFile implementation](https://github.com/bep713/madden-franchise/blob/master/src/FranchiseFile.js), [reference utilities](https://github.com/bep713/madden-franchise/blob/master/src/services/utilService.js), [table header parser](https://github.com/bep713/madden-franchise/blob/master/src/strategies/common/header/m20/M20TableHeaderStrategy.js), and [field-offset parser](https://github.com/bep713/madden-franchise/blob/master/src/FranchiseFileTable.js). These sources guided the user's Python implementation; no parser package was installed. Descriptor interpretation for this two-field table does not establish a general field decoder.
+
+Limits: scans accept the first matching SPBF candidate, omit alternative table markers, and do not prove all table boundaries, unique IDs, or row occupancy. Bounds checks mostly use the entire decompressed buffer rather than independently verified table extents. Target row contents, schema field names/types, and roster entities remain unparsed. Repeated top-level code should be consolidated incrementally while preserving the known outputs. No new negative-fixture tests or independent Codex runtime pass are claimed.
 
 ### Learning topics
 
@@ -544,7 +559,10 @@ The second-screen dashboard updates accurately enough to support live recommenda
 - Verified real-header decoding and short-file/wrong-signature rejection, then restored and reran the real save. See Milestone 3 for values and source attribution.
 - Pushed header-inspection checkpoint `5931dcd`.
 - Learned `seek`, four-byte little-endian decoding, chunk bounds, bounded zlib decompression, stream completion, and trailing/unprocessed input checks. Verified schema 833.0 and a complete stream yielding a `FrTk` prefix; see the decompression checkpoint above.
-- Next: commit decompression evidence, then inspect the database header before interpreting tables.
+- Pushed decompression checkpoint `64f8143`.
+- Practiced big-endian decoding, absolute/relative offsets, `divmod`, reference bit allocation, `find`, `break`, `None`, and field descriptors. Inspected OverallPercentage raw rows and a candidate link to Spline, preserving uncertainty about semantics and row occupancy.
+- Fixed a missing comma in a multiline print and restored the raw-record layout guard's `raise SystemExit`.
+- Next: commit table-inspection evidence, then refactor repeated parsing steps before expanding the inspector.
 
 ### Lesson notes template
 
@@ -642,7 +660,7 @@ No active product blockers.
 
 **Verified:** Python 3.13.5 virtual environment runs the bridge script on the Windows PC.
 
-**Pending:** commit the schema/decompression checkpoint. Week-advance testing is deferred by owner. Watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `5931dcd` were successfully pushed according to owner output.
+**Pending:** commit initial table/reference inspection. Week-advance testing is deferred by owner. Watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `64f8143` were successfully pushed according to owner output.
 
 ---
 
@@ -677,6 +695,7 @@ No active product blockers.
 
 ## 2026-09-18
 
+- Recorded inner/outer schema difference, asset-reference samples, OverallPercentage layout/raw rows, and a capacity-checked Spline target candidate. Decompression checkpoint `64f8143` was pushed.
 - Verified schema 833.0, exact chunk bounds, and complete bounded decompression to 31,165,754 bytes beginning with `FrTk`; recorded remaining validation limits.
 - Started Milestone 3 after the owner deferred week-advance testing; recorded read-only header decoding and both guard tests.
 - Recorded metadata error-handling checkpoint `146e774` as pushed.
@@ -717,7 +736,7 @@ No active product blockers.
 # 11. Next Session — Understand the Dynasty
 
 1. Review and commit the explicit checkpoint files; do not stage local test data.
-2. Inspect the decompressed database header in small read-only lessons; validate schema 833.0 layout before interpreting tables or roster fields.
+2. Refactor repeated table-header reads into a small reusable function; preserve the observed OverallPercentage and Spline metadata as comparison points.
 3. Add appropriate handling for malformed decoded fields as inspection becomes reusable.
 4. Keep week-advance testing deferred until the owner resumes it. Watcher retry, lifecycle, cross-directory events, and meaningful-change filtering remain separate unfinished work.
 

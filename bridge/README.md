@@ -95,6 +95,10 @@ It reads the proposed chunk and decompresses it in memory with a 64 MiB output c
 
 Offsets follow [community CFB27 format research](https://github.com/eric-levinson/cfb27-dynasty-modding/blob/main/docs/save-format.md), with fields checked against owner output. The reference uses a different RL1 identifier. This is an initial inspector, not a full save validator or dynasty parser; malformed text/date values and read failures are not yet handled. Owner-run tests verified the real save, a three-byte input, a 64-byte wrong-signature input, and restoration of the real path. Test fixtures stay in the ignored local test directory.
 
+## Exploratory database inspection
+
+The inspector also displays the decompressed header, inner schema 833.1 (outer 833.0), sample asset-reference entries, and SPBF table candidates. Owner output confirms an unnamed ID-4096 candidate, `OverallPercentage` ID 4097 with 22 eight-byte records and two descriptors, and candidate references from its first three rows to `Spline` ID 5176. The Spline BSFT check and capacity check pass, but no target records or semantic field meanings have been decoded. Searches currently use SPBF only and accept the first ID match. This is an exploratory script, not a complete table index or general field decoder.
+
 ## Save safety
 
 Normal bridge operation is read-first. Do not write to or overwrite original CFB27 dynasty files as part of the MVP.

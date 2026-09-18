@@ -117,3 +117,328 @@ print("Stream complete:", decompressor.eof)
 print("Bytes after stream:", len(decompressor.unused_data))
 print("Unprocessed input bytes:", len(decompressor.unconsumed_tail))
 print("Decompressed prefix:", unpacked_data[:16])
+
+database_header = unpacked_data[:128]
+
+print("Decompressed database header:")
+
+for offset in range(0, len(database_header), 16):
+    row = database_header[offset:offset + 16]
+    print(offset, ":", row.hex(" "))
+
+field_bytes = database_header[44:48]
+
+big_endian_value = int.from_bytes(field_bytes, byteorder="big")
+little_endian_value = int.from_bytes(field_bytes, byteorder="little")
+
+print("Bytes at offset 44:", field_bytes.hex(" "))
+print("As big-endian:", big_endian_value)
+print("As little-endian:", little_endian_value)
+print("Matches outer schema major:", big_endian_value == schema_major)
+
+inner_schema_major = int.from_bytes(
+    database_header[44:48], byteorder="big"
+)
+inner_schema_minor = int.from_bytes(
+    database_header[40:44], byteorder="big"
+)
+
+print("Outer schema:", schema_major, schema_minor)
+print("Inner schema:", inner_schema_major, inner_schema_minor)
+
+asset_table_offset = int.from_bytes(
+    database_header[4:8], byteorder="big"
+)
+asset_entry_count = int.from_bytes(
+    database_header[36:40], byteorder="big"
+)
+
+asset_table_end = asset_table_offset + asset_entry_count * 8
+
+print("Candidate asset-table offset:", asset_table_offset)
+print("Candidate asset entry count:", asset_entry_count)
+print("Candidate asset-table end:", asset_table_end)
+print("Fits within database:", asset_table_end <= len(unpacked_data))
+
+if asset_table_offset < len(database_header) or asset_table_end > len(unpacked_data):
+    print("Invalid candidate asset-table range.")
+    raise SystemExit
+
+print("First asset-reference entries:")
+
+for index in range(min(5, asset_entry_count)):
+    entry_offset = asset_table_offset + index * 8
+
+    asset_id = int.from_bytes(
+        unpacked_data[entry_offset:entry_offset + 4],
+        byteorder="big",
+    )
+    reference = int.from_bytes(
+        unpacked_data[entry_offset + 4:entry_offset + 8],
+        byteorder="big",
+    )
+
+    table_id, row_number = divmod(reference, 2 ** 17)
+
+    print(
+        "Entry:", index,
+        "| Asset ID:", asset_id,
+        "| Table ID:", table_id,
+        "| Row:", row_number,
+    )
+
+marker_offset = unpacked_data.find(b"SPBF", asset_table_end)
+
+if marker_offset == -1:
+    print("No SPBF marker found after the asset-reference area.")
+    raise SystemExit
+
+print("Candidate SPBF marker offset:", marker_offset)
+
+sample_start = max(0, marker_offset - 32)
+sample_end = min(len(unpacked_data), marker_offset + 64)
+
+for offset in range(sample_start, sample_end, 16):
+    row = unpacked_data[offset:min(offset + 16, sample_end)]
+    print(offset, ":", row.hex(" "), "|", repr(row))
+
+
+table_start = marker_offset - 148
+
+if table_start < asset_table_end or table_start + 152 > len(unpacked_data):
+    print("Invalid candidate table-header range.")
+    raise SystemExit
+
+table_name_bytes = unpacked_data[table_start:table_start + 128]
+table_name = table_name_bytes.split(b"\x00", 1)[0].decode("ascii")
+
+table_id = int.from_bytes(
+    unpacked_data[table_start + 128:table_start + 132],
+    byteorder="big",
+)
+
+print("Candidate table start:", table_start)
+print("Candidate table name:", table_name)
+print("Candidate table ID:", table_id)
+print("Name-area length:", len(table_name_bytes))
+print("Raw name area:", repr(table_name_bytes))
+print("All name bytes zero:", all(value == 0 for value in table_name_bytes))
+
+next_marker_offset = unpacked_data.find(b"SPBF", marker_offset + 4)
+
+if next_marker_offset == -1:
+    print("No further SPBF marker found.")
+    raise SystemExit
+
+next_table_start = next_marker_offset - 148
+
+if next_table_start < asset_table_end or next_table_start + 152 > len(unpacked_data):
+    print("Invalid next candidate table-header range.")
+    raise SystemExit
+
+next_name_bytes = unpacked_data[next_table_start:next_table_start + 128]
+next_name = next_name_bytes.split(b"\x00", 1)[0].decode("ascii")
+
+next_table_id = int.from_bytes(
+    unpacked_data[next_table_start + 128:next_table_start + 132],
+    byteorder="big",
+)
+
+print("Next candidate marker:", next_marker_offset)
+print("Next candidate table start:", next_table_start)
+print("Next candidate name:", repr(next_name))
+print("Next candidate table ID:", next_table_id)
+
+if next_table_start + 168 > len(unpacked_data):
+    print("Candidate header is incomplete.")
+    raise SystemExit
+
+store_length = int.from_bytes(
+    unpacked_data[next_table_start + 164:next_table_start + 168],
+    byteorder="big",
+)
+
+record_header_start = next_table_start + 168 + store_length
+
+if record_header_start + 52 > len(unpacked_data):
+    print("Candidate record header extends beyond the database.")
+    raise SystemExit
+
+record_count = int.from_bytes(
+    unpacked_data[record_header_start + 8:record_header_start + 12],
+    byteorder="big",
+)
+record_capacity = int.from_bytes(
+    unpacked_data[record_header_start + 48:record_header_start + 52],
+    byteorder="big",
+)
+
+print("Candidate store-name length:", store_length)
+print("Candidate record count:", record_count)
+print("Candidate record capacity:", record_capacity)
+
+if record_header_start + 56 > len(unpacked_data):
+    print("Candidate record metadata is incomplete.")
+    raise SystemExit
+
+record_marker = unpacked_data[
+    record_header_start + 32:record_header_start + 36
+]
+
+if record_marker != b"BSFT":
+    print("Unexpected record-section marker:", record_marker)
+    raise SystemExit
+
+record_words = int.from_bytes(
+    unpacked_data[record_header_start + 44:record_header_start + 48],
+    byteorder="big",
+)
+field_count = int.from_bytes(
+    unpacked_data[record_header_start + 52:record_header_start + 56],
+    byteorder="big",
+)
+
+record_size = record_words * 4
+
+print("Record-section marker:", record_marker)
+print("Candidate record words:", record_words)
+print("Candidate record size:", record_size, "bytes")
+print("Candidate field count:", field_count)
+
+record_data_start = (
+    next_table_start
+    + 232
+    + store_length
+    + field_count * 4
+)
+record_data_end = record_data_start + record_count * record_size
+
+if record_data_end > len(unpacked_data):
+    print("Candidate records extend beyond the database.")
+    raise SystemExit
+
+print("Candidate record-data start:", record_data_start)
+print("Candidate record-data end:", record_data_end)
+
+for row_number in range(min(3, record_count)):
+    row_start = record_data_start + row_number * record_size
+    record_bytes = unpacked_data[row_start:row_start + record_size]
+
+    print("Row:", row_number, "| Raw bytes:", record_bytes.hex(" "))
+
+field_metadata_start = next_table_start + 232 + store_length
+field_metadata_end = field_metadata_start + field_count * 4
+
+print("Field metadata starts:", field_metadata_start)
+print("Field metadata ends:", field_metadata_end)
+print("Meets record-data start:", field_metadata_end == record_data_start)
+
+for field_index in range(field_count):
+    descriptor_start = field_metadata_start + field_index * 4
+    descriptor = unpacked_data[descriptor_start:descriptor_start + 4]
+
+    print(
+        "Field:", field_index,
+        "| Descriptor bytes:", descriptor.hex(" "),
+        "| As big-endian:", int.from_bytes(descriptor, byteorder="big"),
+    )
+
+if record_size != 8 or field_count !=2:
+    print("This inspection expects two fields in an eight-byte record.")
+    raise SystemExit
+
+for row_number in range(min(3, record_count)):
+    row_start = record_data_start + row_number * record_size
+    record_bytes = unpacked_data[row_start:row_start + record_size]
+
+    raw_field_0 = int.from_bytes(record_bytes[0:4], byteorder="big")
+    raw_field_1 = int.from_bytes(record_bytes[4:8], byteorder="big")
+
+    print(
+        "Row:", row_number,
+        "| Field 0 raw:", raw_field_0,
+        "| Field 1 raw:", raw_field_1,
+    )
+
+    candidate_table_id, candidate_row = divmod(raw_field_0, 2 ** 17)
+
+    print(
+        "Possible reference:",
+        "table:", candidate_table_id,
+        "row", candidate_row,
+    )
+
+target_table_id = 5176
+search_offset = asset_table_end
+target_table_start = None
+
+while True:
+    found_marker = unpacked_data.find(b"SPBF", search_offset)
+
+    if found_marker == -1:
+        break
+
+    search_offset = found_marker + 4
+    candidate_start = found_marker - 148
+
+    if candidate_start < asset_table_end:
+        continue
+
+    found_id = int.from_bytes(
+        unpacked_data[candidate_start + 128:candidate_start + 132],
+        byteorder="big",
+    )
+
+    if found_id == target_table_id:
+        target_table_start = candidate_start
+        break
+
+if target_table_start is None:
+    print("Target table not found amoung SPBF candidates.")
+else:
+    target_name_bytes = unpacked_data[
+        target_table_start:target_table_start + 128
+    ]
+
+    print("Target candidate start:", target_table_start)
+    print("Target candidate ID:", target_table_id)
+    print("Target raw name:", repr(target_name_bytes.split(b"\x00", 1)[0]))
+
+if target_table_start is None:
+    raise SystemExit
+
+if target_table_start + 168 > len(unpacked_data):
+    print("Target table header is incomplete.")
+    raise SystemExit
+
+target_store_length = int.from_bytes(
+    unpacked_data[target_table_start + 164:target_table_start + 168],
+    byteorder="big",
+)
+target_record_header = target_table_start + 168 + target_store_length
+
+if target_record_header + 52 > len(unpacked_data):
+    print("Target record header extends beyond the database.")
+    raise SystemExit
+
+target_marker = unpacked_data[
+    target_record_header + 32:target_record_header + 36
+]
+
+if target_marker != b"BSFT":
+    print("Unexpected target record marker:", target_marker)
+    raise SystemExit
+
+target_record_count = int.from_bytes(
+    unpacked_data[target_record_header + 8:target_record_header + 12],
+    byteorder="big",
+)
+target_capacity = int.from_bytes(
+    unpacked_data[target_record_header + 48:target_record_header + 52],
+    byteorder="big"
+)
+
+print("Target record marker:", target_marker)
+print("Target record count:", target_record_count)
+print("Target record capacity:", target_capacity)
+print("Rows 0–2 fit declared capacity:", target_capacity >= 3)
