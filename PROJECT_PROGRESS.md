@@ -3,7 +3,7 @@
 **Repository:** `bworthy89/HuddleMind`  
 **Current Phase:** Milestone 3 — Understand the Dynasty (header inspection)
 
-**Current Status:** 🟡 Exported schema fields mapped to Spline X/Y references; integer helper and first paired curve passed owner-run checks. Checkpoint pending. Week-advance test deferred by owner.
+**Current Status:** 🟡 Three sampled Splines paired through stored X/Y references; normal lookup and unloaded-row checks passed. Checkpoint pending. Week-advance test deferred by owner.
 
 **Last Updated:** 2026-09-19
 
@@ -78,7 +78,7 @@ The project owner wrote and ran save discovery incrementally. The cleaned-up scr
 
 ### Immediate next step
 
-Review and commit the schema-backed Spline inspection checkpoint. Array-inspection checkpoint `48600dd` was pushed according to owner output. Next, retain each Spline row's actual X/Y references and use them to retrieve arrays instead of explicitly selecting rows 0 and 1. Integer-branch applicability, full schema compatibility, and gameplay meaning remain unresolved. The week-advance test remains deferred and Milestone 2 incomplete.
+Review and commit the reference-based Spline pairing checkpoint. Schema-backed inspection checkpoint `3b0ddf6` was pushed according to owner output. Next, retain OverallPercentage position values alongside their Spline references so curve output can identify the associated position. Integer-branch applicability, full schema compatibility, and gameplay meaning remain unresolved. The week-advance test remains deferred and Milestone 2 incomplete.
 
 ---
 
@@ -96,6 +96,7 @@ For Python work:
 - Inspect output after each meaningful step.
 - Debug together rather than replacing code blindly.
 - Include copyable code comments explaining purpose, offset calculations, and unresolved assumptions in new instructional snippets, with explicit insertion and indentation guidance (owner request, 2026-09-19).
+- Codex may run routine Git checkpoint steps: review, stage explicit project files, commit, fetch, and push (owner authorization, 2026-09-19). The owner continues writing instructional Python and running lesson checks.
 - Do not drop large finished implementations by default.
 - Boilerplate may be supplied when it has little learning value.
 - The project owner can explicitly ask for a full implementation at any time.
@@ -643,6 +644,18 @@ Python practice: return paths, helper reuse, dictionary assignment/lookup, list 
 
 References: [integer decoder](https://github.com/bep713/madden-franchise/blob/master/src/FranchiseFileField.js) and [descriptor handling](https://github.com/bep713/madden-franchise/blob/master/src/FranchiseFileTable.js).
 
+### Pairing through stored references — 2026-09-19
+
+- Owner output confirms checkpoint `3b0ddf6` was pushed to main.
+- Added `spline_references`, keyed by sampled Spline row, containing X/Y tuples of (table ID, row number). Rows 0–2 point to table 4722, with X/Y row pairs (0, 1), (2, 3), (4, 5).
+- Replaced the explicit row-0/row-1 example with iteration over saved references. The code checks both target table IDs and availability in `decoded_array_rows` before pairing values. Array loading still samples only rows 0–5; this is not a general on-demand table reader.
+- Owner-run output confirmed 11 paired points for each of three Splines, with strictly increasing X values. Existing equal-length checks remain in place.
+- Temporarily loading only array rows 0–1 preserved Spline row 0 output and skipped rows 1–2 with `Target row not loaded`. The owner then confirmed restoring the six-row sample and normal operation; source inspection also confirmed the restored limit.
+- Different-target-table and unequal-length branches remain untested. An unloaded row is not evidence of an invalid reference. Full schema compatibility, integer metadata, occupancy, interpolation, and gameplay meaning remain unresolved.
+- Practiced nested dictionaries, tuple unpacking, `.items()`, membership checks, and `continue`. Validation remains manual owner-run checks; no regression suite was added.
+
+Next: associate OverallPercentage position values with the referenced Splines, then display those position labels alongside curve summaries.
+
 ### Lesson notes template
 
 ```text
@@ -739,7 +752,7 @@ No active product blockers.
 
 **Verified:** Python 3.13.5 virtual environment runs the bridge script on the Windows PC.
 
-**Pending:** commit schema-backed Spline mapping and paired samples, then follow actual X/Y references. Week-advance testing is deferred by owner. Decompression negative tests, watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `48600dd` were successfully pushed according to owner output.
+**Pending:** commit reference-based pairing and its unloaded-row check, then connect position values to curve summaries. Week-advance testing is deferred by owner. Decompression negative tests, watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `3b0ddf6` were successfully pushed according to owner output.
 
 ---
 
@@ -820,7 +833,7 @@ No active product blockers.
 # 11. Next Session — Understand the Dynasty
 
 1. Review and commit the explicit checkpoint files; do not stage local test data.
-2. Retain each sampled Spline row's X/Y references and retrieve arrays through those references, checking the target table and available rows. Keep raw values visible; full schema compatibility and gameplay meaning remain unresolved.
+2. Retain OverallPercentage position values alongside Spline references and connect position labels to curve summaries. Keep raw values visible; full schema compatibility and gameplay meaning remain unresolved.
 3. Add appropriate handling for malformed decoded fields as inspection becomes reusable.
 4. Keep week-advance testing deferred until the owner resumes it. Watcher retry, lifecycle, cross-directory events, and meaningful-change filtering remain separate unfinished work.
 

@@ -13,7 +13,7 @@ The project has two major goals:
 
 **Phase:** Milestone 3 — Understand the Dynasty
 
-**Status:** Array-inspection checkpoint pushed; exported schema mapping, integer-helper checks, and paired Spline samples passed owner-run checks. New checkpoint pending. Week-advance test deferred.
+**Status:** Schema-mapping checkpoint pushed; three sampled Splines now pair through stored X/Y references. Normal lookup and unloaded-row checks passed; checkpoint pending. Week-advance test deferred.
 
 The discovery script lists dynasty candidates and selects the newest by modification time. The watcher filters creation, modification, and rename events, debounces per file, and prints metadata. Owner-run checks cover discovery edge cases, event types and filters, controlled bursts, clean shutdown, and an actual in-game save in OneDrive Documents. Save parsing, broader watcher reliability, cloud integration, and the web app remain future work.
 
@@ -21,7 +21,7 @@ See [`PROJECT_PROGRESS.md`](./PROJECT_PROGRESS.md) for the live roadmap and lear
 
 `bridge/inspect_save.py` reads an 82-byte header and decodes the database-name field, timestamp, schema, and chunk size. Owner-run checks verified a complete zlib stream decompressing in memory to 31,165,754 bytes beginning with `FrTk`, under a 64 MiB cap. Earlier header guard tests passed; expanded decompression rejection branches remain untested. It does not yet parse dynasty entities or validate the full save format.
 
-The exploratory inspector distinguishes outer schema 833.0 from inner 833.1 and follows candidate references from `OverallPercentage` through `Spline` to an `int[]` table with ASTO/CMPC markers. Locally exported schema definitions identify position fields and Spline X/Y references. A candidate integer helper preserves raw zero; six sampled arrays retain their previous values. The first paired sample has 11 points, equal X/Y lengths, and strictly increasing X values. Full schema compatibility, integer-branch applicability, row occupancy, interpolation, and gameplay meaning remain unverified. See the progress tracker for exact evidence and limits.
+The exploratory inspector distinguishes outer schema 833.0 from inner 833.1 and follows candidate references from `OverallPercentage` through `Spline` to an `int[]` table with ASTO/CMPC markers. Locally exported schema definitions identify position fields and Spline X/Y references. Three sampled Splines retrieve their arrays through stored references, each producing 11 paired points with strictly increasing X values. An unloaded-row check passed; different-table and unequal-length branches remain untested. Full schema compatibility, integer-branch applicability, row occupancy, interpolation, and gameplay meaning remain unverified. See the progress tracker for exact evidence and limits.
 
 ## Architecture
 

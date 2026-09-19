@@ -462,6 +462,10 @@ if spline_record_size != 8 or spline_record_end > len(unpacked_data):
 print("Candidate Spline record start:", spline_record_start)
 print("Candidate Spline record end:", spline_record_end)
 
+#Keep each sampled Spline row's X/Y references for Later array Lookup.
+#Store both table IDs androw numbers so we can check the destination.
+spline_references = {}
+
 for row_number in range(min(3, spline_summary["record_count"])):
     row_start = spline_record_start + row_number * spline_record_size
     record_bytes = unpacked_data[row_start:row_start + spline_record_size]
@@ -483,9 +487,16 @@ for row_number in range(min(3, spline_summary["record_count"])):
     #split each reference into its table ID and 17-bit row number.
     y_table, y_row = divmod(y_reference, 2 ** 17)
     x_table, x_row = divmod(x_reference, 2 ** 17)
+    spline_references[row_number] = {
+        "x": (x_table, x_row),
+        "y": (y_table, y_row),
+    }
 
     print("Spline X reference:", "table", x_table, "row", x_row)
     print("Spline Y reference:", "table", y_table, "row", y_row)
+
+# Show the collected references once, after all sampled rows are read.
+print("Collected Spline references:", spline_references)
 
 linked_table_start = None
 search_offset = asset_table_end
@@ -638,6 +649,7 @@ for marker in (b"ASTO", b"SPEX"):
 
             #Keep each sampled array under its row number for Later Lookup
             decoded_array_rows = {}
+            # Load the six array rows used by our three sampled Splines.
             for array_row in range(min(6, array_record_count)):
                 row_start = (
                     array_records_start + array_row * array_record_size
@@ -669,27 +681,46 @@ for marker in (b"ASTO", b"SPEX"):
                     "| Candidate decoded values:", candidate_values,
                 )
 
-            #The inspected Spline row 0 references array row 0 for X
-            #and array row 1 for Y. This check uses that observed pair.
-            if 0 in decoded_array_rows and 1 in decoded_array_rows:
-                x_values = decoded_array_rows[0]
-                y_values = decoded_array_rows[1]
+            # Follow each sampled Spline row's saved X/Y references:
+            for spline_row, references in spline_references.items():
+                x_table, x_row = references["x"]
+                y_table, y_row = references["y"]
 
-                # zip pairs elements by position, but would silently stop
-                # at the shorter list. Check lengths before using it.
+                # The decoded arrays belong to this candidate table.
+                # A row number alone is not enough to identify a record.
+                if x_table != candidate_id or y_table != candidate_id:
+                    print("Skipping Spline row:", spline_row, "| Different target table")
+                    continue
+
+                # Only six array rows are currently loaded for inspection.
+                # An unloaded row is not necessarily an invalid reference.
+                if x_row not in decoded_array_rows or y_row not in decoded_array_rows:
+                    print("Skipping Spline row:", spline_row, "| Target row not loaded")
+                    continue
+
+                x_values = decoded_array_rows[x_row]
+                y_values = decoded_array_rows[y_row]
+
+                # Prevent zip from silently dropping unmatched elements.
                 if len(x_values) != len(y_values):
-                    raise ValueError("Spline X and Y lengths do not match.")
+                    raise ValueError(
+                        f"Spline row {spline_row}: X and Y lengths do not match."
+                    )
 
-                #Check that every X value is greater than the previous one.
-                #This tests the sampled data; it does not define interpolation.
+                # Report whether the sampled X values strictly increase.
+                # This does not implement interpolation.
+
                 x_is_strictly_increasing = all(
                     current_x < next_x
                     for current_x, next_x in zip(x_values, x_values[1:])
                 )
 
-                print("X values strictly increasing:", x_is_strictly_increasing)
+                print(
+                    "Candidate Spline Row:", spline_row,
+                    "| X array row:", x_row,
+                    "| Y array row:", y_row,
+                    "| X strictly increasing:", x_is_strictly_increasing,
+                )
 
-                print("Candidate Spline row 0 points:")
-
-                for x_value, y_value in zip(x_values,y_values):
+                for x_value, y_value in zip(x_values, y_values):
                     print("X:", x_value, "| Y:", y_value)
