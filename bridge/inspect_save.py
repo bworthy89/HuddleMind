@@ -463,8 +463,19 @@ print("Collected OverallPercentage links:", overall_links)
 # This path is specific to the current development PC.
 position_schema_path = Path(r"E:\aibridgemod\positionE.FTX")
 
-# Load the enum members through the reusable XML reader
-position_members = read_position_members(position_schema_path)
+# Report a missing schema file clearly and stop with a failure exit code.
+# Keep file-error reporting here, separate from the reusable XML reader.
+try:
+    position_members = read_position_members(position_schema_path)
+except FileNotFoundError:
+    print("Position schema file not found:", position_schema_path)
+    raise SystemExit(1)
+except ET.ParseError as error:
+    # Report malformed XML with the parser's line and column information.
+    print("Position schema contains invalid XML:", position_schema_path)
+    print("Reason:", error)
+    raise SystemExit(1)
+
 print("Parsed enum members:", len(position_members))
 
 # Preserve all names and aliases using the reusable grouping helper.

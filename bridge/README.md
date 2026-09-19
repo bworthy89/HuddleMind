@@ -119,6 +119,10 @@ The XML path now calls three helpers: `read_position_members`, `group_position_n
 
 Manual label-helper checks passed for one eligible name, a marker-only group, and two competing display names; only the first produces a label. Member grouping now rejects missing/empty/whitespace-only names and catches missing/empty/nonnumeric integer values with a member-specific error and chained cause. All six invalid-member checks passed using in-memory XML. Temporary test code was removed and normal output rechecked. Missing-enum and file/XML error cases remain untested; root/count/version and numeric-range validation remain incomplete. Shared-Spline and no-sampled-link cases also remain untested.
 
+## Schema-loading errors
+
+The XML reader's caller catches missing files and malformed XML, reports the path (plus the XML parser reason when available), and exits with SystemExit(1). Owner-run tests confirmed both messages using a nonexistent path and a separate incomplete-XML fixture in the ignored test folder. The real export path was restored and normal output confirmed. Exit-code behavior is explicit in source but was not separately measured in the shell. Missing-enum/member-validation errors and other file-access exceptions still propagate; full schema validation remains unfinished.
+
 ## Save safety
 
 Normal bridge operation is read-first. Do not write to or overwrite original CFB27 dynasty files as part of the MVP.

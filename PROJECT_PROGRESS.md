@@ -3,7 +3,7 @@
 **Repository:** `bworthy89/HuddleMind`  
 **Current Phase:** Milestone 3 — Understand the Dynasty (header inspection)
 
-**Current Status:** 🟡 PositionE member names and integer values are validated; six rejection checks and the normal run passed. Week-advance test deferred by owner.
+**Current Status:** 🟡 Missing schema files and malformed XML now produce clear messages and stop; both checks passed and the real schema path was restored. Week-advance test deferred by owner.
 
 **Last Updated:** 2026-09-19
 
@@ -78,7 +78,7 @@ The project owner wrote and ran save discovery incrementally. The cleaned-up scr
 
 ### Immediate next step
 
-Member-validation checkpoint is ready for commit and push. Helper-refactor checkpoint `0e0bbee` was pushed successfully. Next, handle XML/file errors in small learning steps. Integer-branch applicability, full schema compatibility, and gameplay meaning remain unresolved. The week-advance test remains deferred and Milestone 2 incomplete.
+Schema-loading error checkpoint is ready for commit and push. Member-validation checkpoint `54c9ef3` was pushed successfully. Next, report structurally invalid schemas (including a missing PositionE enum) clearly at the caller, then address other file-access errors in small learning steps. Integer-branch applicability, full schema compatibility, and gameplay meaning remain unresolved. The week-advance test remains deferred and Milestone 2 incomplete.
 
 ---
 
@@ -696,6 +696,15 @@ Next: associate OverallPercentage position values with the referenced Splines, t
 - No automated regression suite was retained. Numeric range policy, duplicate enum definitions, root/count/version validation, missing enum, and XML/file error behavior remain unfinished or untested. Next: clear XML/file error reporting.
 - Practiced short-circuit boolean evaluation, `.strip()`, in-memory ElementTree elements, exception tuples, exception chaining, and isolated negative checks.
 
+### Schema-loading errors — 2026-09-19
+
+- The caller of `read_position_members` now catches FileNotFoundError and ET.ParseError, prints the schema path and (for malformed XML) the parser reason, and raises SystemExit(1). The reusable helper still propagates these exceptions.
+- Owner-run missing-file check used `E:\aibridgemod\positionE-missing-test.FTX` and produced the intended missing-file message.
+- Owner-run malformed-XML check used the separate ignored fixture `empty-save-test/position-invalid-test.ftx` containing incomplete tags. It produced the intended message and `no element found: line 2, column 0` without an unhandled traceback. The fixture was not staged.
+- The real path `E:\aibridgemod\positionE.FTX` was restored; source inspection confirmed it, and the owner confirmed the requested normal rerun with 71 members and CB/C/DT curves. No original schema export or game save was changed.
+- Exit code 1 is explicit in source; the shell exit code was not separately measured. Validation remains owner-run checks rather than a persistent regression suite.
+- Missing-enum and member-validation ValueErrors still propagate to the caller; other OSErrors are not yet caught. Root/count/version validation and full schema compatibility remain unresolved.
+
 ### Lesson notes template
 
 ```text
@@ -792,7 +801,7 @@ No active product blockers.
 
 **Verified:** Python 3.13.5 virtual environment runs the bridge script on the Windows PC.
 
-**Pending:** publish member validation, then handle XML/file errors. Week-advance testing is deferred by owner. Decompression negative tests, watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `0e0bbee` were successfully pushed.
+**Pending:** publish schema-loading error handling, then improve structural-schema error reporting and other file-access errors. Week-advance testing is deferred by owner. Decompression negative tests, watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `54c9ef3` were successfully pushed.
 
 ---
 
@@ -873,7 +882,7 @@ No active product blockers.
 # 11. Next Session — Understand the Dynasty
 
 1. Review and commit the explicit checkpoint files; do not stage local test data.
-2. Handle XML/file errors in small runnable steps. Full schema compatibility and gameplay meaning remain unresolved.
+2. Report structural-schema errors such as a missing PositionE enum at the caller, then handle other file-access errors in small runnable steps. Full schema compatibility and gameplay meaning remain unresolved.
 3. Add appropriate handling for malformed decoded fields as inspection becomes reusable.
 4. Keep week-advance testing deferred until the owner resumes it. Watcher retry, lifecycle, cross-directory events, and meaningful-change filtering remain separate unfinished work.
 
