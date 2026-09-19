@@ -13,7 +13,7 @@ The project has two major goals:
 
 **Phase:** Milestone 3 — Understand the Dynasty
 
-**Status:** Table/reference inspection pushed; reusable parsing helpers verified, refactor checkpoint pending. Week-advance test deferred.
+**Status:** Parsing-helper refactor pushed; five table-summary rejection tests passed, validation notes pending. Week-advance test deferred.
 
 The discovery script lists dynasty candidates and selects the newest by modification time. The watcher filters creation, modification, and rename events, debounces per file, and prints metadata. Owner-run checks cover discovery edge cases, event types and filters, controlled bursts, clean shutdown, and an actual in-game save in OneDrive Documents. Save parsing, broader watcher reliability, cloud integration, and the web app remain future work.
 

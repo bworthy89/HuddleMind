@@ -3,9 +3,9 @@
 **Repository:** `bworthy89/HuddleMind`  
 **Current Phase:** Milestone 3 — Understand the Dynasty (header inspection)
 
-**Current Status:** 🟡 Reusable integer and table-summary helpers verified; refactor checkpoint pending. Week-advance test deferred by owner.
+**Current Status:** 🟡 Table-summary rejection tests passed; validation-record checkpoint pending. Week-advance test deferred by owner.
 
-**Last Updated:** 2026-09-18
+**Last Updated:** 2026-09-19
 
 ---
 
@@ -78,7 +78,7 @@ The project owner wrote and ran save discovery incrementally. The cleaned-up scr
 
 ### Immediate next step
 
-Commit the helper refactor and validation record. Table-inspection checkpoint `5446e85` was pushed successfully according to owner output. Repeated OverallPercentage and Spline header reads now use `read_table_summary`; inner schema reads use `read_u32_be`. Next, exercise the table-summary rejection paths before extending record decoding. The outer schema is 833.0 and inner schema is 833.1; field semantics remain unverified. The week-advance test remains deferred and Milestone 2 incomplete.
+Commit the table-summary validation record. Helper-refactor checkpoint `d13e3d2` was pushed successfully according to owner output. Five in-memory rejection tests passed; temporary fixtures were removed and normal table summaries rechecked. Next, inspect Spline field descriptors before attempting target-record decoding. The outer schema is 833.0 and inner schema is 833.1; field semantics remain unverified. The week-advance test remains deferred and Milestone 2 incomplete.
 
 ---
 
@@ -304,7 +304,7 @@ Layout references were read from the primary [FranchiseFile implementation](http
 
 Limits: scans accept the first matching SPBF candidate, omit alternative table markers, and do not prove all table boundaries, unique IDs, or row occupancy. Bounds checks mostly use the entire decompressed buffer rather than independently verified table extents. Target row contents, schema field names/types, and roster entities remain unparsed. Repeated top-level code should be consolidated incrementally while preserving the known outputs. No new negative-fixture tests or independent Codex runtime pass are claimed.
 
-### Helper refactor checkpoint — 2026-09-18
+### Helper refactor checkpoint — 2026-09-18 (pushed as `d13e3d2`)
 
 The owner added `read_u32_be(data, offset)` with an exact four-byte bounds check and `read_table_summary(data, table_start)` returning a dictionary. The table helper checks SPBF/BSFT markers, accounts for variable store-name length, and returns name, ID, store length, record-header position, count, capacity, record words, and field count. Both OverallPercentage and Spline now use it instead of duplicated record-header reads.
 
@@ -315,7 +315,19 @@ Owner output confirms preserved summaries:
 - Inner/outer schemas and OverallPercentage raw pairs `(678428672, 16)`, `(678428673, 7)`, `(678428674, 12)` remained unchanged.
 - In-memory helper tests: `00 00 03 41` at offset 0 returned 833; offsets -1 and 1 each raised the expected ValueError. Temporary test code was removed; the owner confirmed the final run completed normally afterward. Codex reviewed the final diff and confirmed removal.
 
-The table-summary helper's rejection branches have not yet been exercised with negative fixtures. It remains specific to the inspected SPBF/BSFT layout and does not validate complete table extents, record occupancy, or semantic fields. Helper ValueErrors currently propagate to the caller rather than printing the earlier inline SystemExit messages. No automated test suite or independent Codex runtime pass is claimed.
+Five table-summary rejection cases were subsequently tested on 2026-09-19 (below). The helper remains specific to the inspected SPBF/BSFT layout and does not validate complete table extents, record occupancy, or semantic fields. Helper ValueErrors currently propagate to the caller rather than printing the earlier inline SystemExit messages. No retained automated test suite or independent Codex runtime pass is claimed.
+
+### Table-summary rejection checks — 2026-09-19
+
+Owner output confirms expected ValueErrors for all five in-memory fixtures:
+
+- Negative table start: 168 zero bytes, offset -1.
+- Short table header: 167 zero bytes, offset 0.
+- Wrong SPBF marker: 168 zero bytes, offset 0.
+- Short record header: 168 bytes with SPBF at offsets 148–151.
+- Wrong BSFT marker: 224 bytes with SPBF at offsets 148–151, zero store length, and zero-filled BSFT location.
+
+An initial test-list entry omitted its third value (offset 0), causing tuple-unpacking failure before the parser ran; fixing the tuple allowed all five tests to pass. Temporary fixtures and the test loop were removed. The owner then supplied unchanged OverallPercentage and Spline summaries. Codex's final diff review found no functional parser change from `d13e3d2`, only removal of an extra blank line. These are manual test results, not a persistent regression suite; decompression rejection tests and full table/row validation remain unfinished.
 
 ### Learning topics
 
@@ -578,7 +590,14 @@ The second-screen dashboard updates accurately enough to support live recommenda
 - Pushed table-inspection checkpoint `5446e85`.
 - Introduced bounded integer reads, reusable table-summary parsing, and dictionaries as multi-value function results; replaced duplicate OverallPercentage/Spline record-header sections.
 - Verified unchanged metadata/raw rows and valid/invalid integer-helper offsets; removed temporary test code and confirmed normal operation again.
-- Next: commit the helper refactor, then test table-summary rejection paths before expanding inspection.
+- Helper refactor was subsequently pushed as `d13e3d2`.
+
+### Session notes — 2026-09-19
+
+- Practiced `bytes`, mutable `bytearray`, tuple unpacking, and `try`/`except`/`else` with five invalid table-summary fixtures.
+- Fixed a two-value test tuple where the loop expected three values; all five rejection tests then produced the expected messages.
+- Removed temporary fixtures and confirmed unchanged real-save table summaries. No functional parser changes remain relative to the pushed helper refactor.
+- Next: commit validation notes, then inspect Spline's three field descriptors without assuming OverallPercentage's two-field layout.
 
 ### Lesson notes template
 
@@ -676,7 +695,7 @@ No active product blockers.
 
 **Verified:** Python 3.13.5 virtual environment runs the bridge script on the Windows PC.
 
-**Pending:** commit the helper refactor and validation record. Week-advance testing is deferred by owner. Table-summary negative tests, watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `5446e85` were successfully pushed according to owner output.
+**Pending:** commit the table-summary validation record. Week-advance testing is deferred by owner. Decompression negative tests, watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `d13e3d2` were successfully pushed according to owner output.
 
 ---
 
@@ -708,6 +727,10 @@ No active product blockers.
 ---
 
 # 10. Change Log
+
+## 2026-09-19
+
+- Recorded helper-refactor checkpoint `d13e3d2` as pushed, five successful table-summary rejection cases, and restored normal inspection after removing test fixtures.
 
 ## 2026-09-18
 
@@ -753,7 +776,7 @@ No active product blockers.
 # 11. Next Session — Understand the Dynasty
 
 1. Review and commit the explicit checkpoint files; do not stage local test data.
-2. Exercise table-summary bounds and marker rejection using in-memory fixtures; preserve known OverallPercentage and Spline outputs.
+2. Inspect Spline's three field descriptors using the shared summary, then determine record bit layout before decoding target rows.
 3. Add appropriate handling for malformed decoded fields as inspection becomes reusable.
 4. Keep week-advance testing deferred until the owner resumes it. Watcher retry, lifecycle, cross-directory events, and meaningful-change filtering remain separate unfinished work.
 

@@ -40,7 +40,6 @@ def read_table_summary(data, table_start):
     }
 
 
-
 save_file = Path(
     r"C:\Users\bwort\OneDrive\Documents\EA SPORTS College Football 27\saves"
 ) / "DYNASTY-TULANENEW-AUTOSAVE"
