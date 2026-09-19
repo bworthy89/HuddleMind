@@ -3,7 +3,7 @@
 **Repository:** `bworthy89/HuddleMind`  
 **Current Phase:** Milestone 3 — Understand the Dynasty (header inspection)
 
-**Current Status:** 🟡 Table-summary rejection tests passed; validation-record checkpoint pending. Week-advance test deferred by owner.
+**Current Status:** 🟡 Spline-to-array inspection passed owner-run checks; checkpoint pending. Week-advance test deferred by owner.
 
 **Last Updated:** 2026-09-19
 
@@ -78,7 +78,7 @@ The project owner wrote and ran save discovery incrementally. The cleaned-up scr
 
 ### Immediate next step
 
-Commit the table-summary validation record. Helper-refactor checkpoint `d13e3d2` was pushed successfully according to owner output. Five in-memory rejection tests passed; temporary fixtures were removed and normal table summaries rechecked. Next, inspect Spline field descriptors before attempting target-record decoding. The outer schema is 833.0 and inner schema is 833.1; field semantics remain unverified. The week-advance test remains deferred and Milestone 2 incomplete.
+Review and commit the Spline/array inspection checkpoint. Validation notes were pushed as `df0987a` according to owner output. Next, verify the candidate integer encoding and Spline schema field roles before assigning curve semantics. The outer schema is 833.0 and inner schema is 833.1. The week-advance test remains deferred and Milestone 2 incomplete.
 
 ---
 
@@ -597,7 +597,29 @@ The second-screen dashboard updates accurately enough to support live recommenda
 - Practiced `bytes`, mutable `bytearray`, tuple unpacking, and `try`/`except`/`else` with five invalid table-summary fixtures.
 - Fixed a two-value test tuple where the loop expected three values; all five rejection tests then produced the expected messages.
 - Removed temporary fixtures and confirmed unchanged real-save table summaries. No functional parser changes remain relative to the pushed helper refactor.
-- Next: commit validation notes, then inspect Spline's three field descriptors without assuming OverallPercentage's two-field layout.
+- Validation notes subsequently pushed as `df0987a`. Spline/array inspection continued below.
+
+### Spline and array inspection — 2026-09-19
+
+- Owner output confirms Spline descriptor values 32, 32, 0 and candidate records spanning 22,009,485–22,009,661. Schema field mapping remains unresolved.
+- The two raw u32 slots in Spline rows 0–2 split into candidate references to table 4722, row pairs (1, 0), (3, 2), (5, 4), in slot order.
+- SPBF-only scanning missed that target. Alternate scanning found ASTO at candidate table start 21,516,970, ID 4722, name `int[]`, store length 34. Record header start is 21,517,172, with CMPC at relative offset 32. The existing SPBF/BSFT summary helper remains unchanged.
+- Candidate record count/capacity are 44; width is 11 words (44 bytes). Array entries span 21,517,236–21,517,412 and candidate records span 21,517,412–21,519,348, using exclusive ends. The range fits the database; this does not prove complete table boundaries or occupancy.
+- The first six four-byte entries all contain 11. Their meaning as element counts remains tentative.
+- Owner-run output confirms the following values after experimentally subtracting `2 ** 31` from each raw u32:
+
+```text
+row 0: [44, 45, 60, 64, 69, 74, 79, 83, 88, 93, 97]
+row 1: [100, 100, 99, 94, 65, 33, 13, 7, 3, 2, 1]
+row 2: [49, 58, 62, 66, 70, 75, 79, 83, 87, 91, 95]
+row 3: [100, 97, 87, 67, 40, 19, 11, 5, 3, 2, 1]
+row 4: [53, 61, 65, 68, 72, 76, 80, 83, 87, 91, 94]
+row 5: [100, 98, 91, 75, 49, 24, 9, 4, 3, 2, 1]
+```
+
+The candidate chain is `OverallPercentage (4097) -> Spline (5176) -> int[] (4722)`. Integer encoding and paired-curve interpretation remain hypotheses; axes, units, schema field names, and game behavior are unverified. Marker scans can produce false positives and do not establish unique valid tables. Validation is owner-run output, not a retained automated suite. No original saves were written.
+
+Python practice: nested loops, indentation scope, byte slices, bounded integer reads, `divmod`, lists, and list comprehensions. Layout reference: [M20TableHeaderStrategy.js](https://github.com/bep713/madden-franchise/blob/master/src/strategies/common/header/m20/M20TableHeaderStrategy.js). Alternate-marker reference: [FranchiseFile.js](https://github.com/bep713/madden-franchise/blob/master/src/FranchiseFile.js).
 
 ### Lesson notes template
 
@@ -695,7 +717,7 @@ No active product blockers.
 
 **Verified:** Python 3.13.5 virtual environment runs the bridge script on the Windows PC.
 
-**Pending:** commit the table-summary validation record. Week-advance testing is deferred by owner. Decompression negative tests, watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `d13e3d2` were successfully pushed according to owner output.
+**Pending:** commit Spline/array inspection, then verify integer encoding and field roles. Week-advance testing is deferred by owner. Decompression negative tests, watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `df0987a` were successfully pushed according to owner output.
 
 ---
 
@@ -776,7 +798,7 @@ No active product blockers.
 # 11. Next Session — Understand the Dynasty
 
 1. Review and commit the explicit checkpoint files; do not stage local test data.
-2. Inspect Spline's three field descriptors using the shared summary, then determine record bit layout before decoding target rows.
+2. Verify array integer encoding and Spline schema field roles before labeling curve axes or assigning game meaning. Keep raw values visible alongside experimental conversions.
 3. Add appropriate handling for malformed decoded fields as inspection becomes reusable.
 4. Keep week-advance testing deferred until the owner resumes it. Watcher retry, lifecycle, cross-directory events, and meaningful-change filtering remain separate unfinished work.
 

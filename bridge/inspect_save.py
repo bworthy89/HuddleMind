@@ -413,3 +413,239 @@ print(
 
 print("Overall summary:", overall_summary)
 print("Spline summary:", spline_summary)
+
+spline_metadata_start = (
+    target_table_start + 232 + spline_summary["store_length"]
+)
+spline_metadata_end = (
+    spline_metadata_start + spline_summary["field_count"] * 4
+)
+
+if spline_metadata_end > len(unpacked_data):
+    print("Spline field metadata extends beyond the database.")
+    raise SystemExit
+
+print("Spline field metadata starts:", spline_metadata_start)
+print("Spline field metadata ends", spline_metadata_end)
+
+for field_index in range(spline_summary["field_count"]):
+    descriptor_offset = spline_metadata_start + field_index * 4
+    bit_offset = read_u32_be(unpacked_data,descriptor_offset)
+
+    print("Spline field:", field_index, "| Descriptor bit offset:", bit_offset)
+
+spline_record_size = spline_summary["record_words"] * 4
+spline_record_start = spline_metadata_end
+spline_record_end = (
+    spline_record_start
+    + spline_summary["record_count"] * spline_record_size
+)
+
+if spline_record_size != 8 or spline_record_end > len(unpacked_data):
+    print("Unexpected Spline record size of range.")
+    raise SystemExit
+
+print("Candidate Spline record start:", spline_record_start)
+print("Candidate Spline record end:", spline_record_end)
+
+for row_number in range(min(3, spline_summary["record_count"])):
+    row_start = spline_record_start + row_number * spline_record_size
+    record_bytes = unpacked_data[row_start:row_start + spline_record_size]
+
+    print(
+        "Spline row:", row_number,
+        "| Raw bytes:", record_bytes.hex(" "),
+        "| First u32:", read_u32_be(record_bytes, 0),
+        "| Second u32:", read_u32_be(record_bytes, 4),
+    )
+
+    first_value = read_u32_be(record_bytes, 0)
+    second_value = read_u32_be(record_bytes, 4)
+
+    first_table, first_row = divmod(first_value, 2 ** 17)
+    second_table, second_row = divmod(second_value, 2 ** 17)
+
+    print(
+        "Possible first reference:",
+        "table", first_table,
+        "row", first_row,
+    )
+    print(
+        "Possible Second reference:",
+        "table", second_table,
+        "row", second_row,
+    )
+
+linked_table_start = None
+search_offset = asset_table_end
+
+while True:
+    found_marker = unpacked_data.find(b"SPBF", search_offset)
+
+    if found_marker == -1:
+        break
+
+    search_offset = found_marker + 4
+    candidate_start = found_marker - 148
+
+    if candidate_start < asset_table_end:
+        continue
+
+    candidate_id = read_u32_be(unpacked_data, candidate_start +128)
+
+    if candidate_id == 4722:
+        linked_table_start = candidate_start
+        break
+
+if linked_table_start is None:
+    print("Candidate table 4722 was not found.")
+else:
+    linked_summary = read_table_summary(unpacked_data, linked_table_start)
+    print("Linked table start:", linked_table_start)
+    print("Linked table summary:", linked_summary)
+    print(
+        "Rows 0-5 fit declared capacity:",
+        linked_summary["record_capacity"] >= 6,
+    )
+for marker in (b"ASTO", b"SPEX"):
+    search_offset = asset_table_end
+
+    while True:
+        found_marker = unpacked_data.find(marker, search_offset)
+
+        if found_marker == -1:
+            break
+
+        search_offset = found_marker + 4
+        candidate_start = found_marker - 148
+
+        if candidate_start < asset_table_end:
+            continue
+
+        candidate_id = read_u32_be(unpacked_data, candidate_start + 128)
+
+        if candidate_id == 4722:
+            name_bytes = unpacked_data[candidate_start:candidate_start + 128]
+
+            print("Alternate candidate marker:", marker)
+            print("Alternate candidate start:", candidate_start)
+            print("Alternate candidate ID:", candidate_id)
+            print("Alternate candidate name:", name_bytes.split(b"\x00", 1)[0])
+            candidate_store_length = read_u32_be(
+                unpacked_data, candidate_start + 164
+            )
+            candidate_record_header = (
+                candidate_start + 168 + candidate_store_length
+            )
+
+            print("Alternate store length:", candidate_store_length)
+            print("Alternate record-header start:", candidate_record_header)
+            print(
+                "Alternate record-section marker:",
+                unpacked_data[
+                    candidate_record_header + 32:
+                    candidate_record_header + 36
+                ],
+            )
+
+            print("Alternate record-header bytes:")
+
+            for relative_offset in range(0, 64, 16):
+                start = candidate_record_header + relative_offset
+                header_bytes = unpacked_data[start:start + 16]
+
+                print(
+                    relative_offset, ":",
+                    header_bytes.hex(" "),
+                    "|", repr(header_bytes),
+                )
+
+            array_record_count = read_u32_be(
+                unpacked_data, candidate_record_header + 8
+            )
+            array_record_capacity = read_u32_be(
+                unpacked_data, candidate_record_header + 48
+            )
+            array_record_words = read_u32_be(
+                unpacked_data, candidate_record_header + 44
+            )
+
+            print("Candidate array record count:", array_record_count)
+            print("Candidate array capacity:", array_record_capacity)
+            print("Candidate array record words:", array_record_words)
+            print(
+                "Spline reference rows 0–5 fit capacity:",
+                array_record_capacity >= 6,
+            )
+
+            array_entries_start = candidate_record_header + 64
+            array_entries_end = (
+                array_entries_start + array_record_count * 4
+            )
+
+            array_record_size = array_record_words * 4
+            array_records_start = array_entries_end
+            array_records_end = (
+                array_records_start
+                + array_record_count * array_record_size
+            )
+
+            print("Candidate array entries start:", array_entries_start)
+            print("Candidate array entries end:", array_entries_end)
+            print("Candidate array record size:", array_record_size)
+            print("Candidate array records start:", array_records_start)
+            print("Candidate array records end:", array_records_end)
+            print(
+                "Candidate array records fit database:",
+                array_records_end <= len(unpacked_data),
+            )
+
+            if not (
+                0 <= array_entries_start
+                <= array_entries_end
+                <= len(unpacked_data)
+            ):
+                raise SystemExit("Candidate array entries are outside the database.")
+
+            for array_row in range(min(6, array_record_count)):
+                entry_start = array_entries_start + array_row * 4
+                entry_bytes = unpacked_data[entry_start:entry_start + 4]
+                entry_value = read_u32_be(unpacked_data, entry_start)
+
+                print(
+                    "Array entry:", array_row,
+                    "| Raw bytes:", entry_bytes.hex(" "),
+                    "| As big-endian:", entry_value,
+                )
+
+            if not (
+                0 <= array_records_start
+                <= array_records_end
+                <= len(unpacked_data)
+            ):
+                raise SystemExit("Candidate array records are outside the database.")
+
+            for array_row in range(min(6, array_record_count)):
+                row_start = (
+                    array_records_start + array_row * array_record_size
+                )
+
+                raw_values = []
+
+                for word_index in range(array_record_words):
+                    word_start = row_start + word_index * 4
+                    raw_values.append(
+                        read_u32_be(unpacked_data, word_start)
+                    )
+
+                print("Candidate array row:", array_row, "| Raw u32 values:", raw_values)
+
+                candidate_values = [
+                    value - (2 ** 31)
+                    for value in raw_values
+                ]
+
+                print(
+                    "Candidate array row:", array_row,
+                    "| After subtracting 2**31:", candidate_values,
+                )

@@ -13,7 +13,7 @@ The project has two major goals:
 
 **Phase:** Milestone 3 — Understand the Dynasty
 
-**Status:** Parsing-helper refactor pushed; five table-summary rejection tests passed, validation notes pending. Week-advance test deferred.
+**Status:** Validation checkpoint pushed; Spline-to-array inspection passed owner-run checks, checkpoint pending. Week-advance test deferred.
 
 The discovery script lists dynasty candidates and selects the newest by modification time. The watcher filters creation, modification, and rename events, debounces per file, and prints metadata. Owner-run checks cover discovery edge cases, event types and filters, controlled bursts, clean shutdown, and an actual in-game save in OneDrive Documents. Save parsing, broader watcher reliability, cloud integration, and the web app remain future work.
 
@@ -21,7 +21,7 @@ See [`PROJECT_PROGRESS.md`](./PROJECT_PROGRESS.md) for the live roadmap and lear
 
 `bridge/inspect_save.py` reads an 82-byte header and decodes the database-name field, timestamp, schema, and chunk size. Owner-run checks verified a complete zlib stream decompressing in memory to 31,165,754 bytes beginning with `FrTk`, under a 64 MiB cap. Earlier header guard tests passed; expanded decompression rejection branches remain untested. It does not yet parse dynasty entities or validate the full save format.
 
-The exploratory inspector now distinguishes outer schema 833.0 from inner 833.1, reads sample asset references, and inspects `OverallPercentage` records with candidate references to a `Spline` table. Target capacity checks pass; field semantics, row occupancy, and complete database parsing remain unverified. See the progress tracker for exact evidence and limits.
+The exploratory inspector distinguishes outer schema 833.0 from inner 833.1 and follows candidate references from `OverallPercentage` through `Spline` to an `int[]` table with ASTO/CMPC markers. Owner output confirms six sampled arrays. Experimental subtraction of `2 ** 31` yields paired increasing/decreasing sequences; integer encoding and curve semantics remain unverified. Capacity and database-range checks pass; row occupancy and complete parsing remain unverified. See the progress tracker for exact evidence and limits.
 
 ## Architecture
 
