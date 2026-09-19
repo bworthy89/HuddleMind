@@ -425,11 +425,11 @@ if record_size != 8 or field_count !=2:
     print("This inspection expects two fields in an eight-byte record.")
     raise SystemExit
 
-# Keep each sampled OverallPercentage record's position and SPline link.
-# Key by source row so seperate records remain separate.
+# Inspect every declared OverallPercentage record in the checked byte range.
+# Keep each record's actual Spline reference; do not assume row numbers match.
 overall_links = {}
 
-for row_number in range(min(3, record_count)):
+for row_number in range(record_count):
     row_start = record_data_start + row_number * record_size
     record_bytes = unpacked_data[row_start:row_start + record_size]
 
@@ -607,11 +607,32 @@ if spline_record_size != 8 or spline_record_end > len(unpacked_data):
 print("Candidate Spline record start:", spline_record_start)
 print("Candidate Spline record end:", spline_record_end)
 
-#Keep each sampled Spline row's X/Y references for Later array Lookup.
-#Store both table IDs androw numbers so we can check the destination.
+# Store the X/Y references read from the requested Spline rows.
 spline_references = {}
 
-for row_number in range(min(3, spline_summary["record_count"])):
+# Collect unique row numbers that reference the Spline table we located.
+# A set avoids reading the same row twice if several positions share it.
+requested_spline_rows = set()
+
+for link in overall_links.values():
+    table_id, referenced_row = link["spline_reference"]
+
+    if table_id != spline_summary["table_id"]:
+        print("Skipping reference to another Spline table:", table_id)
+        continue
+
+    # Stay within the declared record range currently available to this reader.
+    # This bounds check does not establish whether a record is occupied.
+    if not 0 <= referenced_row < spline_summary["record_count"]:
+        print("Skipping Spline row outside the declared range:", referenced_row)
+        continue
+
+    requested_spline_rows.add(referenced_row)
+
+print("Requested Spline rows:", sorted(requested_spline_rows))
+
+# Read the requested rows in a predictable order.
+for row_number in sorted(requested_spline_rows):
     row_start = spline_record_start + row_number * spline_record_size
     record_bytes = unpacked_data[row_start:row_start + spline_record_size]
 
@@ -792,10 +813,30 @@ for marker in (b"ASTO", b"SPEX"):
             ):
                 raise SystemExit("Candidate array records are outside the database.")
 
-            #Keep each sampled array under its row number for Later Lookup
+            # Collect the unique X/Y array rows referenced by the loaded Splines.
+            requested_array_rows = set()
+
+            for references in spline_references.values():
+                for table_id, referenced_row in references.values():
+                    # Only read references into the array table we located.
+                    if table_id != candidate_id:
+                        print("Skipping reference to another array table:", table_id)
+                        continue
+
+                    # Stay within the declared record range checked above.
+                    # Being in range does not prove that a row is occupied.
+                    if not 0 <= referenced_row < array_record_count:
+                        print("Skipping array row outside the declared range:", referenced_row)
+                        continue
+
+                    requested_array_rows.add(referenced_row)
+
+            print("Requested array rows:", sorted(requested_array_rows))
+
+            # Decode each requested row once, even if multiple Splines share it.
             decoded_array_rows = {}
-            # Load the six array rows used by our three sampled Splines.
-            for array_row in range(min(6, array_record_count)):
+
+            for array_row in sorted(requested_array_rows):
                 row_start = (
                     array_records_start + array_row * array_record_size
                 )
@@ -825,6 +866,9 @@ for marker in (b"ASTO", b"SPEX"):
                     "Candidate array row:", array_row,
                     "| Candidate decoded values:", candidate_values,
                 )
+
+            # Count curves that pass the reference and equal-length checks.
+            paired_curve_count = 0
 
             # Follow each sampled Spline row's saved X/Y references:
             for spline_row, references in spline_references.items():
@@ -887,6 +931,9 @@ for marker in (b"ASTO", b"SPEX"):
                     for current_x, next_x in zip(x_values, x_values[1:])
                 )
 
+                # This curve reached pairing without being skipped.
+                paired_curve_count += 1
+
                 print(
                     "Candidate Spline Row:", spline_row,
                     "| Position:", position_text,
@@ -897,3 +944,10 @@ for marker in (b"ASTO", b"SPEX"):
 
                 for x_value, y_value in zip(x_values, y_values):
                     print("X:", x_value, "| Y:", y_value)
+
+            # Compare completed pairings with the requested Spline count.
+            # This reports coverage, not record occupancy or gameplay meaning.
+            print(
+                "Curves paired:", paired_curve_count,
+                "| Requested Splines:", len(requested_spline_rows),
+            )

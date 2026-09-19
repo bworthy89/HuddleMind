@@ -13,7 +13,7 @@ The project has two major goals:
 
 **Phase:** Milestone 3 — Understand the Dynasty
 
-**Status:** Planned schema error reporting now covers file access, malformed XML, missing enums, and invalid members. Eleven focused failure checks and real-export loading passed. Next lesson returns to data exploration beyond the three sampled curves. Week-advance test deferred.
+**Status:** Schema error handling is in place, and all 22 requested position curves pair through their referenced array rows. Next: inspect Team/Player schemas and actual dynasty records. Week-advance test deferred.
 
 The discovery script lists dynasty candidates and selects the newest by modification time. The watcher filters creation, modification, and rename events, debounces per file, and prints metadata. Owner-run checks cover discovery edge cases, event types and filters, controlled bursts, clean shutdown, and an actual in-game save in OneDrive Documents. Save parsing, broader watcher reliability, cloud integration, and the web app remain future work.
 

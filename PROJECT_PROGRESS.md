@@ -3,7 +3,7 @@
 **Repository:** `bworthy89/HuddleMind`  
 **Current Phase:** Milestone 3 — Understand the Dynasty (header inspection)
 
-**Current Status:** 🟡 Planned schema error reporting is complete: file-access, XML syntax, and member-validation failures stop clearly. Next lesson returns to data exploration. Week-advance test deferred by owner.
+**Current Status:** 🟡 All 22 requested position curves paired through 44 referenced array rows. Moving to actual Team and Player records; schema exports are the next step. Week-advance test deferred by owner.
 
 **Last Updated:** 2026-09-19
 
@@ -78,7 +78,7 @@ The project owner wrote and ran save discovery incrementally. The cleaned-up scr
 
 ### Immediate next step
 
-Schema-error completion is ready for commit and push. Missing-enum checkpoint `274f41c` was pushed successfully. Resume data exploration with the owner: expand beyond three OverallPercentage records and load referenced Spline/array rows as needed instead of assuming the first three/six rows suffice. Proceed in small commented Python lessons. Integer-branch applicability, full schema compatibility, and gameplay meaning remain unresolved. The week-advance test remains deferred and Milestone 2 incomplete.
+Record the completed 22-curve exploration and move to Team and Player data as requested by the owner. Schema-error checkpoint `cc7e8f5` was pushed successfully. Export `team.ftx` and `player.ftx` from revision folder 4, inspect actual field definitions, then locate and validate corresponding save-table candidates. Start with a small team/player sample and compare interpreted values against the game before defining HuddleMind-owned models. Proceed in small commented Python lessons. Week-advance testing remains deferred.
 
 ---
 
@@ -259,7 +259,7 @@ An initial startup run emitted events for all 11 candidates; a later startup did
 
 **Goal:** Convert CFB27 data into HuddleMind-owned models.
 
-**Status:** 🟡 Header inspection started; no dynasty entities or compressed payload parsed.
+**Status:** 🟡 Save payload decompressed and schema-assisted table/reference inspection demonstrated across 22 position curves. Actual team/player records and HuddleMind-owned dynasty models remain to be implemented and validated.
 
 ### First header-inspection checkpoint — 2026-09-18 (pushed as `5931dcd`)
 
@@ -721,6 +721,14 @@ Next: associate OverallPercentage position values with the referenced Splines, t
 - Planned caller error reporting is complete; this does not establish full format validation. Root/count/version compatibility, occupancy, numeric range policy, interpolation, and gameplay meaning remain unresolved.
 - Next lesson: expand the sampled data by following actual references, keeping the owner's small-step Python workflow and explanatory comments.
 
+### All position curves and transition to dynasty entities — 2026-09-19
+
+- Expanded OverallPercentage inspection to its 22 declared records. Owner output identifies all 22 position labels and references to Spline table 5176, rows 0–21.
+- Requested Spline rows are collected from actual source references, deduplicated with a set, checked against the located table and declared range, then read in sorted order. Array rows are similarly collected from X/Y references; owner output confirms 44 requested rows (0–43).
+- Owner output confirmed extended QB/TE/WR curve pairs with 11 points each and strictly increasing X values, plus final coverage `Curves paired: 22 | Requested Splines: 22`. Coverage means all requested rows reached pairing and passed equal-length checks; it does not establish occupancy, interpolation, or gameplay meaning.
+- Table discovery still uses the exploratory marker/layout assumptions and selected IDs; this is not a general database parser. Diagnostic previews and some historical output text remain sample-specific.
+- Owner agreed to stop polishing the curve example and move toward actual team/player records. Next: export and inspect Team/Player schemas from the installed revision, locate table candidates, and decode a small useful sample before broader roster parsing. No actual team/player records have yet been decoded.
+
 ### Lesson notes template
 
 ```text
@@ -817,7 +825,7 @@ No active product blockers.
 
 **Verified:** Python 3.13.5 virtual environment runs the bridge script on the Windows PC.
 
-**Pending:** publish completed schema error reporting, then resume data exploration beyond the current three curves. Week-advance testing is deferred by owner. Decompression negative tests, watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `274f41c` were successfully pushed.
+**Pending:** publish the 22-curve exploration checkpoint and begin Team/Player schema inspection. Week-advance testing is deferred by owner. Decompression negative tests, watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `cc7e8f5` were successfully pushed.
 
 ---
 
@@ -898,7 +906,7 @@ No active product blockers.
 # 11. Next Session — Understand the Dynasty
 
 1. Review and commit the explicit checkpoint files; do not stage local test data.
-2. Resume data exploration: expand OverallPercentage inspection and load referenced Spline/array rows as needed, replacing fixed sample limits in small steps. Full schema compatibility and gameplay meaning remain unresolved.
+2. Export and inspect Team/Player schemas, then locate corresponding save tables and decode a small sample for comparison with the game UI. Full schema compatibility and gameplay meaning remain unresolved.
 3. Add appropriate handling for malformed decoded fields as inspection becomes reusable.
 4. Keep week-advance testing deferred until the owner resumes it. Watcher retry, lifecycle, cross-directory events, and meaningful-change filtering remain separate unfinished work.
 

@@ -127,6 +127,10 @@ The caller also catches the XML reader's ValueError for missing PositionE, repor
 
 Schema error reporting now surrounds reading, member grouping, and label selection together. FileNotFoundError retains its specific message; other OSErrors report the path and reason; XML syntax and schema/member ValueErrors have distinct messages. All stop with exit code 1. Eleven focused tests of the actual helper/caller code passed, including simulated I/O failures and six invalid-member inputs; the real export still yields 71 members and correct CB/C/DT labels. These are focused checks, not a full save-pipeline run or complete schema-format validation. This supersedes the earlier limitations on uncaught member and file-access errors. Next: explore beyond the fixed three-Spline/six-array sample by following references.
 
+## Expanded reference exploration
+
+OverallPercentage inspection now collects all 22 declared source records. Referenced Spline and array row numbers are deduplicated and checked against the selected table IDs and declared ranges before reading. Owner output confirms 22 requested Splines, 44 requested arrays, and 22 completed pairings; extended QB/TE/WR examples retain 11 points and increasing X values. This supersedes the earlier three-Spline/six-array sample limits. Coverage does not prove occupancy or gameplay semantics, and table discovery remains exploratory. Next work moves to exported Team/Player schemas and actual dynasty records rather than further curve-summary refinement.
+
 ## Save safety
 
 Normal bridge operation is read-first. Do not write to or overwrite original CFB27 dynasty files as part of the MVP.
