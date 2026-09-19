@@ -3,7 +3,7 @@
 **Repository:** `bworthy89/HuddleMind`  
 **Current Phase:** Milestone 3 — Understand the Dynasty (header inspection)
 
-**Current Status:** 🟡 Sampled curve summaries now show linked positions CB, C, and DT; unknown-label fallback passed and DT mapping restored. Week-advance test deferred by owner.
+**Current Status:** 🟡 Position labels now come from exported PositionE XML; aliases are preserved and marker-only fallback passed. Week-advance test deferred by owner.
 
 **Last Updated:** 2026-09-19
 
@@ -78,7 +78,7 @@ The project owner wrote and ran save discovery incrementally. The cleaned-up scr
 
 ### Immediate next step
 
-Position-label checkpoint is ready for commit and push. Reference-pairing checkpoint `e1cbbbd` was pushed successfully. Next, replace the three-entry sample position map with labels read from the exported PositionE schema in small learning steps, handling duplicate enum aliases explicitly. Integer-branch applicability, full schema compatibility, and gameplay meaning remain unresolved. The week-advance test remains deferred and Milestone 2 incomplete.
+XML-label checkpoint is ready for commit and push. Position-link checkpoint `6eec738` was pushed successfully. Next, extract XML label loading into a reusable helper, then add focused input validation and file-error handling in small learning steps. Integer-branch applicability, full schema compatibility, and gameplay meaning remain unresolved. The week-advance test remains deferred and Milestone 2 incomplete.
 
 ---
 
@@ -667,6 +667,17 @@ Next: associate OverallPercentage position values with the referenced Splines, t
 - Practiced dictionary `.get()` fallbacks, `.values()`, full-reference matching, list accumulation, string joining, conditional expressions, and statement execution order. These are manual owner-run checks; no automated regression suite was added.
 - Next: read position labels from the exported XML schema rather than expanding a hard-coded map. Preserve alias handling and unknown-value fallback. Curve gameplay meaning, interpolation, full schema compatibility, and integer metadata remain unresolved.
 
+### PositionE XML labels — 2026-09-19
+
+- Replaced the three-entry position dictionary with standard-library ElementTree parsing of the local exported `E:\aibridgemod\positionE.FTX`. This introduces a required, PC-specific external file; the export is not committed.
+- Owner output confirms FranTkData root, revision 4, named PositionE enum, and 71 parsed members matching the declared count. Root/revision/count are printed, not enforced. Missing PositionE has an explicit ValueError; that branch has not been tested.
+- Grouped all names by integer `value`, preserving aliases. Confirmed 16 -> [CB, FirstDefenseDB_], 7 -> [C], 12 -> [DT, LastDefenseLine_]. The enum member index is not used as the stored value.
+- Display policy selects a label only when exactly one name does not end in an underscore. Original groups remain intact; values with zero or multiple eligible names use the existing unknown-value fallback. This is a PositionE display policy, not a universal enum rule.
+- Fixed a missing `position_labels = {}` initialization. Owner output then confirmed XML-derived CB/C/DT labels in all three curve summaries, with unchanged points and increasing X values.
+- Temporary marker-only check confirmed 63 -> [Invalid_] and display fallback Unknown (63). The check was removed; source inspection confirms removal, and the owner confirmed the requested normal rerun.
+- File-read/XML syntax failures, malformed member attributes, count mismatches, and multiple eligible names remain untested and are not comprehensively handled. Validation remains manual; no persistent regression suite was added.
+- Practiced XML parsing, element paths and attributes, string-to-integer conversion, grouping aliases, list comprehensions, and selecting unambiguous labels. Next: extract a reusable schema-label helper before expanding validation.
+
 ### Lesson notes template
 
 ```text
@@ -763,7 +774,7 @@ No active product blockers.
 
 **Verified:** Python 3.13.5 virtual environment runs the bridge script on the Windows PC.
 
-**Pending:** publish position-linked summaries, then introduce a PositionE schema reader with explicit alias handling. Week-advance testing is deferred by owner. Decompression negative tests, watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `e1cbbbd` were successfully pushed.
+**Pending:** publish XML-derived position labels, then refactor schema loading and add focused validation. Week-advance testing is deferred by owner. Decompression negative tests, watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `6eec738` were successfully pushed.
 
 ---
 
@@ -844,7 +855,7 @@ No active product blockers.
 # 11. Next Session — Understand the Dynasty
 
 1. Review and commit the explicit checkpoint files; do not stage local test data.
-2. Read position labels from the exported PositionE XML, handling enum aliases and unknown values explicitly. Keep raw values visible; full schema compatibility and gameplay meaning remain unresolved.
+2. Extract XML label loading into a reusable helper, then validate schema inputs and handle file errors in small runnable steps. Full schema compatibility and gameplay meaning remain unresolved.
 3. Add appropriate handling for malformed decoded fields as inspection becomes reusable.
 4. Keep week-advance testing deferred until the owner resumes it. Watcher retry, lifecycle, cross-directory events, and meaningful-change filtering remain separate unfinished work.
 

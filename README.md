@@ -13,7 +13,7 @@ The project has two major goals:
 
 **Phase:** Milestone 3 — Understand the Dynasty
 
-**Status:** Reference-pairing checkpoint pushed; sampled curve summaries now identify CB, C, and DT through source references. Unknown-position fallback passed and the normal mapping was restored. Week-advance test deferred.
+**Status:** Position-link checkpoint pushed; curve labels now load from exported PositionE XML with aliases preserved. CB/C/DT output and marker-only fallback passed owner-run checks. Week-advance test deferred.
 
 The discovery script lists dynasty candidates and selects the newest by modification time. The watcher filters creation, modification, and rename events, debounces per file, and prints metadata. Owner-run checks cover discovery edge cases, event types and filters, controlled bursts, clean shutdown, and an actual in-game save in OneDrive Documents. Save parsing, broader watcher reliability, cloud integration, and the web app remain future work.
 

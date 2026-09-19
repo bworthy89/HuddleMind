@@ -1,6 +1,8 @@
 from pathlib import Path
 from datetime import datetime
 import zlib
+# ElementTree reads XML documents using Pythons standard Library.
+import xml.etree.ElementTree as ET
 
 def read_u32_be(data, offset):
     if offset < 0 or offset + 4 > len(data):
@@ -388,13 +390,78 @@ for row_number in range(min(3, record_count)):
 # Display the associations collected from the sampled source records.
 print("Collected OverallPercentage links:", overall_links)
 
-# Labels verified in the exported PositionE schema.
-# This is a small sample mapping, not the complete position enum.
-position_labels = {
-    16: "CB",
-    7: "C",
-    12: "DT",
-}
+# Read the locally exported PositionE schema without modifying it.
+# This path is specific to the current development PC.
+position_schema_path = Path(r"E:\aibridgemod\positionE.FTX")
+
+# Parse the XML document and get its outermost element.
+position_schema_tree = ET.parse(position_schema_path)
+position_schema_root = position_schema_tree.getroot()
+
+print("Position schema root:", position_schema_root.tag)
+print(
+    "Position schame revision:",
+    position_schema_root.get("dataRevisionVersion")
+)
+
+# Find the PositionE enum inside the document's schema sectiion.
+# Match its name explicitly rather than selecting an arbitrary enum.
+position_enum = position_schema_root.find(
+    "./schemas/enum[@name='PositionE']"
+)
+
+# Stop clearly if the exported file does not contain the expected enum.
+# Use "is None" to check whether find() returned no matching element
+if position_enum is None:
+    raise ValueError("PositionE enum not found in the exported schema.")
+
+# Each direct attribute element describes one enum member.
+position_members = position_enum.findall("attribute")
+
+print("Position enum name:", position_enum.get("name"))
+print("Declared enum members:", position_enum.get("numMembers"))
+print("Parsed enum members:", len(position_members))
+
+# Group all enum names by thier stored interger value.
+# Preserve aliases instead of letting later names overwrite earlier ones.
+position_names_by_value = {}
+
+for member in position_members:
+    position_value = int(member.get("value"))
+    position_name = member.get("name")
+
+    # Create an empty list the first time we encounter this value.
+    if position_value not in position_names_by_value:
+        position_names_by_value[position_value] = []
+
+    # Append the current name to the list of names for this value.
+    position_names_by_value[position_value].append(position_name)
+
+# Inspect the groups used by our three sampled OverallPercentage records.
+for position_value in (16, 7, 12):
+    print(
+        "Position names:",
+        position_value,
+        "->",
+        position_names_by_value.get(position_value, [])
+    )
+# Create the display-label dictionary before adding entries to it.
+# Original names and aliases remain preserved in position_names_by_value.
+position_labels = {}
+
+for position_value, names in position_names_by_value.items():
+    display_names = [
+        name
+        for name in names
+        if not name.endswith("_")
+    ]
+
+    # Choose a label only when the rule produces one unambiguous display name.
+    # Other values keep the existing Unknown (...) fallback.
+    if len(display_names) == 1:
+        position_labels[position_value] = display_names[0]
+
+
 
 # Label each source record while preserving its actual SPline reference.
 for overall_row, link in overall_links.items():

@@ -113,7 +113,9 @@ Decoded samples are stored by array row number; a separate dictionary retains ea
 
 ## Position-linked curve summaries
 
-`overall_links` preserves each sampled OverallPercentage record's raw position and full Spline reference. Curve summaries match both table ID and row number, then display associated labels from a three-entry map (16: CB, 7: C, 12: DT). Owner output confirmed all three labels with unchanged curve points. Temporarily removing DT exercised the `Unknown (12)` fallback without interrupting pairing; DT was restored and normal operation confirmed. Multiple source links can be collected, and missing sampled links have a fallback, but those cases have not been tested. PositionE XML loading is the next learning step; the current map is intentionally partial.
+`overall_links` preserves each sampled OverallPercentage record's raw position and full Spline reference. Curve summaries match both table ID and row number. Labels now load through ElementTree from the required local export `E:\aibridgemod\positionE.FTX`; adjust that path on another PC. The file is outside the repository. All enum names are grouped by stored integer value, preserving aliases; a label is selected only when exactly one name lacks a trailing underscore. Other values retain the unknown-value fallback.
+
+Owner output confirms 71 members, revision 4, and unchanged CB/C/DT curve summaries. A temporary check confirmed marker-only value 63 preserves Invalid_ in its name group but displays Unknown (63); that check was removed and normal operation confirmed. Root, revision, and counts are diagnostic prints rather than enforced validation. Missing-enum, malformed-member, ambiguous-label, and file/XML error cases remain untested; input handling is incomplete. Shared-Spline and no-sampled-link cases also remain untested.
 
 ## Save safety
 
