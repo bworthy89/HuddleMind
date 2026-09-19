@@ -115,7 +115,9 @@ Decoded samples are stored by array row number; a separate dictionary retains ea
 
 `overall_links` preserves each sampled OverallPercentage record's raw position and full Spline reference. Curve summaries match both table ID and row number. Labels now load through ElementTree from the required local export `E:\aibridgemod\positionE.FTX`; adjust that path on another PC. The file is outside the repository. All enum names are grouped by stored integer value, preserving aliases; a label is selected only when exactly one name lacks a trailing underscore. Other values retain the unknown-value fallback.
 
-Owner output confirms 71 members, revision 4, and unchanged CB/C/DT curve summaries. A temporary check confirmed marker-only value 63 preserves Invalid_ in its name group but displays Unknown (63); that check was removed and normal operation confirmed. Root, revision, and counts are diagnostic prints rather than enforced validation. Missing-enum, malformed-member, ambiguous-label, and file/XML error cases remain untested; input handling is incomplete. Shared-Spline and no-sampled-link cases also remain untested.
+The XML path now calls three helpers: `read_position_members`, `group_position_names`, and `build_position_labels`. Owner output confirms 71 members, preserved aliases, and unchanged CB/C/DT curve summaries after refactoring. Earlier root/revision/declared-count diagnostics were removed; metadata is not enforced. The local export was previously observed at revision 4.
+
+Manual label-helper checks passed for one eligible name, a marker-only group, and two competing display names; only the first produces a label. Temporary test code was removed and normal output rechecked. Missing-enum, malformed-member, and file/XML error cases remain untested; input handling is incomplete. Shared-Spline and no-sampled-link cases also remain untested.
 
 ## Save safety
 

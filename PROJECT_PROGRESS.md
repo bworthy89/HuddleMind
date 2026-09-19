@@ -3,7 +3,7 @@
 **Repository:** `bworthy89/HuddleMind`  
 **Current Phase:** Milestone 3 — Understand the Dynasty (header inspection)
 
-**Current Status:** 🟡 Position labels now come from exported PositionE XML; aliases are preserved and marker-only fallback passed. Week-advance test deferred by owner.
+**Current Status:** 🟡 PositionE parsing, alias grouping, and label selection are separate helpers; sample curves and label-policy checks passed. Week-advance test deferred by owner.
 
 **Last Updated:** 2026-09-19
 
@@ -78,7 +78,7 @@ The project owner wrote and ran save discovery incrementally. The cleaned-up scr
 
 ### Immediate next step
 
-XML-label checkpoint is ready for commit and push. Position-link checkpoint `6eec738` was pushed successfully. Next, extract XML label loading into a reusable helper, then add focused input validation and file-error handling in small learning steps. Integer-branch applicability, full schema compatibility, and gameplay meaning remain unresolved. The week-advance test remains deferred and Milestone 2 incomplete.
+Position-helper refactor is ready for commit and push. XML-label checkpoint `76e8e9e` was pushed successfully. Next, add focused schema-member validation and file-error handling in small learning steps. Integer-branch applicability, full schema compatibility, and gameplay meaning remain unresolved. The week-advance test remains deferred and Milestone 2 incomplete.
 
 ---
 
@@ -678,6 +678,15 @@ Next: associate OverallPercentage position values with the referenced Splines, t
 - File-read/XML syntax failures, malformed member attributes, count mismatches, and multiple eligible names remain untested and are not comprehensively handled. Validation remains manual; no persistent regression suite was added.
 - Practiced XML parsing, element paths and attributes, string-to-integer conversion, grouping aliases, list comprehensions, and selecting unambiguous labels. Next: extract a reusable schema-label helper before expanding validation.
 
+### Position helper refactor — 2026-09-19
+
+- Extracted `read_position_members(schema_path)`, `group_position_names(position_members)`, and `build_position_labels(names_by_value)`. File parsing, alias preservation, and display policy now have separate responsibilities.
+- Owner output confirms 71 parsed members, unchanged alias groups for 16/7/12, and CB/C/DT on all three sampled curves with unchanged points and increasing X values.
+- Fixed a list-comprehension typo (`names` instead of `name`) that returned nested lists and caused string joining to fail. Corrected output passed.
+- Manual helper checks confirmed one eligible name -> CB, marker-only -> Unknown (63), and competing names -> Unknown (999). Temporary test code was removed and normal output rechecked; leftover test comments were cleaned up during checkpoint review.
+- XML reader retains the missing-enum ValueError. Earlier root/revision/declared-count diagnostic prints were removed during extraction; those fields were not validation checks. Missing files, malformed XML, missing enum, and malformed member attributes still need focused checks and handling.
+- Validation is owner-run output, not an automated regression suite. No schema exports or save files were changed. Next: validate member names and numeric values before grouping, then handle XML/file failures.
+
 ### Lesson notes template
 
 ```text
@@ -774,7 +783,7 @@ No active product blockers.
 
 **Verified:** Python 3.13.5 virtual environment runs the bridge script on the Windows PC.
 
-**Pending:** publish XML-derived position labels, then refactor schema loading and add focused validation. Week-advance testing is deferred by owner. Decompression negative tests, watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `6eec738` were successfully pushed.
+**Pending:** publish the position-helper refactor, then add focused schema validation and file-error handling. Week-advance testing is deferred by owner. Decompression negative tests, watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `76e8e9e` were successfully pushed.
 
 ---
 
@@ -855,7 +864,7 @@ No active product blockers.
 # 11. Next Session — Understand the Dynasty
 
 1. Review and commit the explicit checkpoint files; do not stage local test data.
-2. Extract XML label loading into a reusable helper, then validate schema inputs and handle file errors in small runnable steps. Full schema compatibility and gameplay meaning remain unresolved.
+2. Validate schema-member names and numeric values before grouping, then handle XML/file errors in small runnable steps. Full schema compatibility and gameplay meaning remain unresolved.
 3. Add appropriate handling for malformed decoded fields as inspection becomes reusable.
 4. Keep week-advance testing deferred until the owner resumes it. Watcher retry, lifecycle, cross-directory events, and meaningful-change filtering remain separate unfinished work.
 
