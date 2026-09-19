@@ -8,6 +8,20 @@ def read_u32_be(data, offset):
 
     return int.from_bytes(data[offset:offset + 4], byteorder="big")
 
+def decode_candidate_int_array_value(raw_value):
+    #Accept only values that fit in one unsigned 32-bit word.
+    if not 0 <= raw_value < 2 ** 32:
+        raise ValueError("Array value is outside the unsigned 32-bit range")
+
+    #The reference parser preserves raw zero in its int[] decoding branch.
+    if raw_value == 0:
+        return 0
+
+    #Remove the bias used by the reference parser's 32-bit int[] branch.
+    #Applying this rule to our table still depends on its schema settings.
+    return raw_value - (2 ** 31)
+
+
 def read_table_summary(data, table_start):
     if table_start < 0 or table_start + 168 > len(data):
         raise ValueError("Table header is outside the available data.")
@@ -459,22 +473,19 @@ for row_number in range(min(3, spline_summary["record_count"])):
         "| Second u32:", read_u32_be(record_bytes, 4),
     )
 
-    first_value = read_u32_be(record_bytes, 0)
-    second_value = read_u32_be(record_bytes, 4)
+    #In this spline layout, Y starts at bit 0 and X starts at bit 32.
+    #Each reference occupies one complete four-byte word.
+    #CacuculateY is marked final in the schema and is skipped.
 
-    first_table, first_row = divmod(first_value, 2 ** 17)
-    second_table, second_row = divmod(second_value, 2 ** 17)
+    y_reference = read_u32_be(record_bytes, 0)
+    x_reference = read_u32_be(record_bytes, 4)
 
-    print(
-        "Possible first reference:",
-        "table", first_table,
-        "row", first_row,
-    )
-    print(
-        "Possible Second reference:",
-        "table", second_table,
-        "row", second_row,
-    )
+    #split each reference into its table ID and 17-bit row number.
+    y_table, y_row = divmod(y_reference, 2 ** 17)
+    x_table, x_row = divmod(x_reference, 2 ** 17)
+
+    print("Spline X reference:", "table", x_table, "row", x_row)
+    print("Spline Y reference:", "table", y_table, "row", y_row)
 
 linked_table_start = None
 search_offset = asset_table_end
@@ -625,6 +636,8 @@ for marker in (b"ASTO", b"SPEX"):
             ):
                 raise SystemExit("Candidate array records are outside the database.")
 
+            #Keep each sampled array under its row number for Later Lookup
+            decoded_array_rows = {}
             for array_row in range(min(6, array_record_count)):
                 row_start = (
                     array_records_start + array_row * array_record_size
@@ -640,12 +653,43 @@ for marker in (b"ASTO", b"SPEX"):
 
                 print("Candidate array row:", array_row, "| Raw u32 values:", raw_values)
 
+                #Decode each word using the candidate int[] conversion.
+                #The helper preserves raw zero and removes the bias otherwise.
+                #Keep raw_vales unchanged for comparison.
                 candidate_values = [
-                    value - (2 ** 31)
+                    decode_candidate_int_array_value(value)
                     for value in raw_values
                 ]
 
+                #Store this decoded row without changing its raw values
+                decoded_array_rows[array_row] = candidate_values
+
                 print(
                     "Candidate array row:", array_row,
-                    "| After subtracting 2**31:", candidate_values,
+                    "| Candidate decoded values:", candidate_values,
                 )
+
+            #The inspected Spline row 0 references array row 0 for X
+            #and array row 1 for Y. This check uses that observed pair.
+            if 0 in decoded_array_rows and 1 in decoded_array_rows:
+                x_values = decoded_array_rows[0]
+                y_values = decoded_array_rows[1]
+
+                # zip pairs elements by position, but would silently stop
+                # at the shorter list. Check lengths before using it.
+                if len(x_values) != len(y_values):
+                    raise ValueError("Spline X and Y lengths do not match.")
+
+                #Check that every X value is greater than the previous one.
+                #This tests the sampled data; it does not define interpolation.
+                x_is_strictly_increasing = all(
+                    current_x < next_x
+                    for current_x, next_x in zip(x_values, x_values[1:])
+                )
+
+                print("X values strictly increasing:", x_is_strictly_increasing)
+
+                print("Candidate Spline row 0 points:")
+
+                for x_value, y_value in zip(x_values,y_values):
+                    print("X:", x_value, "| Y:", y_value)

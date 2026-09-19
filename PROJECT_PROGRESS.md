@@ -3,7 +3,7 @@
 **Repository:** `bworthy89/HuddleMind`  
 **Current Phase:** Milestone 3 — Understand the Dynasty (header inspection)
 
-**Current Status:** 🟡 Spline-to-array inspection passed owner-run checks; checkpoint pending. Week-advance test deferred by owner.
+**Current Status:** 🟡 Exported schema fields mapped to Spline X/Y references; integer helper and first paired curve passed owner-run checks. Checkpoint pending. Week-advance test deferred by owner.
 
 **Last Updated:** 2026-09-19
 
@@ -78,7 +78,7 @@ The project owner wrote and ran save discovery incrementally. The cleaned-up scr
 
 ### Immediate next step
 
-Review and commit the Spline/array inspection checkpoint. Validation notes were pushed as `df0987a` according to owner output. Next, verify the candidate integer encoding and Spline schema field roles before assigning curve semantics. The outer schema is 833.0 and inner schema is 833.1. The week-advance test remains deferred and Milestone 2 incomplete.
+Review and commit the schema-backed Spline inspection checkpoint. Array-inspection checkpoint `48600dd` was pushed according to owner output. Next, retain each Spline row's actual X/Y references and use them to retrieve arrays instead of explicitly selecting rows 0 and 1. Integer-branch applicability, full schema compatibility, and gameplay meaning remain unresolved. The week-advance test remains deferred and Milestone 2 incomplete.
 
 ---
 
@@ -95,6 +95,7 @@ For Python work:
 - Build in small runnable increments.
 - Inspect output after each meaningful step.
 - Debug together rather than replacing code blindly.
+- Include copyable code comments explaining purpose, offset calculations, and unresolved assumptions in new instructional snippets, with explicit insertion and indentation guidance (owner request, 2026-09-19).
 - Do not drop large finished implementations by default.
 - Boilerplate may be supplied when it has little learning value.
 - The project owner can explicitly ask for a full implementation at any time.
@@ -621,6 +622,27 @@ The candidate chain is `OverallPercentage (4097) -> Spline (5176) -> int[] (4722
 
 Python practice: nested loops, indentation scope, byte slices, bounded integer reads, `divmod`, lists, and list comprehensions. Layout reference: [M20TableHeaderStrategy.js](https://github.com/bep713/madden-franchise/blob/master/src/strategies/common/header/m20/M20TableHeaderStrategy.js). Alternate-marker reference: [FranchiseFile.js](https://github.com/bep713/madden-franchise/blob/master/src/FranchiseFile.js).
 
+### Exported schema and paired Spline samples — 2026-09-19
+
+The owner exported four files from MMC Frosty's `common/franchise/frantkdata/4` schema groups to `E:\aibridgemod`: `overallpercentage.FTX`, `spline.FTX`, `positione.FTX`, and `spline_calculatey.ftx`. These local reference assets are outside the HuddleMind repository. All four declare `dataRevisionVersion="4"`; this alone does not prove full compatibility with save versions 833.0/833.1. No complete schema bundle has been built.
+
+- OverallPercentage declares index 0 `PercentageSpline` of type `Spline`, and index 1 `PlayerPosition` of type `PositionE`. The enum's `value` attributes map observed values 16, 7, 12 to CB, C, DT respectively; enum `idx` is not the stored value. Boundary aliases can share enum values.
+- Spline declares index 0 `CalculateY` marked final, index 1 `X` of type `int[]`, and index 2 `Y` of type `int[]`. Combining these definitions with descriptors 32, 32, 0 and reference-parser skip rules maps Y to byte offset 0 and X to byte offset 4. Owner output confirms X/Y target rows (0, 1), (2, 3), (4, 5), all in candidate table 4722.
+- Spline_CalculateY declares an integer expression with input `xValue`, range 0–100, default 0. Its owner asset ID matches Spline. The export contains the interface, not interpolation code or proof of gameplay meaning.
+- Added `decode_candidate_int_array_value`: reject values outside unsigned 32-bit range, preserve raw zero, subtract `2 ** 31` otherwise. The reference parser uses that conversion in its int branch with no nonzero min/max metadata. Applicability to this table remains conditional; this is not a universal signed-integer decoder.
+- Owner-run checks passed: raw 0 -> 0, 2147483647 -> -1, 2147483648 -> 0, 2147483649 -> 1. A missing final return was fixed before these checks. Temporary test loop removed; helper integrated into the array loop and all six prior sample sequences remained unchanged. Out-of-range rejection cases have not been exercised.
+- Sample arrays are retained in a dictionary keyed by row number. The current example explicitly selects array rows 0 and 1, checks equal lengths before `zip`, and prints 11 X/Y pairs. Adjacent-X comparisons using `all` and a shifted slice return True. This check reports monotonicity but does not enforce it or implement interpolation.
+
+```text
+Spline row 0 paired samples (associated with CB through OverallPercentage):
+(44, 100), (45, 100), (60, 99), (64, 94), (69, 65), (74, 33),
+(79, 13), (83, 7), (88, 3), (93, 2), (97, 1)
+```
+
+Python practice: return paths, helper reuse, dictionary assignment/lookup, list comprehensions, `zip`, equal-length checks, shifted slices, and `all`. Evidence is owner-run output and read-only export inspection, not an automated regression suite. Next: follow actual saved X/Y references when pairing sampled arrays. Full schema compatibility, record occupancy, integer metadata, interpolation, and gameplay interpretation remain unverified.
+
+References: [integer decoder](https://github.com/bep713/madden-franchise/blob/master/src/FranchiseFileField.js) and [descriptor handling](https://github.com/bep713/madden-franchise/blob/master/src/FranchiseFileTable.js).
+
 ### Lesson notes template
 
 ```text
@@ -717,7 +739,7 @@ No active product blockers.
 
 **Verified:** Python 3.13.5 virtual environment runs the bridge script on the Windows PC.
 
-**Pending:** commit Spline/array inspection, then verify integer encoding and field roles. Week-advance testing is deferred by owner. Decompression negative tests, watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `df0987a` were successfully pushed according to owner output.
+**Pending:** commit schema-backed Spline mapping and paired samples, then follow actual X/Y references. Week-advance testing is deferred by owner. Decompression negative tests, watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `48600dd` were successfully pushed according to owner output.
 
 ---
 
@@ -798,7 +820,7 @@ No active product blockers.
 # 11. Next Session — Understand the Dynasty
 
 1. Review and commit the explicit checkpoint files; do not stage local test data.
-2. Verify array integer encoding and Spline schema field roles before labeling curve axes or assigning game meaning. Keep raw values visible alongside experimental conversions.
+2. Retain each sampled Spline row's X/Y references and retrieve arrays through those references, checking the target table and available rows. Keep raw values visible; full schema compatibility and gameplay meaning remain unresolved.
 3. Add appropriate handling for malformed decoded fields as inspection becomes reusable.
 4. Keep week-advance testing deferred until the owner resumes it. Watcher retry, lifecycle, cross-directory events, and meaningful-change filtering remain separate unfinished work.
 

@@ -103,6 +103,14 @@ SPBF-only scanning missed table 4722. A separate ASTO/SPEX search found an ASTO 
 
 Integer reads and repeated record-header inspection now use `read_u32_be` and `read_table_summary`. The latter returns a dictionary and checks SPBF/BSFT markers plus buffer bounds. Owner-run comparisons preserved both table summaries and raw OverallPercentage rows; integer-helper negative/short reads were rejected. Spline has 21 store-name bytes and three fields, while OverallPercentage has zero and two. Five manual in-memory tests rejected a negative start, short table header, wrong SPBF marker, short record header, and wrong BSFT marker. Temporary test code was removed and both real-save summaries remained unchanged. These tests are not retained as a regression suite; exceptions propagate to the caller.
 
+## Schema-backed Spline inspection
+
+The owner exported revision-4 OverallPercentage, Spline, PositionE, and Spline_CalculateY FTX definitions from MMC Frosty to `E:\aibridgemod`, outside this repository. These identify OverallPercentage's PercentageSpline and PlayerPosition fields; position values 16, 7, 12 correspond to CB, C, DT. Spline declares a final CalculateY member and X/Y int[] references. Descriptor rules map Y to the first four-byte slot and X to the second. Owner output confirms X/Y row pairs (0, 1), (2, 3), (4, 5) in table 4722. This advances the earlier unnamed-slot investigation; complete schema compatibility remains unverified.
+
+`decode_candidate_int_array_value` preserves raw zero and otherwise subtracts `2 ** 31`, following a conditional branch in the reference parser. Four manual zero/bias-boundary checks passed, temporary checks were removed, and all six sampled arrays remained unchanged after helper integration. Its range-rejection cases have not been tested; applicability of this decoding branch still depends on integer metadata.
+
+Decoded samples are stored by array row number. The current pairing example explicitly chooses rows 0 and 1, checks equal lengths, and prints 11 points with increasing X values (44 through 97) and Y values from 100 down to 1. It does not yet retrieve pairs dynamically from saved references. CalculateY's schema declares an integer expression taking xValue in 0–100, but contains no calculation implementation. Interpolation, gameplay meaning, and occupancy remain unresolved. Validation is owner-run output, not a retained automated test suite.
+
 ## Save safety
 
 Normal bridge operation is read-first. Do not write to or overwrite original CFB27 dynasty files as part of the MVP.
