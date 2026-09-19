@@ -3,7 +3,7 @@
 **Repository:** `bworthy89/HuddleMind`  
 **Current Phase:** Milestone 3 — Understand the Dynasty (header inspection)
 
-**Current Status:** 🟡 Schema loading now also reports a missing PositionE enum clearly; focused missing/wrong-enum, malformed-XML, and real-export checks passed. Week-advance test deferred by owner.
+**Current Status:** 🟡 Planned schema error reporting is complete: file-access, XML syntax, and member-validation failures stop clearly. Next lesson returns to data exploration. Week-advance test deferred by owner.
 
 **Last Updated:** 2026-09-19
 
@@ -78,7 +78,7 @@ The project owner wrote and ran save discovery incrementally. The cleaned-up scr
 
 ### Immediate next step
 
-Missing-enum reporting is ready for commit and push. Schema-loading checkpoint `0832f1b` was pushed successfully. Next, address other file-access errors in small learning steps. Integer-branch applicability, full schema compatibility, and gameplay meaning remain unresolved. The week-advance test remains deferred and Milestone 2 incomplete.
+Schema-error completion is ready for commit and push. Missing-enum checkpoint `274f41c` was pushed successfully. Resume data exploration with the owner: expand beyond three OverallPercentage records and load referenced Spline/array rows as needed instead of assuming the first three/six rows suffice. Proceed in small commented Python lessons. Integer-branch applicability, full schema compatibility, and gameplay meaning remain unresolved. The week-advance test remains deferred and Milestone 2 incomplete.
 
 ---
 
@@ -712,6 +712,15 @@ Next: associate OverallPercentage position values with the referenced Splines, t
 - These focused checks did not execute the full save-inspection pipeline and did not modify game saves or exports. No temporary test code was retained in the repository.
 - The new handler only surrounds the XML reader call. Later member-validation ValueErrors and non-FileNotFoundError OSErrors still propagate. Next: other file-access error reporting.
 
+### Complete planned schema error reporting — 2026-09-19
+
+- Owner explicitly requested Codex implement the remaining schema error handling, then resume learning through data exploration.
+- The caller now runs XML reading, member grouping/validation, and label selection inside the same try block. ValueError reports invalid schema data with the helper's reason; OSError reports file-access failures after the specific FileNotFoundError branch. All handled errors exit with code 1 before curve labels are used.
+- Codex executed the actual helpers and caller block extracted via AST. Eleven failure checks passed: simulated missing-file, permission, and general I/O failures; malformed XML; missing enum; and six missing/empty/blank-name or missing/empty/nonnumeric-value cases. Checks asserted path/message, exit 1, and no completed label map.
+- Real export passed: 71 members, CB/C/DT labels, preserved CB alias group, and marker-only fallback. Full script syntax passed. These focused checks did not execute the full game-save pipeline or alter file permissions, game saves, or schema exports. No temporary test code was retained.
+- Planned caller error reporting is complete; this does not establish full format validation. Root/count/version compatibility, occupancy, numeric range policy, interpolation, and gameplay meaning remain unresolved.
+- Next lesson: expand the sampled data by following actual references, keeping the owner's small-step Python workflow and explanatory comments.
+
 ### Lesson notes template
 
 ```text
@@ -808,7 +817,7 @@ No active product blockers.
 
 **Verified:** Python 3.13.5 virtual environment runs the bridge script on the Windows PC.
 
-**Pending:** publish missing-enum reporting, then handle other file-access errors. Week-advance testing is deferred by owner. Decompression negative tests, watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `0832f1b` were successfully pushed.
+**Pending:** publish completed schema error reporting, then resume data exploration beyond the current three curves. Week-advance testing is deferred by owner. Decompression negative tests, watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `274f41c` were successfully pushed.
 
 ---
 
@@ -889,7 +898,7 @@ No active product blockers.
 # 11. Next Session — Understand the Dynasty
 
 1. Review and commit the explicit checkpoint files; do not stage local test data.
-2. Handle other file-access errors in small runnable steps. Later member-validation errors still need caller reporting. Full schema compatibility and gameplay meaning remain unresolved.
+2. Resume data exploration: expand OverallPercentage inspection and load referenced Spline/array rows as needed, replacing fixed sample limits in small steps. Full schema compatibility and gameplay meaning remain unresolved.
 3. Add appropriate handling for malformed decoded fields as inspection becomes reusable.
 4. Keep week-advance testing deferred until the owner resumes it. Watcher retry, lifecycle, cross-directory events, and meaningful-change filtering remain separate unfinished work.
 

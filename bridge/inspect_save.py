@@ -463,12 +463,20 @@ print("Collected OverallPercentage links:", overall_links)
 # This path is specific to the current development PC.
 position_schema_path = Path(r"E:\aibridgemod\positionE.FTX")
 
-# Report a missing schema file clearly and stop with a failure exit code.
-# Keep file-error reporting here, separate from the reusable XML reader.
+# Load and validate the schema before using any of its position labels.
+# Keep user-facing error reporting here; reusable helpers raise exceptions.
 try:
     position_members = read_position_members(position_schema_path)
+    position_names_by_value = group_position_names(position_members)
+    position_labels = build_position_labels(position_names_by_value)
 except FileNotFoundError:
     print("Position schema file not found:", position_schema_path)
+    raise SystemExit(1)
+except OSError as error:
+    # Catch other file-access failures after the specific missing-file case.
+    # This includes permission errors; do not change file permissions or retry.
+    print("Could not read position schema:", position_schema_path)
+    print("Reason:", error)
     raise SystemExit(1)
 except ET.ParseError as error:
     # Report malformed XML with the parser's line and column information.
@@ -476,16 +484,13 @@ except ET.ParseError as error:
     print("Reason:", error)
     raise SystemExit(1)
 except ValueError as error:
-    # Valid XML may still lack the PositionE enum required by this reader.
-    # Report the helper's validation failure without an unhandled traceback.
-    print("Position schema is missing required data:", position_schema_path)
+    # Valid XML can still have a missing enum or invalid member attributes.
+    # Stop before displaying curves with incomplete or invalid schema data.
+    print("Position schema contains invalid data:", position_schema_path)
     print("Reason:", error)
     raise SystemExit(1)
 
 print("Parsed enum members:", len(position_members))
-
-# Preserve all names and aliases using the reusable grouping helper.
-position_names_by_value = group_position_names(position_members)
 
 # Inspect the groups used by our three sampled OverallPercentage records.
 for position_value in (16, 7, 12):
@@ -495,11 +500,6 @@ for position_value in (16, 7, 12):
         "->",
         position_names_by_value.get(position_value, [])
     )
-
-
-# Select unambiguous display labels while retaining the original alias groups.
-position_labels = build_position_labels(position_names_by_value)
-
 
 
 # Label each source record while preserving its actual SPline reference.

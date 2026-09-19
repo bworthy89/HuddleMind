@@ -125,6 +125,8 @@ The XML reader's caller catches missing files and malformed XML, reports the pat
 
 The caller also catches the XML reader's ValueError for missing PositionE, reports the path and reason, and exits with code 1. Focused execution of the actual helper/caller block passed missing-enum and wrong-enum checks, malformed-XML regression, and real-export loading (71 members). These checks used in-memory fixtures and did not run the full save pipeline. Later member-grouping errors remain outside this handler, and other OSErrors still propagate.
 
+Schema error reporting now surrounds reading, member grouping, and label selection together. FileNotFoundError retains its specific message; other OSErrors report the path and reason; XML syntax and schema/member ValueErrors have distinct messages. All stop with exit code 1. Eleven focused tests of the actual helper/caller code passed, including simulated I/O failures and six invalid-member inputs; the real export still yields 71 members and correct CB/C/DT labels. These are focused checks, not a full save-pipeline run or complete schema-format validation. This supersedes the earlier limitations on uncaught member and file-access errors. Next: explore beyond the fixed three-Spline/six-array sample by following references.
+
 ## Save safety
 
 Normal bridge operation is read-first. Do not write to or overwrite original CFB27 dynasty files as part of the MVP.

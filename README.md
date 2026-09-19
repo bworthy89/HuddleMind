@@ -13,7 +13,7 @@ The project has two major goals:
 
 **Phase:** Milestone 3 — Understand the Dynasty
 
-**Status:** Schema-loading checkpoint pushed; missing PositionE enums now also produce a clear message and exit. Focused missing/wrong-enum, malformed-XML, and real-export checks passed. Other file-access and later member-validation error reporting remain unfinished. Week-advance test deferred.
+**Status:** Planned schema error reporting now covers file access, malformed XML, missing enums, and invalid members. Eleven focused failure checks and real-export loading passed. Next lesson returns to data exploration beyond the three sampled curves. Week-advance test deferred.
 
 The discovery script lists dynasty candidates and selects the newest by modification time. The watcher filters creation, modification, and rename events, debounces per file, and prints metadata. Owner-run checks cover discovery edge cases, event types and filters, controlled bursts, clean shutdown, and an actual in-game save in OneDrive Documents. Save parsing, broader watcher reliability, cloud integration, and the web app remain future work.
 
