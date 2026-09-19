@@ -3,7 +3,7 @@
 **Repository:** `bworthy89/HuddleMind`  
 **Current Phase:** Milestone 3 — Understand the Dynasty (header inspection)
 
-**Current Status:** 🟡 All 22 requested position curves paired through 44 referenced array rows. Moving to actual Team and Player records; schema exports are the next step. Week-advance test deferred by owner.
+**Current Status:** 🟡 Public build-833 schema downloaded and compared with local exports and save headers. Player and nine Team candidates match member counts. Codex owns discovery; see `docs/SCHEMA_DISCOVERY.md`. Week-advance test deferred by owner.
 
 **Last Updated:** 2026-09-19
 
@@ -78,7 +78,7 @@ The project owner wrote and ran save discovery incrementally. The cleaned-up scr
 
 ### Immediate next step
 
-Record the completed 22-curve exploration and move to Team and Player data as requested by the owner. Schema-error checkpoint `cc7e8f5` was pushed successfully. Export `team.ftx` and `player.ftx` from revision folder 4, inspect actual field definitions, then locate and validate corresponding save-table candidates. Start with a small team/player sample and compare interpreted values against the game before defining HuddleMind-owned models. Proceed in small commented Python lessons. Week-advance testing remains deferred.
+Codex will perform schema/save discovery autonomously at the owner's request; the owner resumes hands-on lessons at application implementation. The public bundle passed initial export/field-count comparisons; full manual schema export is not currently blocking. Continue with schema resolution, Team/Player decoding and relationship validation, then deliver an implementation handoff. Details and evidence are in `docs/SCHEMA_DISCOVERY.md`. Exploration checkpoint `057d6c3` was pushed. Week-advance testing remains deferred.
 
 ---
 
