@@ -3,7 +3,7 @@
 **Repository:** `bworthy89/HuddleMind`  
 **Current Phase:** Milestone 3 — Understand the Dynasty (header inspection)
 
-**Current Status:** 🟡 Three sampled Splines paired through stored X/Y references; normal lookup and unloaded-row checks passed. Checkpoint pending. Week-advance test deferred by owner.
+**Current Status:** 🟡 Sampled curve summaries now show linked positions CB, C, and DT; unknown-label fallback passed and DT mapping restored. Week-advance test deferred by owner.
 
 **Last Updated:** 2026-09-19
 
@@ -78,7 +78,7 @@ The project owner wrote and ran save discovery incrementally. The cleaned-up scr
 
 ### Immediate next step
 
-Review and commit the reference-based Spline pairing checkpoint. Schema-backed inspection checkpoint `3b0ddf6` was pushed according to owner output. Next, retain OverallPercentage position values alongside their Spline references so curve output can identify the associated position. Integer-branch applicability, full schema compatibility, and gameplay meaning remain unresolved. The week-advance test remains deferred and Milestone 2 incomplete.
+Position-label checkpoint is ready for commit and push. Reference-pairing checkpoint `e1cbbbd` was pushed successfully. Next, replace the three-entry sample position map with labels read from the exported PositionE schema in small learning steps, handling duplicate enum aliases explicitly. Integer-branch applicability, full schema compatibility, and gameplay meaning remain unresolved. The week-advance test remains deferred and Milestone 2 incomplete.
 
 ---
 
@@ -656,6 +656,17 @@ References: [integer decoder](https://github.com/bep713/madden-franchise/blob/ma
 
 Next: associate OverallPercentage position values with the referenced Splines, then display those position labels alongside curve summaries.
 
+### Position-linked curve summaries — 2026-09-19
+
+- Stored sampled OverallPercentage rows in `overall_links`, preserving the raw position value and complete (table ID, row number) Spline reference.
+- Added a three-entry sample position map from the exported PositionE schema: 16 -> CB, 7 -> C, 12 -> DT. It is not a complete enum loader.
+- Each sampled Spline matches source records through its full reference. Matching position labels are collected into a list to permit shared Splines; missing sampled links print `No sampled position link`.
+- Owner output confirms CB, C, DT alongside Spline rows 0, 1, 2 respectively, with the same 11 paired points per curve and increasing X values.
+- A summary print initially preceded its monotonicity calculation and raised NameError. Moving the print after the calculation resolved it; normal output passed.
+- Removing the DT label produced `Unknown (12)` while retaining all curve points. The owner restored and saved the DT entry; source inspection confirmed restoration, and the owner confirmed the requested normal rerun. No-sampled-link and shared-Spline cases remain untested, as do the earlier different-table and unequal-length branches.
+- Practiced dictionary `.get()` fallbacks, `.values()`, full-reference matching, list accumulation, string joining, conditional expressions, and statement execution order. These are manual owner-run checks; no automated regression suite was added.
+- Next: read position labels from the exported XML schema rather than expanding a hard-coded map. Preserve alias handling and unknown-value fallback. Curve gameplay meaning, interpolation, full schema compatibility, and integer metadata remain unresolved.
+
 ### Lesson notes template
 
 ```text
@@ -752,7 +763,7 @@ No active product blockers.
 
 **Verified:** Python 3.13.5 virtual environment runs the bridge script on the Windows PC.
 
-**Pending:** commit reference-based pairing and its unloaded-row check, then connect position values to curve summaries. Week-advance testing is deferred by owner. Decompression negative tests, watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `3b0ddf6` were successfully pushed according to owner output.
+**Pending:** publish position-linked summaries, then introduce a PositionE schema reader with explicit alias handling. Week-advance testing is deferred by owner. Decompression negative tests, watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `e1cbbbd` were successfully pushed.
 
 ---
 
@@ -833,7 +844,7 @@ No active product blockers.
 # 11. Next Session — Understand the Dynasty
 
 1. Review and commit the explicit checkpoint files; do not stage local test data.
-2. Retain OverallPercentage position values alongside Spline references and connect position labels to curve summaries. Keep raw values visible; full schema compatibility and gameplay meaning remain unresolved.
+2. Read position labels from the exported PositionE XML, handling enum aliases and unknown values explicitly. Keep raw values visible; full schema compatibility and gameplay meaning remain unresolved.
 3. Add appropriate handling for malformed decoded fields as inspection becomes reusable.
 4. Keep week-advance testing deferred until the owner resumes it. Watcher retry, lifecycle, cross-directory events, and meaningful-change filtering remain separate unfinished work.
 

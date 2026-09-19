@@ -111,6 +111,10 @@ The owner exported revision-4 OverallPercentage, Spline, PositionE, and Spline_C
 
 Decoded samples are stored by array row number; a separate dictionary retains each sampled Spline's X/Y table and row references. Pairing now follows those references, checks target table IDs and loaded-row availability, and checks equal lengths before zip. Owner output confirms 11 points with increasing X values for each of three Splines. Temporarily loading only two array rows exercised the unloaded-row guard; the six-row sample was restored and normal operation confirmed. Different-table and unequal-length branches remain untested. Loading is still limited to the first six array rows, not a general on-demand reader. CalculateY's schema declares an integer expression taking xValue in 0–100, but contains no calculation implementation. Interpolation, gameplay meaning, and occupancy remain unresolved. Validation is owner-run output, not a retained automated test suite.
 
+## Position-linked curve summaries
+
+`overall_links` preserves each sampled OverallPercentage record's raw position and full Spline reference. Curve summaries match both table ID and row number, then display associated labels from a three-entry map (16: CB, 7: C, 12: DT). Owner output confirmed all three labels with unchanged curve points. Temporarily removing DT exercised the `Unknown (12)` fallback without interrupting pairing; DT was restored and normal operation confirmed. Multiple source links can be collected, and missing sampled links have a fallback, but those cases have not been tested. PositionE XML loading is the next learning step; the current map is intentionally partial.
+
 ## Save safety
 
 Normal bridge operation is read-first. Do not write to or overwrite original CFB27 dynasty files as part of the MVP.

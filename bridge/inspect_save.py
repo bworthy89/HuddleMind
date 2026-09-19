@@ -354,6 +354,10 @@ if record_size != 8 or field_count !=2:
     print("This inspection expects two fields in an eight-byte record.")
     raise SystemExit
 
+# Keep each sampled OverallPercentage record's position and SPline link.
+# Key by source row so seperate records remain separate.
+overall_links = {}
+
 for row_number in range(min(3, record_count)):
     row_start = record_data_start + row_number * record_size
     record_bytes = unpacked_data[row_start:row_start + record_size]
@@ -369,10 +373,45 @@ for row_number in range(min(3, record_count)):
 
     candidate_table_id, candidate_row = divmod(raw_field_0, 2 ** 17)
 
+    # The exported schema identifies field 0 as PercentageSpline
+    # and field 1 as the PlayerPosition enum value.
+    overall_links[row_number] = {
+        "position_value": raw_field_1,
+        "spline_reference": (candidate_table_id, candidate_row)
+    }
+
     print(
         "Possible reference:",
         "table:", candidate_table_id,
         "row", candidate_row,
+    )
+# Display the associations collected from the sampled source records.
+print("Collected OverallPercentage links:", overall_links)
+
+# Labels verified in the exported PositionE schema.
+# This is a small sample mapping, not the complete position enum.
+position_labels = {
+    16: "CB",
+    7: "C",
+    12: "DT",
+}
+
+# Label each source record while preserving its actual SPline reference.
+for overall_row, link in overall_links.items():
+    position_value = link["position_value"]
+    spline_table, spline_row = link["spline_reference"]
+
+    # Keep unrecognized values visible instead of guessing a position.
+    position_label = position_labels.get(
+        position_value,
+        f"Unknown ({position_value})"
+    )
+
+    print(
+        "OverallPercentage row:", overall_row,
+        "| Position:", position_label,
+        "| Spline table:", spline_table,
+        "| Spline row:", spline_row,
     )
 
 target_table_id = 5176
@@ -683,6 +722,33 @@ for marker in (b"ASTO", b"SPEX"):
 
             # Follow each sampled Spline row's saved X/Y references:
             for spline_row, references in spline_references.items():
+                current_spline_reference = (
+                    spline_summary["table_id"],
+                    spline_row,
+                )
+
+                # Find sampled OverallPercentage records thar reference it.
+                # Keep a list because multiple records could share a SPline.
+                linked_positions = []
+
+                for link in overall_links.values():
+                    if link["spline_reference"] == current_spline_reference:
+                        position_value = link["position_value"]
+                        linked_positions.append(
+                            position_labels.get(
+                                position_value,
+                                f"Unknown ({position_value})"
+                            )
+                        )
+
+                # A missing sampled link does not mean the Spline is unused.
+                position_text = (
+                    ",".join(linked_positions)
+                    if linked_positions
+                    else "No sampled position link"
+                )
+
+
                 x_table, x_row = references["x"]
                 y_table, y_row = references["y"]
 
@@ -717,6 +783,7 @@ for marker in (b"ASTO", b"SPEX"):
 
                 print(
                     "Candidate Spline Row:", spline_row,
+                    "| Position:", position_text,
                     "| X array row:", x_row,
                     "| Y array row:", y_row,
                     "| X strictly increasing:", x_is_strictly_increasing,
