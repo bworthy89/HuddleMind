@@ -3,7 +3,7 @@
 **Repository:** `bworthy89/HuddleMind`  
 **Current Phase:** Milestone 3 — Understand the Dynasty (header inspection)
 
-**Current Status:** 🟡 Missing schema files and malformed XML now produce clear messages and stop; both checks passed and the real schema path was restored. Week-advance test deferred by owner.
+**Current Status:** 🟡 Schema loading now also reports a missing PositionE enum clearly; focused missing/wrong-enum, malformed-XML, and real-export checks passed. Week-advance test deferred by owner.
 
 **Last Updated:** 2026-09-19
 
@@ -78,7 +78,7 @@ The project owner wrote and ran save discovery incrementally. The cleaned-up scr
 
 ### Immediate next step
 
-Schema-loading error checkpoint is ready for commit and push. Member-validation checkpoint `54c9ef3` was pushed successfully. Next, report structurally invalid schemas (including a missing PositionE enum) clearly at the caller, then address other file-access errors in small learning steps. Integer-branch applicability, full schema compatibility, and gameplay meaning remain unresolved. The week-advance test remains deferred and Milestone 2 incomplete.
+Missing-enum reporting is ready for commit and push. Schema-loading checkpoint `0832f1b` was pushed successfully. Next, address other file-access errors in small learning steps. Integer-branch applicability, full schema compatibility, and gameplay meaning remain unresolved. The week-advance test remains deferred and Milestone 2 incomplete.
 
 ---
 
@@ -705,6 +705,13 @@ Next: associate OverallPercentage position values with the referenced Splines, t
 - Exit code 1 is explicit in source; the shell exit code was not separately measured. Validation remains owner-run checks rather than a persistent regression suite.
 - Missing-enum and member-validation ValueErrors still propagate to the caller; other OSErrors are not yet caught. Root/count/version validation and full schema compatibility remain unresolved.
 
+### Missing PositionE reporting — 2026-09-19
+
+- At the owner's explicit request, Codex implemented the caller's ValueError handler for `read_position_members`. Valid XML without PositionE now prints the path and helper reason, then exits with code 1 rather than an unhandled traceback.
+- Codex executed the actual helper and caller try/except block extracted from the script's AST, using in-memory XML. Missing enum and differently named enum both passed (handled, exit 1); malformed XML retained its existing handler (exit 1). The real export still returned 71 members. Full script syntax also passed.
+- These focused checks did not execute the full save-inspection pipeline and did not modify game saves or exports. No temporary test code was retained in the repository.
+- The new handler only surrounds the XML reader call. Later member-validation ValueErrors and non-FileNotFoundError OSErrors still propagate. Next: other file-access error reporting.
+
 ### Lesson notes template
 
 ```text
@@ -801,7 +808,7 @@ No active product blockers.
 
 **Verified:** Python 3.13.5 virtual environment runs the bridge script on the Windows PC.
 
-**Pending:** publish schema-loading error handling, then improve structural-schema error reporting and other file-access errors. Week-advance testing is deferred by owner. Decompression negative tests, watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `54c9ef3` were successfully pushed.
+**Pending:** publish missing-enum reporting, then handle other file-access errors. Week-advance testing is deferred by owner. Decompression negative tests, watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `0832f1b` were successfully pushed.
 
 ---
 
@@ -882,7 +889,7 @@ No active product blockers.
 # 11. Next Session — Understand the Dynasty
 
 1. Review and commit the explicit checkpoint files; do not stage local test data.
-2. Report structural-schema errors such as a missing PositionE enum at the caller, then handle other file-access errors in small runnable steps. Full schema compatibility and gameplay meaning remain unresolved.
+2. Handle other file-access errors in small runnable steps. Later member-validation errors still need caller reporting. Full schema compatibility and gameplay meaning remain unresolved.
 3. Add appropriate handling for malformed decoded fields as inspection becomes reusable.
 4. Keep week-advance testing deferred until the owner resumes it. Watcher retry, lifecycle, cross-directory events, and meaningful-change filtering remain separate unfinished work.
 

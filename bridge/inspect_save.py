@@ -475,6 +475,12 @@ except ET.ParseError as error:
     print("Position schema contains invalid XML:", position_schema_path)
     print("Reason:", error)
     raise SystemExit(1)
+except ValueError as error:
+    # Valid XML may still lack the PositionE enum required by this reader.
+    # Report the helper's validation failure without an unhandled traceback.
+    print("Position schema is missing required data:", position_schema_path)
+    print("Reason:", error)
+    raise SystemExit(1)
 
 print("Parsed enum members:", len(position_members))
 

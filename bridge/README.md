@@ -123,6 +123,8 @@ Manual label-helper checks passed for one eligible name, a marker-only group, an
 
 The XML reader's caller catches missing files and malformed XML, reports the path (plus the XML parser reason when available), and exits with SystemExit(1). Owner-run tests confirmed both messages using a nonexistent path and a separate incomplete-XML fixture in the ignored test folder. The real export path was restored and normal output confirmed. Exit-code behavior is explicit in source but was not separately measured in the shell. Missing-enum/member-validation errors and other file-access exceptions still propagate; full schema validation remains unfinished.
 
+The caller also catches the XML reader's ValueError for missing PositionE, reports the path and reason, and exits with code 1. Focused execution of the actual helper/caller block passed missing-enum and wrong-enum checks, malformed-XML regression, and real-export loading (71 members). These checks used in-memory fixtures and did not run the full save pipeline. Later member-grouping errors remain outside this handler, and other OSErrors still propagate.
+
 ## Save safety
 
 Normal bridge operation is read-first. Do not write to or overwrite original CFB27 dynasty files as part of the MVP.
