@@ -13,7 +13,7 @@ The project has two major goals:
 
 **Phase:** Milestone 3 — Understand the Dynasty
 
-**Status:** XML-label checkpoint pushed; parsing, alias grouping, and display-label selection now use separate helpers. Sample curves and unambiguous/marker-only/ambiguous label checks passed owner-run validation. Week-advance test deferred.
+**Status:** Position-helper checkpoint pushed; member validation now rejects missing/blank names and missing/invalid integers. Six owner-run rejection checks passed, followed by a confirmed normal run. XML/file error handling remains next. Week-advance test deferred.
 
 The discovery script lists dynasty candidates and selects the newest by modification time. The watcher filters creation, modification, and rename events, debounces per file, and prints metadata. Owner-run checks cover discovery edge cases, event types and filters, controlled bursts, clean shutdown, and an actual in-game save in OneDrive Documents. Save parsing, broader watcher reliability, cloud integration, and the web app remain future work.
 

@@ -117,7 +117,7 @@ Decoded samples are stored by array row number; a separate dictionary retains ea
 
 The XML path now calls three helpers: `read_position_members`, `group_position_names`, and `build_position_labels`. Owner output confirms 71 members, preserved aliases, and unchanged CB/C/DT curve summaries after refactoring. Earlier root/revision/declared-count diagnostics were removed; metadata is not enforced. The local export was previously observed at revision 4.
 
-Manual label-helper checks passed for one eligible name, a marker-only group, and two competing display names; only the first produces a label. Temporary test code was removed and normal output rechecked. Missing-enum, malformed-member, and file/XML error cases remain untested; input handling is incomplete. Shared-Spline and no-sampled-link cases also remain untested.
+Manual label-helper checks passed for one eligible name, a marker-only group, and two competing display names; only the first produces a label. Member grouping now rejects missing/empty/whitespace-only names and catches missing/empty/nonnumeric integer values with a member-specific error and chained cause. All six invalid-member checks passed using in-memory XML. Temporary test code was removed and normal output rechecked. Missing-enum and file/XML error cases remain untested; root/count/version and numeric-range validation remain incomplete. Shared-Spline and no-sampled-link cases also remain untested.
 
 ## Save safety
 

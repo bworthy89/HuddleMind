@@ -3,7 +3,7 @@
 **Repository:** `bworthy89/HuddleMind`  
 **Current Phase:** Milestone 3 — Understand the Dynasty (header inspection)
 
-**Current Status:** 🟡 PositionE parsing, alias grouping, and label selection are separate helpers; sample curves and label-policy checks passed. Week-advance test deferred by owner.
+**Current Status:** 🟡 PositionE member names and integer values are validated; six rejection checks and the normal run passed. Week-advance test deferred by owner.
 
 **Last Updated:** 2026-09-19
 
@@ -78,7 +78,7 @@ The project owner wrote and ran save discovery incrementally. The cleaned-up scr
 
 ### Immediate next step
 
-Position-helper refactor is ready for commit and push. XML-label checkpoint `76e8e9e` was pushed successfully. Next, add focused schema-member validation and file-error handling in small learning steps. Integer-branch applicability, full schema compatibility, and gameplay meaning remain unresolved. The week-advance test remains deferred and Milestone 2 incomplete.
+Member-validation checkpoint is ready for commit and push. Helper-refactor checkpoint `0e0bbee` was pushed successfully. Next, handle XML/file errors in small learning steps. Integer-branch applicability, full schema compatibility, and gameplay meaning remain unresolved. The week-advance test remains deferred and Milestone 2 incomplete.
 
 ---
 
@@ -687,6 +687,15 @@ Next: associate OverallPercentage position values with the referenced Splines, t
 - XML reader retains the missing-enum ValueError. Earlier root/revision/declared-count diagnostic prints were removed during extraction; those fields were not validation checks. Missing files, malformed XML, missing enum, and malformed member attributes still need focused checks and handling.
 - Validation is owner-run output, not an automated regression suite. No schema exports or save files were changed. Next: validate member names and numeric values before grouping, then handle XML/file failures.
 
+### PositionE member validation — 2026-09-19
+
+- `group_position_names` now rejects missing, empty, or whitespace-only names before grouping. The guard does not strip or rewrite valid names.
+- Integer conversion catches TypeError and ValueError, raises a message naming the affected member, and preserves the original exception using `raise ... from error`.
+- Six owner-run in-memory XML checks passed: missing/empty/whitespace-only names, and missing/empty/nonnumeric values. Value tests supplied valid names to isolate numeric validation. No test files or saves were changed.
+- A missing `not` initially rejected valid names; correcting it restored normal operation. Temporary test blocks were removed, confirmed by source review, and the owner confirmed the requested normal rerun with 71 members and CB/C/DT curves.
+- No automated regression suite was retained. Numeric range policy, duplicate enum definitions, root/count/version validation, missing enum, and XML/file error behavior remain unfinished or untested. Next: clear XML/file error reporting.
+- Practiced short-circuit boolean evaluation, `.strip()`, in-memory ElementTree elements, exception tuples, exception chaining, and isolated negative checks.
+
 ### Lesson notes template
 
 ```text
@@ -783,7 +792,7 @@ No active product blockers.
 
 **Verified:** Python 3.13.5 virtual environment runs the bridge script on the Windows PC.
 
-**Pending:** publish the position-helper refactor, then add focused schema validation and file-error handling. Week-advance testing is deferred by owner. Decompression negative tests, watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `76e8e9e` were successfully pushed.
+**Pending:** publish member validation, then handle XML/file errors. Week-advance testing is deferred by owner. Decompression negative tests, watcher retries, meaningful-change detection, consistent save snapshots, and full database parsing remain unfinished. Checkpoints through `0e0bbee` were successfully pushed.
 
 ---
 
@@ -864,7 +873,7 @@ No active product blockers.
 # 11. Next Session — Understand the Dynasty
 
 1. Review and commit the explicit checkpoint files; do not stage local test data.
-2. Validate schema-member names and numeric values before grouping, then handle XML/file errors in small runnable steps. Full schema compatibility and gameplay meaning remain unresolved.
+2. Handle XML/file errors in small runnable steps. Full schema compatibility and gameplay meaning remain unresolved.
 3. Add appropriate handling for malformed decoded fields as inspection becomes reusable.
 4. Keep week-advance testing deferred until the owner resumes it. Watcher retry, lifecycle, cross-directory events, and meaningful-change filtering remain separate unfinished work.
 

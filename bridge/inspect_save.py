@@ -46,8 +46,22 @@ def group_position_names(position_members):
     names_by_value = {}
 
     for member in position_members:
-        position_value = int(member.get("value"))
         position_name = member.get("name")
+
+        # Reject missing or blank names before building the alias groups.
+        # A missing XML attribute returns None; a present name is a string
+        if position_name is None or  not position_name.strip():
+            raise ValueError("PositionE member has a missing or blank name.")
+
+        # Convert the XML value to an integer for matching save data.
+        # Missing values produce TypeError; invalid numeric text produces ValueError.
+        try:
+            position_value = int(member.get("value"))
+        except (TypeError, ValueError) as error:
+            # Include the member name so a malformed entry is easy to locate.
+            raise ValueError(
+                f"PositionE member {position_name!r} has a missing or invalid integer value."
+            ) from error
 
         # Each value gets its own list of names.
         if position_value not in names_by_value:
@@ -57,6 +71,8 @@ def group_position_names(position_members):
 
     # Return the completed groups for inspection and label selection.
     return names_by_value
+
+
 
 def build_position_labels(names_by_value):
     # Apply our PositionE display policy without changing the alais groups.
