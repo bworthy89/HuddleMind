@@ -45,7 +45,10 @@ def main() -> None:
 
     # Explain an empty result and stop before printing the table headings.
     if not players_to_show:
-        print(f"No players found for position {args.position}.")
+        if args.position:
+            print(f"No players found for position {args.position}.")
+        else:
+            print("The team roster is empty.")
         return
 
     # Sort a display copy by position, descending overall, then player name.
