@@ -25,3 +25,11 @@ The loader still uses research reader internals. Other save builds, complete sch
 The first local pass found regular-season fixtures plus a distinct practice record. A completed-status enum was consistent with the stored score ordering; unplayed rows also exist. This is initial evidence, not in-game validation or a general results adapter.
 
 Next: validate season-manager schedule references, distinguish current-season fixtures from templates/history, establish week/year display semantics, and classify completed outcomes using status plus scores. Do not infer byes from missing rows or completed games from nonzero scores alone. A SeasonManager layout currently fails strict whole-word coverage and must be investigated rather than bypassed.
+
+## Schedule reference follow-up
+
+The manager's isolated whole-word SeasonSchedule and SeasonInfo pointers now resolve through checked types, row bounds, and occupancy. This does not relax the general packed-layout check: the manager's method-bearing layout remains unsupported for general decoding. Its occupied schedule array resolves to occupied SeasonGame rows without null or duplicate entries. Team fixtures are intersected with that reference set, and practice records are excluded from the fixture list.
+
+Completed outcomes use the schema's HomeWon/AwayWon/Tied labels and must agree with score ordering. Pending statuses do not become completed merely because scores are present. StatsReported and unfamiliar labels remain unknown. Raw season/week values are preserved; missing weeks are not labeled as byes.
+
+The combined suite now has 46 passing tests, including enum values/aliases, home/away outcome orientation, contradictory scores, and invalid/duplicate schedule references. The detailed fixture report stays local. Next evidence needed is owner comparison of the completed fixture, next opponent, and displayed season/week against the same save. No application schedule model has been added yet.
