@@ -3,7 +3,7 @@
 **Repository:** `bworthy89/HuddleMind`  
 **Current Phase:** Milestone 3 — Understand the Dynasty (header inspection)
 
-**Current Status:** 🟡 Public build-833 schema downloaded and compared with local exports and save headers. Player and nine Team candidates match member counts. Codex owns discovery; see `docs/SCHEMA_DISCOVERY.md`. Week-advance test deferred by owner.
+**Current Status:** 🟡 Read-only roster probe follows 143 candidate teams to 12,154 distinct Player references with readable names. Tulane resolves to 85 players. Packed ratings/positions, occupancy, and user-controlled team selection remain under investigation. Codex owns discovery; see `docs/SCHEMA_DISCOVERY.md`. Week-advance test deferred by owner.
 
 **Last Updated:** 2026-09-19
 

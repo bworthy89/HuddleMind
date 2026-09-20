@@ -45,4 +45,21 @@ OverallPercentage ID 4097 and Spline IDs 5176/5177 also match their bundle field
 4. Establish team/player joins and how the user-controlled program is identified; validate samples against available game evidence.
 5. Produce a discovery handoff and concrete HuddleMind model/adapter plan, clearly separating verified fields from unresolved interpretations.
 
-The public bundle can support continued investigation without requiring a full manual export immediately. Exact compatibility remains conditional until field decoding and sample validation succeed. No actual Team/Player records have yet been decoded at this checkpoint.
+The public bundle can support continued investigation without requiring a full manual export immediately. Exact compatibility remains conditional until field decoding and sample validation succeed.
+
+## Team-to-player roster discovery — 2026-09-19
+
+`bridge/discover_rosters.py` is a separate, read-only research probe. It reads one save snapshot, bounds the decompressed chunk to 64 MiB, requires a complete zlib stream, scans candidate SPBF/ASTO tables, and rejects ambiguous player targets. Schema attributes are consumed in their serialized array order, which differs from numeric attribute-index order for Player. Only isolated, aligned 32-bit fields are decoded; this does not implement packed fields or general inheritance resolution.
+
+String words are offsets into the table's secondary byte section. Names are bounded by the schema maximum length and that section, then decoded as UTF-8. This interpretation was checked against the reference [string reader](https://github.com/bep713/madden-franchise/blob/master/src/strategies/common/table2Field/FranchiseTable2FieldStrategy.js) and actual save data.
+
+Results on the same save hash recorded above:
+
+- Team table 6351 contains 143 candidate team rows with readable identity fields and resolvable Player[] roster references.
+- Following those references yields 12,154 distinct, non-null Player references, all targeting table 4255. Every referenced player has non-empty first and last names. Rosters contain 84 or 85 such references.
+- Tulane is Team row 118 and references Player[] table 6137, row 120. Its roster has 85 non-null references. Source and target row numbers must not be assumed equal.
+- Tulane samples: Zycarl Lewis Jr. (Player row 6349), Bredell Richardson (8980), Justin Agu (84).
+- Four synthetic tests pass for integer/header bounds, invalid string pointers/rows, and rejection of packed fields.
+- Full local report: ignored `local_data/roster-discovery.json`; no save/schema assets are added to Git.
+
+These results establish a usable candidate team-to-roster-to-player identity path. They do not yet establish free-list occupancy, user-controlled team selection, packed position/rating/TeamIndex fields, or comparison against the in-game roster. Table 6351 now has identity/reference evidence beyond its capacity, but automatic selection across other saves remains unimplemented. The earlier final/inherited-member discrepancy is still open for general decoding.
