@@ -63,3 +63,18 @@ Results on the same save hash recorded above:
 - Full local report: ignored `local_data/roster-discovery.json`; no save/schema assets are added to Git.
 
 These results establish a usable candidate team-to-roster-to-player identity path. They do not yet establish free-list occupancy, user-controlled team selection, packed position/rating/TeamIndex fields, or comparison against the in-game roster. Table 6351 now has identity/reference evidence beyond its capacity, but automatic selection across other saves remains unimplemented. The earlier final/inherited-member discrepancy is still open for general decoding.
+
+## PocketScout archive comparison — 2026-09-19
+
+Owner-provided [PocketScout Utilities 0.9.14 archive](https://drive.google.com/file/d/1ImmlBvez46FFPoqAH_jtwVvn68bTmhb5/view) downloaded to `E:\aibridgemod\schema-discovery\pocketscout-download` (100,022,914 bytes). Only packaged app resources were extracted into `schema-discovery/pocketscout-static`; no application code was executed. Release metadata identifies PocketScout and Yoyopaulsen and build time 2026-09-08T14:13:08.302Z. The package includes readable JavaScript and madden-franchise version 4.3.1.
+
+- Bundled schema: `resources/app/node_modules/madden-franchise/data/schemas/27/C27_486_6.gz`.
+- SHA-256: `dc0d37834a95cbad6edd39d9adbd5572c04ddb6f3f795bf87c00b4fe883aa8d5`.
+- Metadata: major 486, minor 6, gameYear 27. This is different from the GitHub bundle's 486.1 metadata, not proof of better compatibility with save 833.1.
+- Comparing `schemas` entries by name: 3,503 versus 3,526 in the GitHub bundle; no newly named definitions, 23 absent, and 99 shared definitions differ.
+- Team remains 424 attributes, Player 288, Coach 138. User, UserEntity, PositionE, Spline, and OverallPercentage definitions compare equal.
+- Player's StartingHotCold, nine Team contract-goal status fields, and Coach's LeagueJobMotivation lack embedded enum metadata present in the GitHub bundle. A higher minor label is therefore not sufficient reason to replace the existing source.
+- Running our own read-only roster probe with this schema on the same save hash produces exactly the same team/roster/player-name report.
+- Packaged `src/modules/userRecruitingHours.js` checks `record.IsUserControlled` with `!record.isEmpty` when selecting coach records. This is a discovery lead, not yet validated against our save.
+
+Keep both bundles for comparison; retain the existing GitHub schema for now. Neither PocketScout nor its bundled JavaScript was launched, and extracted third-party assets remain outside the repository.
