@@ -1,11 +1,11 @@
 # HuddleMind — Project Progress & Learning Tracker
 
 **Repository:** `bworthy89/HuddleMind`  
-**Current Phase:** Milestone 3 — Understand the Dynasty (header inspection)
+**Current Phase:** Milestone 3 - Understand the Dynasty (schedule/results discovery)
 
-**Current Status:** 🟡 Read-only roster probe follows 143 candidate teams to 12,154 distinct Player references with readable names. Tulane resolves to 85 players. Packed ratings/positions, occupancy, and user-controlled team selection remain under investigation. Codex owns discovery; see `docs/SCHEMA_DISCOVERY.md`. Week-advance test deferred by owner.
+**Current Status:** Roster portion checkpointed: models, validated loading, CLI filtering, JSON export, and position summaries implemented; 40 roster/reader tests pass. Owner confirmed in-game roster samples. Schedule/results discovery is active; Milestone 3 remains open. Week-advance testing remains deferred.
 
-**Last Updated:** 2026-09-19
+**Last Updated:** 2026-09-20
 
 ---
 
@@ -259,7 +259,7 @@ An initial startup run emitted events for all 11 candidates; a later startup did
 
 **Goal:** Convert CFB27 data into HuddleMind-owned models.
 
-**Status:** 🟡 Save payload decompressed and schema-assisted table/reference inspection demonstrated across 22 position curves. Actual team/player records and HuddleMind-owned dynasty models remain to be implemented and validated.
+**Status:** Roster portion implemented and checkpointed. Schedule/results discovery is active; depth chart, injuries, and recruiting remain future work. See `docs/ROSTER_CHECKPOINT.md`.
 
 ### First header-inspection checkpoint — 2026-09-18 (pushed as `5931dcd`)
 

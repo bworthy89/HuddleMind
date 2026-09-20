@@ -1,5 +1,7 @@
 # Read-only roster reader handoff
 
+Update 2026-09-20: the initial implementation sequence below has been carried out through the roster command, JSON export, and position summaries. The owner confirmed selected roster values in-game. See `ROSTER_CHECKPOINT.md` for current status; broader reader/build/lifecycle limitations below still apply.
+
 ## Implementation target
 
 The first application feature should load a stable dynasty-save snapshot and show the controlled team's roster: player name, position, and overall rating. Keep all game-file access read-only. The current discovery modules are research code to guide an adapter, not a general-purpose save parser.
