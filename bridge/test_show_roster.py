@@ -3,6 +3,8 @@ from contextlib import redirect_stderr, redirect_stdout
 from dataclasses import replace
 from io import StringIO
 from pathlib import Path
+from tempfile import TemporaryDirectory
+import json
 import unittest
 from unittest.mock import patch
 
@@ -91,7 +93,7 @@ class RosterCommandTests(unittest.TestCase):
 
     def test_bad_arguments_do_not_load_save(self):
         for arguments in ([], ['save'], ['save', 'schema', '--unknown'],
-                          ['save', 'schema', '--position']):
+                          ['save', 'schema', '--position'], ['save', 'schema', '--export']):
             with self.subTest(arguments=arguments):
                 code, out, err, loader = self.invoke(arguments)
                 self.assertEqual(code, 2)
@@ -104,6 +106,54 @@ class RosterCommandTests(unittest.TestCase):
         self.assertEqual((code, err), (0, ''))
         self.assertIn('--position', out)
         loader.assert_not_called()
+
+    def test_export_keeps_full_roster_despite_display_filter(self):
+        # Exercise the actual writer, substituting only the save loader.
+        for position in ('qb', 'xyz'):
+            with self.subTest(position=position), TemporaryDirectory() as folder:
+                path = Path(folder) / 'snapshot.json'
+                code, out, err, _ = self.invoke([
+                    'save', 'schema', '--position', position, '--export', str(path),
+                ])
+                self.assertEqual((code, err), (0, ''))
+                self.assertIn(f'Exported: {path}', out)
+                self.assertNotIn('Will Sample', out)
+                players = json.loads(path.read_text(encoding='utf-8'))['team']['players']
+                self.assertEqual(len(players), 4)
+                self.assertEqual({p['position'] for p in players}, {'QB', 'WR'})
+
+    def test_existing_export_is_preserved_by_command(self):
+        with TemporaryDirectory() as folder:
+            path = Path(folder) / 'snapshot.json'
+            path.write_bytes(b'preserve this file')
+            code, out, err, _ = self.invoke(['save', 'schema', '--export', str(path)])
+            self.assertEqual(code, 1)
+            self.assertEqual(out, '')
+            self.assertIn('Could not export snapshot:', err)
+            self.assertNotIn('Traceback', err)
+            self.assertEqual(path.read_bytes(), b'preserve this file')
+
+    def test_export_permission_error_is_reported(self):
+        # Simulate permissions for a deterministic test on Windows and Unix.
+        with patch('bridge.show_roster.write_snapshot_json', side_effect=PermissionError('denied')):
+            code, out, err, _ = self.invoke(['save', 'schema', '--export', 'sample.json'])
+        self.assertEqual((code, out), (1, ''))
+        self.assertEqual(err, 'Could not export snapshot: denied\n')
+
+    def test_load_failure_does_not_create_export(self):
+        with TemporaryDirectory() as folder:
+            path = Path(folder) / 'snapshot.json'
+            code, out, err, _ = self.invoke(
+                ['save', 'schema', '--export', str(path)], ValueError('invalid save'))
+            self.assertEqual(code, 1)
+            self.assertIn('Could not load dynasty:', err)
+            self.assertFalse(path.exists())
+
+    def test_no_export_option_does_not_call_writer(self):
+        with patch('bridge.show_roster.write_snapshot_json') as writer:
+            code, _, _, _ = self.invoke(['save', 'schema'])
+        self.assertEqual(code, 0)
+        writer.assert_not_called()
 
 
 if __name__ == '__main__':

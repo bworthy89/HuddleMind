@@ -2,6 +2,7 @@ import argparse
 from pathlib import Path
 
 from bridge.load_snapshot import load_snapshot
+from bridge.snapshot_export import write_snapshot_json
 
 def main() -> None:
     # Accept file paths from the command line instead of hardcoding them.
@@ -17,6 +18,13 @@ def main() -> None:
         help="Show only this position, such as QB or WR.",
     )
 
+    # Optionally save the complet snapshot to a new JSON file.
+    parser.add_argument(
+        "--export",
+        type=Path,
+        help="Write the full snapshot to a new JSON file.",
+    )
+
     args = parser.parse_args()
 
     # Report expected file-access or validation failures as command-line errors.
@@ -27,6 +35,17 @@ def main() -> None:
             status=1,
             message=f"Could not load dynasty: {error}\n",
         )
+
+    if args.export is not None:
+        try:
+            write_snapshot_json(snapshot, args.export)
+        except OSError as error:
+            parser.exit(
+                status=1,
+                message=f"Could not export snapshot: {error}\n",
+            )
+        print("Exported:", args.export)
+
 
     print("Coach:", snapshot.coach.full_name)
     print("Team:", snapshot.team.name)
