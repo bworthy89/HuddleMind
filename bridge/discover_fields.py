@@ -1,21 +1,5 @@
 """Bounded research for packed fields and the record free list (read only)."""
-from bridge.discover_rosters import u32
-
-
-def empty_rows(data, info):
-    # The header points to a linked list of unused slots; capacity terminates it.
-    header = info['metadata'] - 64
-    capacity = u32(data, header + 48)
-    if capacity != info['count']:
-        raise ValueError('Unsupported count/capacity mismatch')
-    row = u32(data, header + 60)
-    unused = set()
-    while row != capacity:
-        if row in unused or not 0 <= row < capacity:
-            raise ValueError('Invalid or cyclic free list')
-        unused.add(row)
-        row = u32(data, info['records'] + row * info['words'] * 4)
-    return unused
+from bridge.discover_rosters import u32, empty_rows, table_directory
 
 
 def layout(data, info, attributes):
@@ -75,6 +59,20 @@ def packed_value(data, info, fields, row, name):
     return value
 
 
+def controlled_selection(coaches):
+    """Return an explicit selection outcome; never silently pick the first match."""
+    if not coaches:
+        return {'status': 'no_controlled_coach'}
+    if len(coaches) > 1:
+        return {'status': 'multiple_controlled_coaches'}
+    teams = coaches[0]['team_candidates']
+    if not teams:
+        return {'status': 'missing_team'}
+    if len(teams) > 1:
+        return {'status': 'ambiguous_team'}
+    return {'status': 'resolved', 'team': teams[0]}
+
+
 def inspect_fields(save, schema):
     import gzip
     import hashlib
@@ -92,18 +90,10 @@ def inspect_fields(save, schema):
         raise ValueError('Invalid compressed stream')
     schemas = {s['name']: s for s in json.loads(gzip.decompress(schema.read_bytes()))['schemas']}
     tables = {}
-    cursor = 0
-    while (cursor := data.find(b'SPBF', cursor)) >= 0:
-        try:
-            info = table(data, cursor - 148)
-        except (ValueError, UnicodeError):
-            cursor += 4
-            continue
-        cursor += 4
+    for choices in table_directory(data).values():
+        info = choices[0]
         if info['name'] not in ('Team', 'Player', 'Coach'):
             continue
-        if info['id'] in tables:
-            raise ValueError('Ambiguous table ID')
         tables[info['id']] = (info, layout(data, info, schemas[info['name']]['attributes']), empty_rows(data, info))
     controlled, counts, mismatches = [], [], []
     for info, fields, unused in tables.values():
@@ -139,7 +129,8 @@ def inspect_fields(save, schema):
                                     for t in active if t['TeamIndex'] == coach['TeamIndex']]
     report.update(teams=active, controlled_coaches=controlled, occupancy=counts,
                   roster_team_mismatches=mismatches,
-                  caveat='Single-save structural validation; no in-game comparison yet. Roster array occupancy remains unchecked.')
+                  selection=controlled_selection(controlled),
+                  caveat='Structurally checked snapshot; in-game comparison and other builds remain unverified.')
     return report
 
 

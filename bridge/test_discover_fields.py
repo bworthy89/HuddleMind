@@ -1,8 +1,14 @@
 import unittest
-from bridge.discover_fields import empty_rows, layout, packed_value
+from bridge.discover_fields import empty_rows, layout, packed_value, controlled_selection
 
 
 class PackedFieldTests(unittest.TestCase):
+    def test_selection_outcomes(self):
+        self.assertEqual(controlled_selection([])['status'], 'no_controlled_coach')
+        self.assertEqual(controlled_selection([{}, {}])['status'], 'multiple_controlled_coaches')
+        for candidates, expected in [([], 'missing_team'), ([{}, {}], 'ambiguous_team'), ([{}], 'resolved')]:
+            self.assertEqual(controlled_selection([{'team_candidates': candidates}])['status'], expected)
+
     def test_reversed_packing(self):
         data = (0).to_bytes(4, 'big') + (8).to_bytes(4, 'big') + bytes.fromhex('123456ab')
         info = dict(fields=2, metadata=0, words=1, records=8, count=1)

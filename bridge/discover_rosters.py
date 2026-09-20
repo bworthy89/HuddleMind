@@ -32,12 +32,55 @@ def table(data, start):
     records = metadata + 4 * (count if marker == b"ASTO" else fields)
     strings = records + count * words * 4
     string_end = strings + u32(data, header + 20)
-    if string_end > len(data):
+    end = header + 32 + u32(data, header + 40)
+    if (count != u32(data, header + 48)
+            or u32(data, header + 4) != u32(data, start + 128)
+            or strings != header + 32 + u32(data, header + 16)
+            or u32(data, header + 16) != u32(data, header + 36)
+            or string_end + u32(data, header + 24) != end):
+        raise ValueError("Inconsistent table lengths or identity")
+    if end > len(data) or end <= start:
         raise ValueError("Table data exceeds database")
     return dict(name=data[start:start + 128].split(b"\0")[0].decode("ascii"),
                 id=u32(data, start + 128), count=count, words=words,
                 fields=fields, metadata=metadata, records=records,
-                strings=strings, string_end=string_end, marker=marker.decode())
+                strings=strings, string_end=string_end, marker=marker.decode(), end=end)
+
+
+def table_directory(data):
+    """Walk declared table lengths; never search record payloads for markers."""
+    if len(data) < 128 or data[:4] != b'FrTk':
+        raise ValueError('Unsupported database header')
+    start = u32(data, 4)
+    if start != 128:
+        raise ValueError('Unsupported asset-table offset')
+    cursor = start + 8 * u32(data, 36)
+    count = u32(data, 20)
+    if cursor > len(data) or count > (len(data) - cursor) // 232:
+        raise ValueError('Invalid table count or asset bounds')
+    result = {}
+    for _ in range(count):
+        info = table(data, cursor)
+        if info['id'] in result:
+            raise ValueError('Duplicate table ID')
+        result[info['id']] = [info]
+        cursor = info['end']
+    if data[cursor:] != b'\0' * 8:
+        raise ValueError('Unsupported database trailer')
+    return result
+
+
+def empty_rows(data, info):
+    """Follow unused slots until the capacity sentinel, rejecting corrupt links."""
+    capacity = info['count']
+    row = u32(data, info['metadata'] - 4)
+    unused = set()
+    while row != capacity:
+        if row in unused or not 0 <= row < capacity or info['words'] < 1:
+            raise ValueError('Invalid or cyclic free list')
+        unused.add(row)
+        row = u32(data, info['records'] + row * info['words'] * 4)
+    return unused
 
 
 def word_field(data, info, attributes, row, name):
@@ -73,23 +116,16 @@ def inspect(save, schema):
     if not decoder.eof or decoder.unused_data or decoder.unconsumed_tail or data[:4] != b"FrTk":
         raise ValueError("Incomplete or unsupported database chunk")
     schemas = {s["name"]: s for s in json.loads(gzip.decompress(schema.read_bytes()))["schemas"]}
-    candidates = {}
-    # Marker searching remains a discovery technique, not a table directory parser.
-    for marker in (b"SPBF", b"ASTO"):
-        cursor = 0
-        while (cursor := data.find(marker, cursor)) >= 0:
-            try:
-                info = table(data, cursor - 148)
-                candidates.setdefault(info["id"], []).append(info)
-            except (ValueError, UnicodeError):
-                pass
-            cursor += 4
+    candidates = table_directory(data)
     teams = []
     for choices in candidates.values():
         for info in choices:
             if info["name"] != "Team":
                 continue
+            unused = empty_rows(data, info)
             for row in range(info["count"]):
+                if row in unused:
+                    continue
                 attrs = schemas["Team"]["attributes"]
                 record = {key: word_field(data, info, attrs, row, key)
                           for key in ("DisplayName", "LongName", "Roster")}
@@ -100,6 +136,8 @@ def inspect(save, schema):
                     target = targets[0]
                     if target["marker"] != "ASTO" or target_row >= target["count"]:
                         raise ValueError("Invalid roster array reference")
+                    if target_row in empty_rows(data, target):
+                        raise ValueError('Roster references an unused array slot')
                     length = u32(data, target["metadata"] + target_row * 4)
                     if length > target["words"]:
                         raise ValueError("Roster length exceeds row capacity")
@@ -117,6 +155,11 @@ def inspect(save, schema):
                         player.update(table=player_id, row=player_row)
                         players.append(player)
                     record["players"] = players
+                    record['roster_status'] = 'resolved'
+                elif target_id == 0 and target_row == 0:
+                    record['roster_status'] = 'null'
+                else:
+                    raise ValueError('Missing or wrong-type roster target')
                 teams.append(record)
     return dict(save_sha256=hashlib.sha256(raw).hexdigest(),
                 schema_sha256=hashlib.sha256(schema.read_bytes()).hexdigest(),
