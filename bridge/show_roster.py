@@ -3,6 +3,11 @@ from pathlib import Path
 
 from bridge.load_snapshot import load_snapshot
 from bridge.snapshot_export import write_snapshot_json
+from bridge.roster_summary import (
+    average_overall_by_position,
+    best_overall_by_position,
+    count_players_by_position,
+)
 
 def main() -> None:
     # Accept file paths from the command line instead of hardcoding them.
@@ -50,6 +55,30 @@ def main() -> None:
     print("Coach:", snapshot.coach.full_name)
     print("Team:", snapshot.team.name)
     print("Roster size:", len(snapshot.team.players))
+
+    # Calculate summaries from the full roster, independent of display filtering.
+    position_counts = count_players_by_position(snapshot.team.players)
+    best_ratings = best_overall_by_position(snapshot.team.players)
+    average_ratings = average_overall_by_position(snapshot.team.players)
+
+    print()
+    print(
+        f"{'Position':<10} "
+        f"{'Players':>7} "
+        f"{'Best OVR':>9} "
+        f"{'Avg OVR':>9}"
+    )
+    print("-" * 38)
+
+    # Display the calculated average to one decimal place.
+    for position in sorted(position_counts):
+        print(
+            f"{position:<10} "
+            f"{position_counts[position]:>7} "
+            f"{best_ratings[position]:>9} "
+            f"{average_ratings[position]:>9.1f}"
+        )
+
     print()
 
     # Keep the full roster unless the user requests a particular position.

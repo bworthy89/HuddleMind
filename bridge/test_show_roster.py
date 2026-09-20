@@ -70,7 +70,7 @@ class RosterCommandTests(unittest.TestCase):
         code, out, err, _ = self.invoke(['save', 'schema', '--position', 'xyz'])
         self.assertEqual((code, err), (0, ''))
         self.assertIn('No players found for position XYZ.', out)
-        self.assertNotIn('OVR', out)
+        self.assertNotIn('Player                       Pos', out)
 
     def test_empty_roster_without_filter(self):
         self.snapshot = replace(self.snapshot, team=replace(self.snapshot.team, players=()))
@@ -78,7 +78,20 @@ class RosterCommandTests(unittest.TestCase):
         self.assertEqual((code, err), (0, ''))
         self.assertIn('The team roster is empty.', out)
         self.assertNotIn('None', out)
-        self.assertNotIn('OVR', out)
+        self.assertNotIn('Player                       Pos', out)
+
+    def test_summary_uses_full_roster_and_formats_average(self):
+        # Summary totals stay unchanged even with an unmatched player filter.
+        for position in (None, 'qb', 'xyz'):
+            with self.subTest(position=position):
+                args = ['save', 'schema']
+                if position is not None:
+                    args.extend(['--position', position])
+                code, out, err, _ = self.invoke(args)
+                self.assertEqual((code, err), (0, ''))
+                rows = [line.split() for line in out.splitlines()
+                        if line.split() and line.split()[0] in ('QB', 'WR')]
+                self.assertEqual(rows, [['QB', '3', '90', '83.3'], ['WR', '1', '99', '99.0']])
 
     def test_expected_loader_errors_exit_cleanly(self):
         for error in (FileNotFoundError('missing sample save'),
