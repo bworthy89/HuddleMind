@@ -50,3 +50,14 @@ class DynastySnapshot:
     schema_sha256: str
     coach: Coach
     team: Team
+
+@dataclass(frozen=True)
+class ScheduleGame:
+    record_id: RecordId
+    season_index: int
+    week: int
+    home_team: str
+    away_team: str
+    status: str
+    home_score: int | None
+    away_score: int | None
