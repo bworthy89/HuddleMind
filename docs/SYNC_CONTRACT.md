@@ -2,6 +2,28 @@
 
 Initial Milestone 5 design; no endpoint is deployed yet.
 
+## Implemented local outbox
+
+```powershell
+python -m bridge.queue_observation DYNASTY_ID OBSERVATION_ID
+```
+
+Use `--database PATH` for a non-default database. Version 3 is required. The
+command records an event locally and prints its ID, observation, queue time,
+and status; it does not transmit anything. Repeating it for the same observation
+and contract version returns the original entry without rebuilding JSON or
+resetting delivery state. One immediate transaction serializes competing writers.
+
+`bridge.outbox.list_pending_events(path, dynasty_id)` reads pending entries in
+queue insertion order with their exact stored JSON. Consumers must send that JSON,
+not call the event builder again. Ownership is checked using the observation's
+dynasty. Missing observations, incompatible databases, serialization failures,
+and failed inserts produce no partial queued event.
+
+Tested with temporary databases, concurrent writers, and a separate Python
+process. HTTP delivery, acknowledgment processing, retry timing, and server
+authentication are still future work.
+
 The bridge sends normalized observations from SQLite. The local database remains
 usable offline. Raw save files and local filesystem paths are not request fields.
 

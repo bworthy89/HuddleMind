@@ -13,9 +13,10 @@ Local history commands (run from the repository root):
 ```powershell
 python -m bridge.capture_dynasty "PATH_TO_SAVE" "PATH_TO_SCHEMA.gz" "DYNASTY_ID"
 python -m bridge.show_history "DYNASTY_ID"
+python -m bridge.queue_observation "DYNASTY_ID" OBSERVATION_ID
 ```
 
-Both accept `--database "PATH_TO_DATABASE"`, defaulting to
+These commands accept `--database "PATH_TO_DATABASE"`, defaulting to
 `local_data/huddlemind.sqlite3`. The database and dynasty must already exist.
 History opens the database read-only, lists observation IDs and UTC capture
 timestamps newest insertion first, and does not load the game save. An older

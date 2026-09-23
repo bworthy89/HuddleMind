@@ -9,8 +9,9 @@ The game save is never modified. Local databases and their backups are ignored b
 Current version is **3**: it adds the sync outbox schema. The version-2 description
 below records the recommendation-history migration. Upgrades from compatible
 versions 0, 1, and 2 now finish at version 3. The outbox migration was tested and
-applied after a local backup, preserving all existing history. Queueing and
-network delivery are not implemented yet. Full suite: 157 passing tests.
+applied after a local backup, preserving all existing history. Persistent queueing
+is now implemented; network delivery is still pending. See `SYNC_CONTRACT.md`.
+Full suite: 168 passing tests.
 
 `initialize_database()` handles fresh databases and compatible version-0/1
 databases. Version 2 adds recommendations and recommendation events. Initialization

@@ -6,6 +6,7 @@ from uuid import uuid4
 
 from bridge.local_store import connect_database
 
+EVENT_SCHEMA_VERSION = 1
 
 
 
@@ -22,7 +23,7 @@ class ObservationEvent:
     payload: dict
 
     # Version the network format separately from the database structure.
-    schema_version: int =1
+    schema_version: int = EVENT_SCHEMA_VERSION
     event_type: str = "dynasty.observation.captured"
 
 def build_observation_event(
