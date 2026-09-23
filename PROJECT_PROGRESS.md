@@ -3,9 +3,17 @@
 **Repository:** `bworthy89/HuddleMind`  
 **Current Phase:** Milestone 3 - Understand the Dynasty (schedule/results discovery)
 
-**Current Status:** Roster portion checkpointed: models, validated loading, CLI filtering, JSON export, and position summaries implemented; 40 roster/reader tests pass. Owner confirmed in-game roster samples. Schedule/results discovery is active; Milestone 3 remains open. Week-advance testing remains deferred.
+**Current Status:** Roster portion checkpointed. Schedule loading, CLI display, and controlled-team results summaries are implemented and tested; 68 synthetic bridge tests pass. The owner verified the schedule command and summary against the current sample. Milestone 3 remains open; week-advance and broader save/lifecycle validation remain deferred.
 
-**Last Updated:** 2026-09-20
+**Last Updated:** 2026-09-22
+
+### Schedule/results application checkpoint
+
+- Each game records whether the controlled team is home, matched by source table and row. Conversion rejects matchups where the team appears on neither or both sides.
+- The schedule command displays completed games, wins/losses/ties, pending games, and unknown statuses before the fixtures.
+- Automated checks cover home/away outcomes, zero-score ties, unfinished and unfamiliar statuses, empty schedules, identity checks, loading errors, and command output. Tests use synthetic data and do not read game saves.
+- Removed an obsolete duplicate model definition. Full bridge suite: 68 tests passed.
+- Next learning slice: identify and display the next pending fixture. Future-season and postseason behavior still need separate validation.
 
 ---
 

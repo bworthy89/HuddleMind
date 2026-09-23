@@ -2,7 +2,7 @@ import argparse
 from pathlib import Path
 
 from bridge.load_schedule import load_schedule
-
+from bridge.schedule_summary import summarize_results
 
 def main() -> None:
     # Accept the save and schema paths from the command line.
@@ -23,6 +23,19 @@ def main() -> None:
         )
 
     print("Scheduled games:", len(games))
+
+    # Summarize the controlled team's results across the loaded fixtures.
+    summary = summarize_results(games)
+    completed = summary["wins"] + summary["losses"] + summary["ties"]
+
+    print("Completed:", completed)
+    print(
+        f"Record (W-L-T): "
+        f"{summary['wins']}-{summary['losses']}-{summary['ties']}"
+    )
+    print("Pending:", summary["pending"])
+    print("Unknown status:", summary["unknown"])
+    print()
 
     # Handle an empty schedule before attempting to display game records.
     if not games:

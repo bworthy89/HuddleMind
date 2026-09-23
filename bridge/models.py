@@ -51,6 +51,7 @@ class DynastySnapshot:
     coach: Coach
     team: Team
 
+# Store one scheduled game's identity, teams, and completion state.
 @dataclass(frozen=True)
 class ScheduleGame:
     record_id: RecordId
@@ -61,3 +62,4 @@ class ScheduleGame:
     status: str
     home_score: int | None
     away_score: int | None
+    controlled_team_is_home: bool
