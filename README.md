@@ -11,13 +11,13 @@ The project has two major goals:
 
 ## Current Status
 
-**Phase:** Milestone 3 — Understand the Dynasty
+**Phase:** Milestone 4 — Local Memory (initial implementation complete)
 
-**Status:** The read-only dynasty application loads coach/team identity, roster, season, schedule/results, depth chart, health, and recruiting into HuddleMind models. The combined command supports section views and full JSON export. Implementation is complete for the inspected save/schema pair; final depth-chart and injury UI acceptance checks are deferred. See [the Milestone 3 checkpoint](docs/MILESTONE_3_CHECKPOINT.md).
+**Status:** Dynasty snapshots now persist in SQLite, with capture/history commands, transactional database upgrades, and recommendation history including choices and reported outcomes. All 146 synthetic tests pass. See [Local Memory](docs/LOCAL_MEMORY.md). The underlying dynasty reader covers roster, season, schedule/results, depth, health, and recruiting; final depth-chart and injury UI checks remain deferred as recorded in [Milestone 3](docs/MILESTONE_3_CHECKPOINT.md).
 
 Run `python -m bridge.show_dynasty "PATH_TO_SAVE" "PATH_TO_SCHEMA.gz"` from the project root. Add `--section depth`, `--section health`, `--section recruiting`, or `--section all`. Add `--export "local_data/dynasty-full.json"` to create a new complete export; existing files are protected.
 
-Save discovery and event watching are also implemented. Automatic parsing after watcher notifications, broader lifecycle validation, local history, cloud integration, and the web app remain future work. The inspector notes below describe the earlier exploratory script; the current application uses the validated reader modules.
+Save discovery and event watching are also implemented. Automatic parsing after watcher notifications, broader lifecycle validation, cloud integration, and the web app remain future work. The inspector notes below describe the earlier exploratory script; the current application uses the validated reader modules.
 
 See [`PROJECT_PROGRESS.md`](./PROJECT_PROGRESS.md) for the live roadmap and learning tracker.
 

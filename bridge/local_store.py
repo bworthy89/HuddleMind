@@ -7,6 +7,94 @@ from dataclasses import asdict
 from bridge.dynasty_details import DynastyDetails
 from datetime import datetime, timezone
 
+DATABASE_VERSION = 2
+
+def validate_database_columns(connection: sqlite3.Connection) -> None:
+    # Describe the columns required by database version 1.
+    # Each tuple contains: name, type, NOT NULL flag, primary-key position.
+    expected_tables = {
+        "dynasties": [
+            ("dynasty_id", "TEXT", 1, 1),
+            ("name", "TEXT", 1, 0),
+        ],
+        "observations": [
+            ("observation_id", "INTEGER", 0, 1),
+            ("dynasty_id", "TEXT", 1, 0),
+            ("observed_at", "TEXT", 1, 0),
+            ("save_sha256", "TEXT", 1, 0),
+            ("schema_sha256", "TEXT", 1, 0),
+            ("snapshot_json", "TEXT", 1, 0),
+        ],
+    }
+
+    for table_name, expected_columns in expected_tables.items():
+        # Table names come only from the fixed definitions above.
+        rows = connection.execute(
+            f"PRAGMA table_info({table_name})"
+        ).fetchall()
+
+        actual_columns = [
+            (row[1], row[2].upper(), row[3], row[5])
+            for row in rows
+        ]
+
+        if actual_columns != expected_columns:
+            raise ValueError(
+                f"Unexpected column structure for table: {table_name}"
+            )
+
+def validate_database_relationships(
+    connection: sqlite3.Connection,
+) -> None:
+    # Require the expected relationship between observations and dynasties.
+    foreign_keys = connection.execute(
+        "PRAGMA foreign_key_list(observations)"
+    ).fetchall()
+
+    expected_foreign_keys = [
+        (
+            0, 0,
+            "dynasties",
+            "dynasty_id",
+            "dynasty_id",
+            "NO ACTION",
+            "NO ACTION",
+            "NONE",
+        )
+    ]
+
+    if foreign_keys != expected_foreign_keys:
+        raise ValueError("Unexpected observation foreign-key structure.")
+
+    # Find the UNIQUE constraint that prevents duplicate source snapshots.
+    indexes = connection.execute(
+        "PRAGMA index_list(observations)"
+    ).fetchall()
+
+    expected_columns = [
+        "dynasty_id",
+        "save_sha256",
+        "schema_sha256",
+    ]
+    found_unique_constraint = False
+
+    for index in indexes:
+        # Require a non-partial index created by a UNIQUE constraint.
+        if index[2] != 1 or index[3] != "u" or index[4] != 0:
+            continue
+
+        columns = connection.execute(
+            "SELECT name FROM pragma_index_info(?) ORDER BY seqno",
+            (index[1],),
+        ).fetchall()
+
+        if [column[0] for column in columns] == expected_columns:
+            found_unique_constraint = True
+            break
+
+    if not found_unique_constraint:
+        raise ValueError("Missing observation duplicate-prevention constraint.")
+
 
 def initialize_database(database_path: Path) -> None:
     # Create the parent folder if it does not exist.
@@ -16,6 +104,20 @@ def initialize_database(database_path: Path) -> None:
     connection = connect_database(database_path)
 
     try:
+        # Keep table creation, validation, and version assignment atomic.
+        connection.execute("BEGIN IMMEDIATE")
+        # Check compatibility before making any database changes.
+        version = connection.execute(
+            "PRAGMA user_version"
+        ).fetchone()[0]
+
+        if version > DATABASE_VERSION:
+            raise ValueError(
+                f"Database version {version} is newer than "
+                f"supported version {DATABASE_VERSION}."
+            )
+        if version < 0:
+            raise ValueError('Unsupported negative database version')
         # Create a table for HuddleMinds own dynasty identities.
         # IF NOT EXISTS makes repeated initialization safe.
         connection.execute(
@@ -43,11 +145,23 @@ def initialize_database(database_path: Path) -> None:
         )
 
 
-        # Commit any pending database changes.
+        # Validate before changing the version; all steps share one transaction.
+        validate_database_columns(connection)
+        validate_database_relationships(connection)
+        if connection.execute('PRAGMA foreign_key_check(observations)').fetchall():
+            raise ValueError('Database contains invalid dynasty references.')
+        from bridge.recommendation_schema import create_schema, validate_schema
+        if version < 2:
+            create_schema(connection)
+        validate_schema(connection)
+        connection.execute("PRAGMA user_version = 2")
         connection.commit()
+    except Exception:
+        # Undo initialization changes if any validation or database step fails.
+        connection.rollback()
+        raise
     finally:
         connection.close()
-
 
 def connect_database(database_path: Path, *, read_only: bool = False) -> sqlite3.Connection:
     # Open the database and enforce relationships between its tables.

@@ -4,6 +4,10 @@ The bridge is the Windows-side component that connects College Football 27 to Hu
 
 ## Current application
 
+Database upgrades and recommendation history are documented in
+[Local Memory](../docs/LOCAL_MEMORY.md). Use `python -m bridge.recommendations --help`
+for the `init`, `add`, `list`, `show`, `choice`, and `outcome` commands.
+
 Local history commands (run from the repository root):
 
 ```powershell
