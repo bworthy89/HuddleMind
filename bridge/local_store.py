@@ -49,9 +49,13 @@ def initialize_database(database_path: Path) -> None:
         connection.close()
 
 
-def connect_database(database_path: Path) -> sqlite3.Connection:
+def connect_database(database_path: Path, *, read_only: bool = False) -> sqlite3.Connection:
     # Open the database and enforce relationships between its tables.
-    connection = sqlite3.connect(database_path)
+    if read_only:
+        # URI read-only mode also prevents creating a missing database.
+        connection = sqlite3.connect(database_path.resolve().as_uri() + '?mode=ro', uri=True)
+    else:
+        connection = sqlite3.connect(database_path)
 
     try:
         connection.execute("PRAGMA foreign_keys = On")
@@ -89,8 +93,9 @@ def create_dynasty(database_path: Path, name: str) -> str:
 def get_dynasty(
         database_path: Path,
         dynasty_id: str,
+        *, read_only: bool = False,
 ) -> tuple[str, str] | None:
-    connection = connect_database(database_path)
+    connection = connect_database(database_path, read_only=read_only)
 
     try:
         cursor = connection.execute(
@@ -199,8 +204,9 @@ def get_observation(
 def list_observations(
         database_path: Path,
         dynasty_id: str,
+        *, read_only: bool = False,
 ) -> list[tuple[int, str]]:
-    connection = connect_database(database_path)
+    connection = connect_database(database_path, read_only=read_only)
 
     try:
         # Return observation IDs and capture times, newest insertion first.

@@ -4,6 +4,19 @@ The bridge is the Windows-side component that connects College Football 27 to Hu
 
 ## Current application
 
+Local history commands (run from the repository root):
+
+```powershell
+python -m bridge.capture_dynasty "PATH_TO_SAVE" "PATH_TO_SCHEMA.gz" "DYNASTY_ID"
+python -m bridge.show_history "DYNASTY_ID"
+```
+
+Both accept `--database "PATH_TO_DATABASE"`, defaulting to
+`local_data/huddlemind.sqlite3`. The database and dynasty must already exist.
+History opens the database read-only, lists observation IDs and UTC capture
+timestamps newest insertion first, and does not load the game save. An older
+game save captured later appears first; insertion order is not game chronology.
+
 `python -m bridge.show_dynasty "PATH_TO_SAVE" "PATH_TO_SCHEMA.gz"` displays the
 controlled dynasty overview. Use `--section depth`, `health`, `recruiting`, or
 `all` for details, and `--export "local_data/dynasty-full.json"` for a new full

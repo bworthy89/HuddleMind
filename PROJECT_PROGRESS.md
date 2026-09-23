@@ -3,7 +3,7 @@
 **Repository:** `bworthy89/HuddleMind`  
 **Current Phase:** Milestone 4 - Local Memory (initial persistence checkpoint)
 
-**Current Status:** Local SQLite storage creates dynasty identities, saves complete observations, deduplicates source hash pairs, retrieves dynasty-scoped snapshots, and lists history. The capture command is implemented; all 116 synthetic tests pass, including 11 capture-command checks. Milestone 4 remains in progress; the history command, recommendation history, and migrations remain future work. Milestone 3 depth-chart and injury UI acceptance checks remain deferred.
+**Current Status:** Local SQLite storage creates dynasty identities, saves complete observations, deduplicates source hash pairs, retrieves dynasty-scoped snapshots, and lists history. Capture and read-only history commands are implemented; all 125 synthetic tests pass. Milestone 4 remains in progress; recommendation history and migrations remain future work. Milestone 3 depth-chart and injury UI acceptance checks remain deferred.
 
 **Last Updated:** 2026-09-23
 
@@ -372,7 +372,8 @@ An initial test-list entry omitted its third value (offset 0), causing tuple-unp
 - Tests use disposable databases and synthetic snapshots; the owner's local history was not touched.
 - The capture command now accepts save/schema paths, an existing dynasty ID, and an optional database path. It rejects missing databases and unknown dynasties before loading the save, reports expected failures cleanly, and reuses duplicate observations.
 - Eleven capture-command tests cover actual temporary-database writes, duplicate/new snapshots, early rejection, invalid databases, loader/storage errors, argument handling, and the default path. Full regression suite: 116 passing tests. No application fixes were needed for this checkpoint.
-- Remaining: a user-facing history command, migration/version policy, recommendation history, and later comparisons between observations. Source record IDs remain scoped to snapshots; they are not proven persistent player identities.
+- `python -m bridge.show_history DYNASTY_ID [--database PATH]` lists observation IDs and capture timestamps in newest-insertion-first order. It distinguishes empty history from an unknown dynasty and opens SQLite in enforced read-only mode. Nine additional tests cover ordering, isolation, missing/corrupt databases, clean failures, arguments, and write prevention. Full suite: 125 passing tests.
+- Remaining: migration/version policy, recommendation history, and later comparisons between observations. Source record IDs remain scoped to snapshots; they are not proven persistent player identities.
 
 ### Learning topics
 
