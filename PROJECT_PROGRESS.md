@@ -3,7 +3,7 @@
 **Repository:** `bworthy89/HuddleMind`  
 **Current Phase:** Milestone 4 - Local Memory (initial persistence checkpoint)
 
-**Current Status:** Local SQLite storage now creates dynasty identities, saves complete observations, deduplicates source hash pairs, retrieves dynasty-scoped snapshots, and lists history. All 105 synthetic tests pass, including 13 local-storage checks. Milestone 4 remains in progress; recommendation history, migrations, and command integration remain future work. Milestone 3 depth-chart and injury UI acceptance checks remain deferred.
+**Current Status:** Local SQLite storage creates dynasty identities, saves complete observations, deduplicates source hash pairs, retrieves dynasty-scoped snapshots, and lists history. The capture command is implemented; all 116 synthetic tests pass, including 11 capture-command checks. Milestone 4 remains in progress; the history command, recommendation history, and migrations remain future work. Milestone 3 depth-chart and injury UI acceptance checks remain deferred.
 
 **Last Updated:** 2026-09-23
 
@@ -370,7 +370,9 @@ An initial test-list entry omitted its third value (offset 0), causing tuple-unp
 - Foreign keys are enabled through the shared connection helper, including initialization. Failed writes roll back and connections close.
 - Thirteen synthetic tests verify full round trips, restart persistence in a separate Python process, initialization preservation, name handling, missing records, identity isolation, foreign-key rejection, rollback recovery, and ordering. Full bridge suite: 105 passing tests.
 - Tests use disposable databases and synthetic snapshots; the owner's local history was not touched.
-- Remaining: a user-facing capture/history command, migration/version policy, recommendation history, and later comparisons between observations. Source record IDs remain scoped to snapshots; they are not proven persistent player identities.
+- The capture command now accepts save/schema paths, an existing dynasty ID, and an optional database path. It rejects missing databases and unknown dynasties before loading the save, reports expected failures cleanly, and reuses duplicate observations.
+- Eleven capture-command tests cover actual temporary-database writes, duplicate/new snapshots, early rejection, invalid databases, loader/storage errors, argument handling, and the default path. Full regression suite: 116 passing tests. No application fixes were needed for this checkpoint.
+- Remaining: a user-facing history command, migration/version policy, recommendation history, and later comparisons between observations. Source record IDs remain scoped to snapshots; they are not proven persistent player identities.
 
 ### Learning topics
 
