@@ -2,6 +2,19 @@
 
 The bridge is the Windows-side component that connects College Football 27 to HuddleMind.
 
+## Current application
+
+`python -m bridge.show_dynasty "PATH_TO_SAVE" "PATH_TO_SCHEMA.gz"` displays the
+controlled dynasty overview. Use `--section depth`, `health`, `recruiting`, or
+`all` for details, and `--export "local_data/dynasty-full.json"` for a new full
+JSON export. The destination directory must exist; existing files are protected.
+
+The combined loader captures the save/schema once and builds immutable models
+for roster, season, schedule, depth, health, and recruiting. Run all synthetic
+tests with `python -m unittest discover -s bridge -p "test_*.py"`.
+See [the current checkpoint](../docs/MILESTONE_3_CHECKPOINT.md) for validation
+and pending manual checks. Earlier lesson notes below are historical.
+
 It will eventually handle:
 
 - Finding dynasty saves/data

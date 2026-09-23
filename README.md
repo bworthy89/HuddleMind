@@ -13,9 +13,11 @@ The project has two major goals:
 
 **Phase:** Milestone 3 — Understand the Dynasty
 
-**Status:** Schema error handling is in place, and all 22 requested position curves pair through their referenced array rows. Next: inspect Team/Player schemas and actual dynasty records. Week-advance test deferred.
+**Status:** The read-only dynasty application loads coach/team identity, roster, season, schedule/results, depth chart, health, and recruiting into HuddleMind models. The combined command supports section views and full JSON export. Implementation is complete for the inspected save/schema pair; final depth-chart and injury UI acceptance checks are deferred. See [the Milestone 3 checkpoint](docs/MILESTONE_3_CHECKPOINT.md).
 
-The discovery script lists dynasty candidates and selects the newest by modification time. The watcher filters creation, modification, and rename events, debounces per file, and prints metadata. Owner-run checks cover discovery edge cases, event types and filters, controlled bursts, clean shutdown, and an actual in-game save in OneDrive Documents. Save parsing, broader watcher reliability, cloud integration, and the web app remain future work.
+Run `python -m bridge.show_dynasty "PATH_TO_SAVE" "PATH_TO_SCHEMA.gz"` from the project root. Add `--section depth`, `--section health`, `--section recruiting`, or `--section all`. Add `--export "local_data/dynasty-full.json"` to create a new complete export; existing files are protected.
+
+Save discovery and event watching are also implemented. Automatic parsing after watcher notifications, broader lifecycle validation, local history, cloud integration, and the web app remain future work. The inspector notes below describe the earlier exploratory script; the current application uses the validated reader modules.
 
 See [`PROJECT_PROGRESS.md`](./PROJECT_PROGRESS.md) for the live roadmap and learning tracker.
 

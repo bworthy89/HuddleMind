@@ -1,9 +1,9 @@
 # HuddleMind — Project Progress & Learning Tracker
 
 **Repository:** `bworthy89/HuddleMind`  
-**Current Phase:** Milestone 3 - Understand the Dynasty (schedule/results discovery)
+**Current Phase:** Milestone 3 - Implementation complete; final manual acceptance pending
 
-**Current Status:** Roster portion checkpointed. Schedule loading, CLI display, and controlled-team results summaries are implemented and tested; 68 synthetic bridge tests pass. The owner verified the schedule command and summary against the current sample. Milestone 3 remains open; week-advance and broader save/lifecycle validation remain deferred.
+**Current Status:** The combined dynasty loader and CLI cover roster, season, schedule/results, depth chart, health, and recruiting, with full JSON export; all 92 synthetic tests pass. The owner confirmed recruiting-board count and total hours. Depth-chart and injury UI checks are deferred by the owner, so final milestone acceptance remains pending. See `docs/MILESTONE_3_CHECKPOINT.md`. Next implementation milestone: Local Memory.
 
 **Last Updated:** 2026-09-22
 
@@ -13,7 +13,7 @@
 - The schedule command displays completed games, wins/losses/ties, pending games, and unknown statuses before the fixtures.
 - Automated checks cover home/away outcomes, zero-score ties, unfinished and unfamiliar statuses, empty schedules, identity checks, loading errors, and command output. Tests use synthetic data and do not read game saves.
 - Removed an obsolete duplicate model definition. Full bridge suite: 68 tests passed.
-- Next learning slice: identify and display the next pending fixture. Future-season and postseason behavior still need separate validation.
+- Next fixtures and the remaining data sections are now implemented; see the complete dynasty checkpoint. Future-season and postseason behavior still need separate validation.
 
 ---
 
@@ -267,7 +267,7 @@ An initial startup run emitted events for all 11 candidates; a later startup did
 
 **Goal:** Convert CFB27 data into HuddleMind-owned models.
 
-**Status:** Roster portion implemented and checkpointed. Schedule/results discovery is active; depth chart, injuries, and recruiting remain future work. See `docs/ROSTER_CHECKPOINT.md`.
+**Status:** All scoped data sections and HuddleMind-owned models are implemented for the inspected save/schema pair. Synthetic and end-to-end read-only command/export checks pass. Final depth-chart and injury UI checks remain pending at the owner's request. See `docs/MILESTONE_3_CHECKPOINT.md`; the entries below preserve the exploration history.
 
 ### First header-inspection checkpoint — 2026-09-18 (pushed as `5931dcd`)
 
@@ -911,11 +911,11 @@ No active product blockers.
 
 ---
 
-# 11. Next Session — Understand the Dynasty
+# 11. Next Session — Local Memory and Manual Acceptance
 
-1. Review and commit the explicit checkpoint files; do not stage local test data.
-2. Export and inspect Team/Player schemas, then locate corresponding save tables and decode a small sample for comparison with the game UI. Full schema compatibility and gameplay meaning remain unresolved.
-3. Add appropriate handling for malformed decoded fields as inspection becomes reusable.
-4. Keep week-advance testing deferred until the owner resumes it. Watcher retry, lifecycle, cross-directory events, and meaningful-change filtering remain separate unfinished work.
+1. When the owner is ready, confirm the QB depth order and roster injury status in the game; record final Milestone 3 acceptance.
+2. Begin Milestone 4 with local SQLite observations keyed by source hashes and record identities.
+3. Preserve raw values and validation limits when saving normalized snapshots; do not equate changing source row IDs across saves with persistent player identity.
+4. Keep week-advance testing deferred until the owner resumes it. Watcher retry, readiness, and meaningful-change filtering remain separate unfinished work.
 
 Continue the learning-first workflow: the owner writes small Python increments, runs them, and shares output before the next step.
