@@ -1,11 +1,11 @@
 # HuddleMind — Project Progress & Learning Tracker
 
 **Repository:** `bworthy89/HuddleMind`  
-**Current Phase:** Milestone 3 - Implementation complete; final manual acceptance pending
+**Current Phase:** Milestone 4 - Local Memory (initial persistence checkpoint)
 
-**Current Status:** The combined dynasty loader and CLI cover roster, season, schedule/results, depth chart, health, and recruiting, with full JSON export; all 92 synthetic tests pass. The owner confirmed recruiting-board count and total hours. Depth-chart and injury UI checks are deferred by the owner, so final milestone acceptance remains pending. See `docs/MILESTONE_3_CHECKPOINT.md`. Next implementation milestone: Local Memory.
+**Current Status:** Local SQLite storage now creates dynasty identities, saves complete observations, deduplicates source hash pairs, retrieves dynasty-scoped snapshots, and lists history. All 105 synthetic tests pass, including 13 local-storage checks. Milestone 4 remains in progress; recommendation history, migrations, and command integration remain future work. Milestone 3 depth-chart and injury UI acceptance checks remain deferred.
 
-**Last Updated:** 2026-09-22
+**Last Updated:** 2026-09-23
 
 ### Schedule/results application checkpoint
 
@@ -362,6 +362,15 @@ An initial test-list entry omitted its third value (offset 0), causing tuple-unp
 ## Milestone 4 — Local Memory
 
 **Goal:** Preserve useful history independently from the current CFB27 save.
+
+### Initial persistence checkpoint — 2026-09-23
+
+- Owner implemented `bridge/local_store.py`: initialization, UUID dynasty identity, lookup, full JSON observation storage, scoped retrieval, and newest-insertion-first listing.
+- Duplicate dynasty/save/schema combinations preserve the original observation ID, timestamp, and payload. Different save/schema hashes create new observations.
+- Foreign keys are enabled through the shared connection helper, including initialization. Failed writes roll back and connections close.
+- Thirteen synthetic tests verify full round trips, restart persistence in a separate Python process, initialization preservation, name handling, missing records, identity isolation, foreign-key rejection, rollback recovery, and ordering. Full bridge suite: 105 passing tests.
+- Tests use disposable databases and synthetic snapshots; the owner's local history was not touched.
+- Remaining: a user-facing capture/history command, migration/version policy, recommendation history, and later comparisons between observations. Source record IDs remain scoped to snapshots; they are not proven persistent player identities.
 
 ### Learning topics
 
