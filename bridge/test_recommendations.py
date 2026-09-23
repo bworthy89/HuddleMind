@@ -10,7 +10,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from bridge.local_store import initialize_database, create_dynasty, save_observation
+from bridge.local_store import initialize_database, create_dynasty, save_observation, DATABASE_VERSION
 from bridge.recommendation_store import record_recommendation, record_event, list_recommendations, get_recommendation
 from bridge.recommendations import main
 from bridge.test_dynasty_details import sample
@@ -138,7 +138,7 @@ class RecommendationTests(unittest.TestCase):
 
     def test_cli_init_empty_and_missing(self):
         db = ['--database', str(self.path)]
-        self.assertIn('Version: 2', self.invoke(['init', *db])[1])
+        self.assertIn(f'Version: {DATABASE_VERSION}', self.invoke(['init', *db])[1])
         self.assertEqual(self.invoke(['list', self.dynasty, *db]), (0, 'No recommendations recorded.\n', ''))
         code, out, err = self.invoke(['show', self.dynasty, 'missing', *db])
         self.assertEqual((code, out), (1, ''))

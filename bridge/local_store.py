@@ -7,7 +7,7 @@ from dataclasses import asdict
 from bridge.dynasty_details import DynastyDetails
 from datetime import datetime, timezone
 
-DATABASE_VERSION = 2
+DATABASE_VERSION = 3
 
 def validate_database_columns(connection: sqlite3.Connection) -> None:
     # Describe the columns required by database version 1.
@@ -151,10 +151,23 @@ def initialize_database(database_path: Path) -> None:
         if connection.execute('PRAGMA foreign_key_check(observations)').fetchall():
             raise ValueError('Database contains invalid dynasty references.')
         from bridge.recommendation_schema import create_schema, validate_schema
+        from bridge.outbox_schema import (
+            create_outbox_schema,
+            validate_outbox_schema,
+        )
+
+        # Apply earlier migrations before adding the outbox.
         if version < 2:
             create_schema(connection)
         validate_schema(connection)
-        connection.execute("PRAGMA user_version = 2")
+
+        # Existing version-2 databases receive the new outbox table.
+        if version < 3:
+            create_outbox_schema(connection)
+        validate_outbox_schema(connection)
+
+        # Commit the schema changes and version assignment together.
+        connection.execute("PRAGMA user_version = 3")
         connection.commit()
     except Exception:
         # Undo initialization changes if any validation or database step fails.

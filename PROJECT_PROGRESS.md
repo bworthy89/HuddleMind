@@ -1,9 +1,9 @@
 # HuddleMind — Project Progress & Learning Tracker
 
 **Repository:** `bworthy89/HuddleMind`  
-**Current Phase:** Milestone 4 - Local Memory (initial implementation complete)
+**Current Phase:** Milestone 5 - Cloud Bridge (event model and outbox schema)
 
-**Current Status:** Milestone 4's initial storage scope is implemented: dynasty identities, complete observations, capture/history commands, transactional version-2 migrations, and recommendation/choice/outcome history. All 146 synthetic tests pass. The local database was backed up and upgraded with every existing row preserved. See `docs/LOCAL_MEMORY.md` for usage and limits. Milestone 3 depth-chart and injury UI acceptance checks remain deferred.
+**Current Status:** Observation event construction/serialization and the version-3 outbox schema are implemented. All 157 synthetic tests pass. The local database was backed up and upgraded from version 2 to 3 with every existing history row preserved; integrity and foreign-key checks passed. The outbox is empty. Queueing, HTTP delivery, authentication, retries, and hosted storage remain unfinished. Milestone 3 depth-chart and injury UI acceptance checks remain deferred.
 
 **Last Updated:** 2026-09-23
 
@@ -399,6 +399,14 @@ An initial test-list entry omitted its third value (offset 0), causing tuple-unp
 ## Milestone 5 — Cloud Bridge
 
 **Goal:** Synchronize normalized HuddleMind events to the cloud.
+
+### Event and outbox-schema checkpoint
+
+- `ObservationEvent` preserves the stored capture timestamp and complete payload; serialization rejects non-finite numbers. Building an event creates a fresh UUID; it is not yet persisted for retries.
+- Version 3 adds `sync_outbox`, with an observation foreign key and uniqueness per observation/contract version. Initialization validates its definition and foreign-key data inside the migration transaction.
+- Eight outbox migration tests cover fresh/repeated initialization, complete history preservation, missing/invalid tables, orphan references, constraints, and rollback. Three event tests cover UUIDs, timestamps, isolation, JSON, and unchanged source data. Full suite: 157 passing tests.
+- Backed up and upgraded the real local database; existing dynasty, observation, recommendation, and event rows remained unchanged. No events were queued or sent.
+- Next: implement persistent queueing that returns the original event ID and exact JSON for an already-queued observation.
 
 ### Learning topics
 
