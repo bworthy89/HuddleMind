@@ -7,6 +7,17 @@
 
 **Last Updated:** 2026-09-23
 
+Bridge health checkpoint: **227 tests pass**. Authenticated
+`/v1/bridge-health` stores owner/dynasty-scoped reports and exposes server-timed
+online/offline/unknown status. The scheduled sender reports even without new
+observations; capture pulse, last successful capture/delivery, queue count, and
+fixed error codes remain separate fields. Live HTTPS validation reported online,
+zero pending, no errors, and capture stopped. Last capture is unknown until the
+new watcher records a successful capture. Receiver deployment `c73a04f` and its
+post-deployment backup/isolated restore passed. The fresh in-game acceptance test
+remains deferred. Milestone 5 health is available through an authenticated API
+and PowerShell command; the graphical display belongs to Milestone 6.
+
 Automatic capture checkpoint: **220 automated tests pass**. `bridge/watch_capture.py`
 polls one selected save, waits three seconds for stable metadata, validates frozen
 bytes, rechecks source contents, and atomically stores the observation and outbox
