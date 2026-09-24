@@ -8,6 +8,8 @@ from typing import get_args, get_origin, get_type_hints
 from uuid import UUID
 
 from bridge.dynasty_details import DynastyDetails
+from bridge.models import Player
+from bridge.player_ratings import RATING_FIELDS
 
 
 def uuid_text(value):
@@ -25,9 +27,16 @@ def _shape(value, annotation, path):
             if option is not type(None):
                 return _shape(value, option, path)
     if is_dataclass(annotation):
-        if not isinstance(value, dict) or set(value) != {f.name for f in fields(annotation)}:
+        expected_fields = {f.name for f in fields(annotation)}
+        # Additive v1 compatibility: old immutable events lack ratings. Do not mutate them.
+        legacy_player = annotation is Player and isinstance(value, dict) and 'ratings' not in value
+        if legacy_player:
+            expected_fields.remove('ratings')
+        if not isinstance(value, dict) or set(value) != expected_fields:
             raise ValueError(f'Unexpected fields at {path}')
         for name, expected in get_type_hints(annotation).items():
+            if legacy_player and name == 'ratings':
+                continue
             _shape(value[name], expected, f'{path}.{name}')
     elif origin is tuple:
         if not isinstance(value, list) or len(value) > 10000:
@@ -89,6 +98,13 @@ def decode_event(body):
             raise ValueError('Duplicate roster player')
         if any(not 0 <= p['overall'] <= 100 for p in players):
             raise ValueError('Invalid overall rating')
+        for player in players:
+            ratings = player.get('ratings', [])
+            names = [rating['field'] for rating in ratings]
+            if len(names) != len(set(names)) or set(names) - set(RATING_FIELDS):
+                raise ValueError('Invalid player rating fields')
+            if any(r['value'] is not None and not 0 <= r['value'] <= 127 for r in ratings):
+                raise ValueError('Invalid saved player rating')
         health_ids = [identity(h['player_id']) for h in event['payload']['health']]
         if len(health_ids) != len(ids) or set(health_ids) != set(ids):
             raise ValueError('Health records do not match roster')

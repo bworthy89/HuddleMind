@@ -26,6 +26,11 @@ bridge/receiver configuration; the selector does not create or capture saves.
 
 ## Authentication
 
+Player details now include grouped saved ratings. See `docs/PLAYER_RATINGS.md` for
+source evidence and compatibility. Deploy receiver and web together for this
+release: older receivers reject the additive ratings field. Historical snapshots
+remain unchanged and show ratings unavailable until a new enriched save is synced.
+
 The web server alone holds `HUDDLEMIND_READ_TOKEN`, which can read
 `GET /v1/dashboard` but cannot upload events. The bridge upload token cannot use
 that read route. Both are scoped to the receiver's configured owner/allowlist.

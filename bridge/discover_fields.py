@@ -1,5 +1,6 @@
 """Bounded research for packed fields and the record free list (read only)."""
 from bridge.discover_rosters import u32, empty_rows, table_directory
+from bridge.player_ratings import read_ratings
 
 
 def layout(data, info, attributes):
@@ -118,6 +119,7 @@ def inspect_fields(save, schema):
                 raise ValueError('Roster references an unused Player slot')
             for key in ('Position', 'OverallRating', 'TeamIndex'):
                 player[key] = packed_value(data, pi, pf, player['row'], key)
+            player['Ratings'] = read_ratings(data, pi, pf, player['row'], packed_value)
             enum = pf['Position']['enum']['_members']
             labels = [m['_name'] for m in enum if m['_value'] == player['Position'] and not m['_name'].endswith('_')]
             player['PositionLabel'] = labels[0] if len(labels) == 1 else f"Unknown ({player['Position']})"

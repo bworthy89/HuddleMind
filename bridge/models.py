@@ -7,6 +7,13 @@ class RecordId:
     table_id: int
     row_id: int
 
+@dataclass(frozen=True)
+class PlayerRating:
+    # Preserve the exact source field name; null means unavailable, never zero.
+    field: str
+    value: int | None
+
+
 # Store one player's basic information in a named, structured object.
 @dataclass(frozen=True)
 class Player:
@@ -15,6 +22,7 @@ class Player:
     last_name: str
     position: str
     overall: int
+    ratings: tuple[PlayerRating, ...] = ()
 
     @property
     def full_name(self) -> str:

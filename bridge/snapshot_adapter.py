@@ -1,9 +1,16 @@
-from bridge.models import Coach, DynastySnapshot, Player, RecordId, Team
+from bridge.models import Coach, DynastySnapshot, Player, PlayerRating, RecordId, Team
+from bridge.player_ratings import RATING_FIELDS
 
 
 
 def player_from_report(record: dict) -> Player:
     # Translate the discovery report's field names into our application model.
+    ratings = record.get('Ratings', {})
+    if not isinstance(ratings, dict) or set(ratings) - set(RATING_FIELDS):
+        raise ValueError('Unsupported player rating fields')
+    if any(value is not None and (type(value) is not int or not 0 <= value <= 127)
+           for value in ratings.values()):
+        raise ValueError('Invalid saved player rating')
     return Player(
         record_id=RecordId(
             table_id=record["table"],
@@ -13,6 +20,7 @@ def player_from_report(record: dict) -> Player:
         last_name=record["LastName"],
         position=record["PositionLabel"],
         overall=record["OverallRating"],
+        ratings=tuple(PlayerRating(name, ratings[name]) for name in RATING_FIELDS if name in ratings),
     )
 
 def team_from_report(record: dict) -> Team:

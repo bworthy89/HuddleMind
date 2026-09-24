@@ -41,7 +41,7 @@ class SnapshotExportTests(unittest.TestCase):
                      'team_index': 5, 'name': 'Sample Team', 'players': [
                          {'record_id': {'table_id': 7, 'row_id': 8},
                           'first_name': 'José', 'last_name': 'Sample',
-                          'position': 'QB', 'overall': 85},
+                          'position': 'QB', 'overall': 85, 'ratings': []},
                      ]},
         })
 
