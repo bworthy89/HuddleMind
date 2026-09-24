@@ -1,0 +1,7 @@
+# Use with compose.yaml when the VPS already runs Nginx.
+services:
+  receiver:
+    ports:
+      - '127.0.0.1:8765:8080'
+  proxy:
+    profiles: [standalone-caddy]

@@ -22,6 +22,15 @@ volume permissions, external TLS, and restart persistence still require validati
 
 ## Deployment commands (after server checks and configuration)
 
+The selected VPS was inspected over SSH: Nginx already serves port 80, a Newt
+tunnel is running with host networking, and UFW permits 22/80/443. Preserve these
+services. On this server, use both `-f deploy/compose.yaml` and
+`-f deploy/compose.nginx.yaml` for all Compose commands. This disables the Caddy
+service by profile and binds the receiver to `127.0.0.1:8765`. Install
+`deploy/nginx.conf` as a separate site after checking `nginx -t`. Provision TLS
+for `huddlemind-api.worthymedia.tech` using Certbot's Nginx integration. Deployment
+and certificate issuance require the owner's final approval; neither has run.
+
 Run from a checked-out, reviewed release of the repository:
 
 ```sh
