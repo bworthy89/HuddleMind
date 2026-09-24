@@ -25,10 +25,13 @@ The web app will be HuddleMind's primary user interface and should work well fro
 - Responsive/mobile-first design
 - PWA support later
 
-## Why This Folder Is Not Initialized Yet
+## Current implementation
 
-The first product risk is proving that the Windows bridge can reliably locate and normalize real CFB27 dynasty data.
+The private Next.js application runs at `/app` with Overview, Roster, Schedule,
+and Recruiting tabs, responsive CSS, and a persistent mobile bottom navigation.
+All data comes from the authenticated receiver's latest snapshot. Schedule and
+Recruiting provide filters and saved results/target details; all views are read-only.
 
-We will avoid generating a large frontend before we know the shape of the data it actually needs to display.
+Run `npm test`, `npm run build`, and `node tests/http-smoke.mjs` from this folder.
 
-The first web milestone begins after the bridge can produce useful normalized dynasty information and synchronize it to the backend.
+See `deploy/WEB.md` for authentication, deployment, and verification details.

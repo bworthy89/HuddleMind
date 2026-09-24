@@ -1,0 +1,16 @@
+'use client';
+import {useState} from 'react';
+import {gameResult,gameState,seasonSchedule} from '../../lib/schedule.mjs';
+type Game={record_id:{table_id:number;row_id:number};season_index:number;week:number;home_team:string;away_team:string;status:string;home_score:number|null;away_score:number|null;controlled_team_is_home:boolean};
+type Season={calendar_year:number;season_index:number;week:number};
+export default function ScheduleView({games,season,team}:{games:Game[]|null;season:Season;team:string}){
+ const [filter,setFilter]=useState('all');
+ if(games===null)return <><h1>Schedule</h1><section className="card"><h2>Schedule data unavailable</h2><p>This snapshot does not include schedule data.</p></section></>;
+ const summary=seasonSchedule(games,season),counts=summary.counts;
+ const visible=summary.games.filter(g=>filter==='all'||gameState(g)===filter);
+ return <><h1>Schedule</h1><p>{season.calendar_year} season · {team} · Week {season.week}</p><div className="grid section-stats"><section className="card"><p>Record (W–L–T)</p><strong className="stat">{counts.wins}–{counts.losses}–{counts.ties}</strong><small>this season</small></section><section className="card"><p>Scheduled games</p><strong className="stat">{summary.games.length}</strong><small>{counts.pending} pending · {counts.unknown} unknown</small></section></div>
+ <div className="position-chips" aria-label="Game filters">{[['all','All'],['pending','Pending'],['completed','Completed'],['unknown','Unknown']].map(([value,label])=><button key={value} className={filter===value?'selected':''} aria-pressed={filter===value} onClick={()=>setFilter(value)}>{label}</button>)}</div>
+ <p className="result-count" role="status">Showing {visible.length} of {summary.games.length} games</p>
+ {visible.length===0?<section className="card"><h2>{summary.games.length===0?'No scheduled games':'No games match this filter'}</h2><p>{summary.games.length===0?'No fixtures are included for this season.':'Choose another game filter.'}</p></section>:visible.map((game:Game)=>{const result=gameResult(game),state=gameState(game);const next=game.week===summary.nextWeek&&['Unplayed','HomeScheduled','AwayScheduled'].includes(game.status);return <article className="card fixture" key={`${game.record_id.table_id}-${game.record_id.row_id}`}><div className="fixture-top"><span>Week {game.week} · {game.controlled_team_is_home?'Home':'Away'}</span>{next&&<span className="tag">Next scheduled</span>}{result&&<span className={'tag result-'+result}>{result==='W'?'Win':result==='L'?'Loss':'Tie'}</span>}</div><div className="fixture-team"><div>{game.away_team}<small>Away</small></div><strong>{state==='completed'?(game.away_score??'—'):'—'}</strong></div><div className="fixture-team"><div>{game.home_team}<small>Home</small></div><strong>{state==='completed'?(game.home_score??'—'):'—'}</strong></div><p className="note">{state==='completed'?'Final':state==='pending'?'Pending':'Unknown status'} · {game.status}</p>{state==='completed'&&(game.home_score==null||game.away_score==null)&&<p className="note">Final score unavailable in this snapshot.</p>}</article>;})}
+ <p className="note">Results are from {team}’s perspective. Only fixtures in the current season are shown; a missing week is not assumed to be a bye.</p></>;
+}

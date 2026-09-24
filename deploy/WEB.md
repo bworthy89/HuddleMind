@@ -7,8 +7,16 @@ The Roster screen now supports all synced players, name search, quick and comple
 position filters, rating/name sorting, and player details. Detail navigation keeps
 filters and restores focus to the selected row. Depth/injury matches use both
 table and row ID; missing sections remain unavailable. In-game verification of
-those fields remains pending and is labeled in the detail screen. Schedule,
-Recruiting, and multi-dynasty selection remain pending.
+those fields remains pending and is labeled in the detail screen.
+
+Schedule shows current-season fixtures in week order, team-relative W/L/T results,
+next scheduled fixtures, and pending/completed/unknown filters. Completion comes
+from status, not score values. Unknown statuses stay unknown; gaps do not imply
+byes. Recruiting shows saved board totals and target hours separately, supports
+name/position/stage filters and rank/hours/name sorting, and expands target details
+including scholarship status. Missing boards, empty boards, and zero hours have
+different displays. No commitment odds or star ratings are invented.
+Multi-dynasty selection remains pending.
 
 ## Authentication
 
@@ -49,11 +57,12 @@ labels empty, unreachable, and stale states; missing recruiting data is not zero
 
 ## Verification
 
-- `npm test`: password/setup/session and schedule summary tests.
+- `npm test`: password/setup/session, roster, schedule outcomes, and recruit filtering/sorting tests.
 - `npm run build`: production build and TypeScript checks.
 - `node tests/http-smoke.mjs`: starts an isolated production web server and tests
   unauthenticated redirects, origin checks, setup replay, wrong/correct login,
-  secure cookie flags, receiver-unavailable display, and logout.
+  secure cookie flags, populated/empty/missing snapshot sections, receiver-unavailable
+  display, protected Schedule/Recruiting routes, and logout.
 - Python suite: read/upload credential separation, owner/dynasty scoping,
   latest-capture selection, and empty snapshots.
 

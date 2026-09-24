@@ -6,7 +6,9 @@ import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 const dir=mkdtempSync(join(tmpdir(),'huddlemind-http-'));
 const origin='http://127.0.0.1:3017';
-const receiver=createServer((request,response)=>{response.setHeader('Content-Type','application/json');response.end(JSON.stringify({dynasties:[{dynasty_id:'sample',snapshot:{observed_at:'2026-09-23T18:00:00Z',payload:{roster:{team:{name:'Sample Team',players:[]},coach:{first_name:'Sample',last_name:'Coach'}},season:{calendar_year:2026,week:2,season_index:0,stage:{label:'Season'}},schedule:[],recruiting:null}}}],bridges:[]}));});
+const payload={roster:{team:{name:'Sample Team',players:[]},coach:{first_name:'Sample',last_name:'Coach'}},season:{calendar_year:2026,week:2,season_index:0,stage:{label:'Season'}},schedule:[],recruiting:null};
+let snapshot={observed_at:'2026-09-23T18:00:00Z',payload};
+const receiver=createServer((request,response)=>{response.setHeader('Content-Type','application/json');response.end(JSON.stringify({dynasties:[{dynasty_id:'sample',snapshot}],bridges:[]}));});
 await new Promise(r=>receiver.listen(3018,'127.0.0.1',r));
 const server=spawn(process.execPath,['node_modules/next/dist/bin/next','start','-p','3017'],{stdio:'ignore',env:{...process.env,
  HUDDLEMIND_AUTH_FILE:join(dir,'auth.json'),HUDDLEMIND_WEB_ORIGIN:origin,HUDDLEMIND_SESSION_SECRET:'s'.repeat(48),
@@ -27,10 +29,19 @@ try{
  for(const section of ['roster','schedule','recruiting']){
   assert.ok(html.includes('href="/app/'+section+'"'));
   const page=await fetch(origin+'/app/'+section,{headers:{Cookie:cookie.split(';')[0]}});
-  assert.equal(page.status,200);assert.ok((await page.text()).includes(section==='roster'?'No roster players':'Coming next'));
+  assert.equal(page.status,200);assert.ok((await page.text()).includes({roster:'No roster players',schedule:'No scheduled games',recruiting:'Recruiting board unavailable'}[section]));
   assert.equal((await fetch(origin+'/app/'+section,{redirect:'manual'})).status,307);
  }
+ const getPage=async section=>(await fetch(origin+'/app/'+section,{headers:{Cookie:cookie.split(';')[0]}})).text();
+ payload.schedule=[{record_id:{table_id:1,row_id:0},season_index:0,week:1,status:'AwayWon',controlled_team_is_home:false,home_team:'Sample Home',away_team:'Sample Team',home_score:23,away_score:28},
+ {record_id:{table_id:1,row_id:1},season_index:0,week:2,status:'Unplayed',controlled_team_is_home:true,home_team:'Sample Team',away_team:'Next Opponent',home_score:0,away_score:0}];
+ const schedule=await getPage('schedule');for(const text of ['Sample Home','Next Opponent','Next scheduled','Win','Final'])assert.ok(schedule.includes(text));
+ payload.recruiting={hours_total:480,hours_assigned:0,hours_processed:0,targets:[{record_id:{table_id:2,row_id:1},name:'Sample Recruit',position:{label:'QB'},stage:{label:'Top5'},scholarship:{label:'Offered'},national_rank:1,position_rank:1,hours_spent_current:0}]};
+ const recruiting=await getPage('recruiting');for(const text of ['Sample Recruit','480','Top5','Offered','Current target hours'])assert.ok(recruiting.includes(text));
+ payload.recruiting.targets=[];assert.ok((await getPage('recruiting')).includes('No recruiting targets'));
+ snapshot=null;for(const section of ['schedule','recruiting'])assert.ok((await getPage(section)).includes('No snapshot received yet'));
  await new Promise(r=>receiver.close(r));
+ for(const section of ['schedule','recruiting'])assert.ok((await getPage(section)).includes('Your saved data has not been removed'));
  const unavailable=await fetch(origin+'/app',{headers:{Cookie:cookie.split(';')[0]}});assert.ok((await unavailable.text()).includes('We couldn’t load your dynasty'));
  const logout=await post({action:'logout'});assert.ok(logout.headers.get('set-cookie').includes('Max-Age=0'));
  console.log('Production HTTP smoke passed: route protection, CSRF, enrollment, login, cookie flags, error state, logout.');

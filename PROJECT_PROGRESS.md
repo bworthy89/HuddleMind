@@ -1,11 +1,22 @@
 # HuddleMind — Project Progress & Learning Tracker
 
 **Repository:** `bworthy89/HuddleMind`  
-**Current Phase:** Milestone 6 - Web Headquarters (private Overview deployed)
+**Current Phase:** Milestone 6 - Web Headquarters (Overview, Roster, Schedule, Recruiting)
 
 **Current Status:** The hosted receiver is live behind Nginx at https://huddlemind-api.worthymedia.tech. Database version 4 tracks acknowledgments by receiver origin while preserving legacy history. Daily receiver backups now retain 14 successful copies and verify each through isolated restoration. The first VPS backup and a downloaded copy restored both stored events. Windows Task Scheduler retries queued delivery every five minutes while the user is logged in; the first run succeeded with zero pending deliveries. Credentials remain DPAPI-protected. See deploy/OPERATIONS.md for controls and recovery limits. Ongoing off-server backup replication and failure notifications remain future work. Milestone 3 depth-chart/injury UI checks remain deferred.
 
-**Last Updated:** 2026-09-23
+**Last Updated:** 2026-09-24
+
+Milestone 6 Schedule and Recruiting tabs: authenticated snapshot-backed routes
+now show current-season fixtures, team-relative results, next-week fixtures,
+and pending/completed/unknown filters. Recruiting includes board hours, name
+search, position/stage filters, rank/hours/name sorting, and expandable target
+details with scholarship status. Missing boards remain distinct from empty
+boards; unknown labels and zero hours are preserved. No star ratings, odds,
+bye weeks, or live hour balances are inferred. Ten web unit tests, production
+build, and expanded HTTP smoke checks passed. Mobile browser checks at 390px
+verified filters, long names, recruit details, and the persistent four-tab bar.
+Owner phone acceptance and the previously deferred game checks remain pending.
 
 Milestone 6 roster slice: `/app/roster` reads the authorized latest snapshot and
 provides name search, every position filter, rating/name sorting, and player
