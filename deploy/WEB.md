@@ -3,7 +3,12 @@
 `/app` runs Next.js with TypeScript. `/preview/` remains the public sample design.
 This release provides single-owner sign-in and a live read-only Overview with
 snapshot freshness, next game, record, roster/recruiting counts, and bridge status.
-The full roster/schedule/recruiting screens and multi-dynasty selector are pending.
+The Roster screen now supports all synced players, name search, quick and complete
+position filters, rating/name sorting, and player details. Detail navigation keeps
+filters and restores focus to the selected row. Depth/injury matches use both
+table and row ID; missing sections remain unavailable. In-game verification of
+those fields remains pending and is labeled in the detail screen. Schedule,
+Recruiting, and multi-dynasty selection remain pending.
 
 ## Authentication
 

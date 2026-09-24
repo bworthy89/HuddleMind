@@ -27,7 +27,7 @@ try{
  for(const section of ['roster','schedule','recruiting']){
   assert.ok(html.includes('href="/app/'+section+'"'));
   const page=await fetch(origin+'/app/'+section,{headers:{Cookie:cookie.split(';')[0]}});
-  assert.equal(page.status,200);assert.ok((await page.text()).includes('Coming next'));
+  assert.equal(page.status,200);assert.ok((await page.text()).includes(section==='roster'?'No roster players':'Coming next'));
   assert.equal((await fetch(origin+'/app/'+section,{redirect:'manual'})).status,307);
  }
  await new Promise(r=>receiver.close(r));

@@ -7,6 +7,14 @@
 
 **Last Updated:** 2026-09-23
 
+Milestone 6 roster slice: `/app/roster` reads the authorized latest snapshot and
+provides name search, every position filter, rating/name sorting, and player
+details joined by full record ID. Search/filter state and row focus survive
+detail navigation. Missing depth/injury data is distinct from no placement;
+deferred game verification is labeled. Six web unit tests, production build,
+HTTP authentication/route checks, and a 390px browser review with synthetic data
+passed. The four-tab mobile bar remains visible. Owner phone review is pending.
+
 Milestone 6 first functional slice: approved phone-first design retained at
 `/preview/`; private Next.js/TypeScript app deployed at `/app`. One-time enrollment
 lets the owner choose a password, with a salted scrypt hash and expiring secure

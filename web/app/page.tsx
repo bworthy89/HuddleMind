@@ -4,6 +4,7 @@ import {validSession,cookieName} from '../lib/auth.mjs';
 import {summarize} from '../lib/overview.mjs';
 import SignOut from './sign-out';
 import BottomNav from './bottom-nav';
+import Link from 'next/link';
 export const dynamic='force-dynamic';
 type Game={week:number;season_index:number;away_team:string;home_team:string;status:string;controlled_team_is_home:boolean};
 type Snapshot={observed_at:string;payload:{roster:{team:{name:string;players:unknown[]};coach:{first_name:string;last_name:string}};season:{calendar_year:number;week:number;season_index:number;stage:{label:string}};schedule:Game[];recruiting:{targets:unknown[];hours_total:number;hours_assigned:number}|null}};
@@ -19,7 +20,7 @@ export default async function Overview(){
  }catch{}
  const entry=data?.dynasties[0],snapshot=entry?.snapshot,p=snapshot?.payload;
  const bridge=data?.bridges.find(b=>b.dynasty_id===entry?.dynasty_id),summary=p?summarize(p):null;
- return <div className="shell"><aside><div className="brand">Huddle<span>Mind</span></div><div className="active">Overview</div><p className="note">Roster, Schedule, and Recruiting screens are coming next.</p><a href="/preview/">Design preview ↗</a></aside><div><header><div className="brand">Huddle<span>Mind</span></div><span className="dynasty">{p?.roster.team.name||'Your dynasty'}</span><SignOut/></header><main>
+ return <div className="shell"><aside><div className="brand">Huddle<span>Mind</span></div><Link className="active" href="/">Overview</Link><Link href="/roster">Roster</Link><Link href="/schedule">Schedule</Link><Link href="/recruiting">Recruiting</Link><a href="/preview/">Design preview ↗</a></aside><div><header><div className="brand">Huddle<span>Mind</span></div><span className="dynasty">{p?.roster.team.name||'Your dynasty'}</span><SignOut/></header><main>
  <a className="status" href="#bridge"><span className={bridge?.status==='online'?'dot':'dot muted'}/>{bridge?'Bridge '+bridge.status:'Bridge status unavailable'} <span>· View details</span></a>
  {!data?<section className="card"><h1>We couldn’t load your dynasty</h1><p>Your saved snapshots have not been removed. Refresh to try again.</p><a className="button" href="/app">Try again</a></section>:!p?<section className="card"><h1>Your headquarters is ready</h1><p>No snapshot has arrived yet. Start capture on your gaming PC and let the bridge deliver your first observation.</p></section>:<>
  <div className="eyebrow">Your dynasty, at a glance</div><h1>{p.roster.team.name}</h1><p>Coach {p.roster.coach.first_name} {p.roster.coach.last_name}</p>
