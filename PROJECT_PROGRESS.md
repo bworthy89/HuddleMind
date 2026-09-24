@@ -1,11 +1,21 @@
 # HuddleMind — Project Progress & Learning Tracker
 
 **Repository:** `bworthy89/HuddleMind`  
-**Current Phase:** Milestone 7 - Dynasty Brain preparation (individual player ratings)
+**Current Phase:** Milestone 7 - Dynasty Brain (rating and position-depth summaries)
 
 **Current Status:** The hosted receiver is live behind Nginx at https://huddlemind-api.worthymedia.tech. Database version 4 tracks acknowledgments by receiver origin while preserving legacy history. Daily receiver backups now retain 14 successful copies and verify each through isolated restoration. The first VPS backup and a downloaded copy restored both stored events. Windows Task Scheduler retries queued delivery every five minutes while the user is logged in; the first run succeeded with zero pending deliveries. Credentials remain DPAPI-protected. See deploy/OPERATIONS.md for controls and recovery limits. Ongoing off-server backup replication and failure notifications remain future work. Milestone 3 depth-chart/injury UI checks remain deferred.
 
 **Last Updated:** 2026-09-24
+
+Milestone 7 summary checkpoint: individual-rating helpers preserve zero versus
+unavailable, calculate averages from available ratings, and report coverage.
+`show_roster --rating SpeedRating` displays the full-roster summary and rejects
+unsupported field names. `--depth` reports position counts, top two overall
+ratings and their gap using stable ranking, not the game's depth-chart order.
+The two summary modes are mutually exclusive; exports still contain the full
+snapshot. All 257 Python tests pass, including 39 roster tests. Next learning
+step: configurable roster targets and shortfalls, including absent positions.
+No recruiting policy or recommendation thresholds have been implemented yet.
 
 Player rating foundation: the reader now carries 56 explicit saved rating fields
 through immutable player models, exports, observations and sync. Receiver accepts
@@ -15,8 +25,7 @@ from zero. Current Tulane save read-only verification found 56 fields for each o
 85 players. Base-versus-boosted semantics remain unverified and are labeled.
 236 Python tests, 13 web tests, production build, HTTP checks and mobile review
 passed. Existing history is immutable: fresh enriched delivery waits for a new
-save (restart any existing watcher). See docs/PLAYER_RATINGS.md. Next learning
-step: Python position-depth analysis using the richer models.
+save (restart any existing watcher). See docs/PLAYER_RATINGS.md.
 
 Milestone 6 dynasty selection: all four tabs share an authenticated dashboard
 loader and remember the selected authorized dynasty in a secure, HttpOnly cookie.

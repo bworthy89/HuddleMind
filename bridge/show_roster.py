@@ -7,7 +7,10 @@ from bridge.roster_summary import (
     average_overall_by_position,
     best_overall_by_position,
     count_players_by_position,
+    summarize_rating_by_position,
+    summarize_position_depth,
 )
+from bridge.player_ratings import RATING_FIELDS
 
 def main() -> None:
     # Accept file paths from the command line instead of hardcoding them.
@@ -28,6 +31,21 @@ def main() -> None:
         "--export",
         type=Path,
         help="Write the full snapshot to a new JSON file.",
+    )
+
+    # Allow one summary mode at a time so neither option is silently ignored.
+    summary_options = parser.add_mutually_exclusive_group()
+
+    summary_options.add_argument(
+        "--rating",
+        choices=RATING_FIELDS,
+        help="Show a rating summary, such as SpeedRating or StrengthRating.",
+    )
+
+    summary_options.add_argument(
+        "--depth",
+        action="store_true",
+        help="Show position depth by overall rating, not game depth-chart order.",
     )
 
     args = parser.parse_args()
@@ -55,6 +73,68 @@ def main() -> None:
     print("Coach:", snapshot.coach.full_name)
     print("Team:", snapshot.team.name)
     print("Roster size:", len(snapshot.team.players))
+
+    # Summarize the complete roster using overall-rating order.
+    if args.depth:
+        summary = summarize_position_depth(snapshot.team.players)
+
+        print()
+        print("Ordered by overall rating, not the game's depth chart.")
+        print(
+            f"{'Position':<10} {'Players':>7} "
+            f"{'Top OVR':>8} {'Next OVR':>9} {'Gap':>5}"
+        )
+        print("-" * 43)
+
+        for position, details in summary.items():
+            # A missing second player has no rating gap to calculate.
+            next_overall = details["next_overall"]
+            gap = details["gap"]
+
+            next_text = (
+                "N/A" if next_overall is None else str(next_overall)
+            )
+            gap_text = "N/A" if gap is None else str(gap)
+
+            print(
+                f"{position:<10} {details['roster_count']:>7} "
+                f"{details['top_overall']:>8} "
+                f"{next_text:>9} {gap_text:>5}"
+            )
+
+        # Finish after displaying the requested depth summary.
+        return
+
+    # Show the requested attribute summary using the complete roster.
+    if args.rating is not None:
+        summary = summarize_rating_by_position(
+            snapshot.team.players,
+            args.rating,
+        )
+
+        print()
+        print("Rating:", args.rating)
+        print(f"{'Position':<10} {'Rated/Total':>12} {'Average':>12}")
+        print("-" * 36)
+
+        for position, details in summary.items():
+            # Report how many players contributed to the average.
+            coverage = (
+                f"{details['rated_players']}/{details['roster_count']}"
+            )
+
+            # Missing values stay distinct from a real average of zero.
+            average = details["average"]
+            average_text = (
+                "Unavailable" if average is None else f"{average:.1f}"
+            )
+
+            print(
+                f"{position:<10} {coverage:>12} {average_text:>12}"
+            )
+
+        # Finish after the requested rating summary.
+        return
 
     # Calculate summaries from the full roster, independent of display filtering.
     position_counts = count_players_by_position(snapshot.team.players)
