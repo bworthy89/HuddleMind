@@ -1,10 +1,13 @@
 # Hostinger VPS deployment preparation
 
 Target selected by the owner: the second VPS, `srv1391279.hstgr.cloud`.
-Existing stopped website containers must be preserved. These files are prepared;
-they have not been deployed. The production HTTP adapter passes local tests,
-including actual Waitress requests. Docker image build, Compose startup, Linux
-volume permissions, external TLS, and restart persistence still require validation.
+Existing stopped website containers are preserved. Release `4a8735b` is deployed
+at https://huddlemind-api.worthymedia.tech using the Nginx override. The image built
+on the VPS, the non-root receiver is healthy, and external HTTPS synthetic tests
+returned 201 for insertion, 200 for duplicate delivery, and 401 for invalid
+credentials. Repeating the same test after container restart confirmed persistence.
+No real dynasty observations have been uploaded. The deployment contains one
+clearly named synthetic verification snapshot.
 
 ## Before deployment
 
@@ -27,9 +30,11 @@ tunnel is running with host networking, and UFW permits 22/80/443. Preserve thes
 services. On this server, use both `-f deploy/compose.yaml` and
 `-f deploy/compose.nginx.yaml` for all Compose commands. This disables the Caddy
 service by profile and binds the receiver to `127.0.0.1:8765`. Install
-`deploy/nginx.conf` as a separate site after checking `nginx -t`. Provision TLS
-for `huddlemind-api.worthymedia.tech` using Certbot's Nginx integration. Deployment
-and certificate issuance require the owner's final approval; neither has run.
+`deploy/nginx.conf` as a separate site after checking `nginx -t`. TLS was provisioned
+with Certbot's Nginx integration following owner approval. The certificate initially
+expires December 23, 2026; the automatic renewal timer is active. Nginx and the
+existing Newt container remained running. The private runtime token is stored
+only in `/opt/huddlemind/deploy/.env` with mode 0600 and container runtime settings.
 
 Run from a checked-out, reviewed release of the repository:
 
@@ -65,5 +70,6 @@ python -m unittest bridge.test_hosted_receiver -v
 ```
 
 Without the optional deployment dependency, the Waitress integration test skips.
-The full suite with it installed passed 200 tests. Hosted deployment is pending
-hostname selection and server access checks.
+The full suite with it installed passed 200 tests. Hosted deployment and synthetic
+HTTPS acceptance are complete. Application backup/restore testing and destination
+migration for the previously delivered local event remain pending.

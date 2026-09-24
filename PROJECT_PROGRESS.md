@@ -1,9 +1,9 @@
 # HuddleMind — Project Progress & Learning Tracker
 
 **Repository:** `bworthy89/HuddleMind`  
-**Current Phase:** Milestone 5 - Cloud Bridge (VPS deployment preparation)
+**Current Phase:** Milestone 5 - Cloud Bridge (hosted receiver validated)
 
-**Current Status:** The user confirmed successful local delivery and selected the second Hostinger VPS. A production WSGI receiver, pinned Waitress dependency, Dockerfile, Compose stack, and Caddy configuration are prepared. All 200 tests pass with deployment dependencies installed. No VPS changes have been made; domain/SSH details, non-Docker service checks, container validation, and hosted HTTPS acceptance remain pending. Background retry scheduling and Milestone 3 depth-chart/injury UI checks remain deferred. See deploy/README.md.
+**Current Status:** The production receiver is deployed on the selected Hostinger VPS behind existing Nginx at https://huddlemind-api.worthymedia.tech. Container build/health, HTTPS, authenticated synthetic insertion, duplicate acknowledgment, invalid-token rejection, and restart persistence passed. All 200 local tests pass with deployment dependencies installed. Existing services remain running; no real dynasty data has been uploaded. Destination migration from the local receiver, application backup/restore validation, and background retry scheduling remain pending. Milestone 3 depth-chart/injury UI checks remain deferred. See deploy/README.md.
 
 **Last Updated:** 2026-09-23
 
