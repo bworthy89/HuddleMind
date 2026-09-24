@@ -22,7 +22,14 @@ try{
  assert.equal((await post({action:'setup',key:'test-key',password:'another sufficiently long password'})).status,401);
  assert.equal((await post({action:'login',password:'wrong'})).status,401);
  assert.equal((await post({action:'login',password:'a sufficiently long test password'})).status,200);
- const home=await fetch(origin+'/app',{headers:{Cookie:cookie.split(';')[0]}});assert.equal(home.status,200);assert.ok((await home.text()).includes('Sample Team'));
+ const home=await fetch(origin+'/app',{headers:{Cookie:cookie.split(';')[0]}});assert.equal(home.status,200);const html=await home.text();assert.ok(html.includes('Sample Team'));
+ assert.ok(html.includes('aria-label="Main navigation"'));
+ for(const section of ['roster','schedule','recruiting']){
+  assert.ok(html.includes('href="/app/'+section+'"'));
+  const page=await fetch(origin+'/app/'+section,{headers:{Cookie:cookie.split(';')[0]}});
+  assert.equal(page.status,200);assert.ok((await page.text()).includes('Coming next'));
+  assert.equal((await fetch(origin+'/app/'+section,{redirect:'manual'})).status,307);
+ }
  await new Promise(r=>receiver.close(r));
  const unavailable=await fetch(origin+'/app',{headers:{Cookie:cookie.split(';')[0]}});assert.ok((await unavailable.text()).includes('We couldn’t load your dynasty'));
  const logout=await post({action:'logout'});assert.ok(logout.headers.get('set-cookie').includes('Max-Age=0'));
