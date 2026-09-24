@@ -1,0 +1,10 @@
+[Unit]
+Description=Back up HuddleMind receiver and verify restoration
+After=docker.service
+
+[Service]
+Type=oneshot
+UMask=0077
+ExecStart=/usr/bin/python3 /opt/huddlemind-ops/backup_receiver.py /var/lib/docker/volumes/huddlemind_receiver-data/_data/receiver.sqlite3 /var/backups/huddlemind --keep 14
+TimeoutStartSec=300
+Nice=10

@@ -3,9 +3,13 @@
 **Repository:** `bworthy89/HuddleMind`  
 **Current Phase:** Milestone 5 - Cloud Bridge (hosted receiver validated)
 
-**Current Status:** The hosted receiver is live behind Nginx at https://huddlemind-api.worthymedia.tech. Database version 4 tracks acknowledgments by receiver origin while preserving legacy history. The local database was backed up and upgraded, one real observation reached the hosted receiver, and subsequent sends reported zero. A Windows DPAPI-protected credential supports bridge/send_hosted.ps1. All 204 tests pass. Application backup/restore validation and background retry scheduling remain pending. Milestone 3 depth-chart/injury UI checks remain deferred.
+**Current Status:** The hosted receiver is live behind Nginx at https://huddlemind-api.worthymedia.tech. Database version 4 tracks acknowledgments by receiver origin while preserving legacy history. Daily receiver backups now retain 14 successful copies and verify each through isolated restoration. The first VPS backup and a downloaded copy restored both stored events. Windows Task Scheduler retries queued delivery every five minutes while the user is logged in; the first run succeeded with zero pending deliveries. Credentials remain DPAPI-protected. See deploy/OPERATIONS.md for controls and recovery limits. Ongoing off-server backup replication and failure notifications remain future work. Milestone 3 depth-chart/injury UI checks remain deferred.
 
 **Last Updated:** 2026-09-23
+
+Backup and delivery operations checkpoint: **211 automated tests pass**. The daily
+backup service completed successfully with two restored events, and two Windows
+scheduled delivery runs returned success. See `deploy/OPERATIONS.md`.
 
 ### Schedule/results application checkpoint
 
