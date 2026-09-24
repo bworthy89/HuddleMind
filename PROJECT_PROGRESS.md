@@ -1,11 +1,23 @@
 # HuddleMind — Project Progress & Learning Tracker
 
 **Repository:** `bworthy89/HuddleMind`  
-**Current Phase:** Milestone 5 - Cloud Bridge (hosted receiver validated)
+**Current Phase:** Milestone 6 - Web Headquarters (private Overview deployed)
 
 **Current Status:** The hosted receiver is live behind Nginx at https://huddlemind-api.worthymedia.tech. Database version 4 tracks acknowledgments by receiver origin while preserving legacy history. Daily receiver backups now retain 14 successful copies and verify each through isolated restoration. The first VPS backup and a downloaded copy restored both stored events. Windows Task Scheduler retries queued delivery every five minutes while the user is logged in; the first run succeeded with zero pending deliveries. Credentials remain DPAPI-protected. See deploy/OPERATIONS.md for controls and recovery limits. Ongoing off-server backup replication and failure notifications remain future work. Milestone 3 depth-chart/injury UI checks remain deferred.
 
 **Last Updated:** 2026-09-23
+
+Milestone 6 first functional slice: approved phone-first design retained at
+`/preview/`; private Next.js/TypeScript app deployed at `/app`. One-time enrollment
+lets the owner choose a password, with a salted scrypt hash and expiring secure
+session cookie. A separate server-held read credential authorizes latest-snapshot
+and health retrieval without allowing uploads. Overview renders season, record,
+next game, roster/recruiting counts, freshness, and bridge status. Read API verified
+the actual Tulane snapshot; existing sender still succeeds. **231 Python tests,
+3 web unit tests, TypeScript/production build, and production HTTP checks pass**,
+including successful authenticated sample rendering and API-unavailable state.
+Owner password setup and phone acceptance are pending. Detailed roster, schedule,
+recruiting, and multi-dynasty selection remain next slices. No new in-game test ran.
 
 Bridge health checkpoint: **227 tests pass**. Authenticated
 `/v1/bridge-health` stores owner/dynasty-scoped reports and exposes server-timed
