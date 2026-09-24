@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from bridge.local_store import initialize_database
+from bridge.local_store import initialize_database, DATABASE_VERSION
 from bridge.outbox_schema import validate_outbox_schema
 
 
@@ -34,7 +34,7 @@ class OutboxMigrationTests(unittest.TestCase):
 
     def legacy(self):
         initialize_database(self.path)
-        self.execute("""DROP TABLE sync_outbox;
+        self.execute("""DROP TABLE sync_deliveries; DROP TABLE sync_outbox;
             INSERT INTO dynasties VALUES ('d','Sample');
             INSERT INTO observations VALUES (1,'d','original time','save','schema','{}');
             INSERT INTO recommendations VALUES ('r',1,'time','advice','reason','manual');
@@ -46,7 +46,7 @@ class OutboxMigrationTests(unittest.TestCase):
         with redirect_stdout(output):
             initialize_database(self.path)
         self.assertEqual(output.getvalue(), '')
-        self.assertEqual(self.state()[0], 3)
+        self.assertEqual(self.state()[0], DATABASE_VERSION)
         connection = sqlite3.connect(self.path)
         try:
             validate_outbox_schema(connection)
@@ -65,7 +65,7 @@ class OutboxMigrationTests(unittest.TestCase):
         try:
             after = {name: connection.execute(f'SELECT * FROM {name}').fetchall() for name in names}
             self.assertEqual(before, after)
-            self.assertEqual(connection.execute('PRAGMA user_version').fetchone()[0], 3)
+            self.assertEqual(connection.execute('PRAGMA user_version').fetchone()[0], DATABASE_VERSION)
         finally:
             connection.close()
 
@@ -79,7 +79,7 @@ class OutboxMigrationTests(unittest.TestCase):
 
     def test_invalid_structure_rejected_without_changes(self):
         initialize_database(self.path)
-        self.execute('DROP TABLE sync_outbox; CREATE TABLE sync_outbox (wrong TEXT);')
+        self.execute('DROP TABLE sync_deliveries; DROP TABLE sync_outbox; CREATE TABLE sync_outbox (wrong TEXT);')
         before = self.state()
         with self.assertRaisesRegex(ValueError, 'structure'):
             initialize_database(self.path)
@@ -87,7 +87,7 @@ class OutboxMigrationTests(unittest.TestCase):
 
     def test_missing_version_three_table_rejected(self):
         initialize_database(self.path)
-        self.execute('DROP TABLE sync_outbox;')
+        self.execute('DROP TABLE sync_deliveries; DROP TABLE sync_outbox;')
         with self.assertRaisesRegex(ValueError, 'Missing sync outbox'):
             initialize_database(self.path)
 

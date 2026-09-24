@@ -3,7 +3,7 @@
 **Repository:** `bworthy89/HuddleMind`  
 **Current Phase:** Milestone 5 - Cloud Bridge (hosted receiver validated)
 
-**Current Status:** The production receiver is deployed on the selected Hostinger VPS behind existing Nginx at https://huddlemind-api.worthymedia.tech. Container build/health, HTTPS, authenticated synthetic insertion, duplicate acknowledgment, invalid-token rejection, and restart persistence passed. All 200 local tests pass with deployment dependencies installed. Existing services remain running; no real dynasty data has been uploaded. Destination migration from the local receiver, application backup/restore validation, and background retry scheduling remain pending. Milestone 3 depth-chart/injury UI checks remain deferred. See deploy/README.md.
+**Current Status:** The hosted receiver is live behind Nginx at https://huddlemind-api.worthymedia.tech. Database version 4 tracks acknowledgments by receiver origin while preserving legacy history. The local database was backed up and upgraded, one real observation reached the hosted receiver, and subsequent sends reported zero. A Windows DPAPI-protected credential supports bridge/send_hosted.ps1. All 204 tests pass. Application backup/restore validation and background retry scheduling remain pending. Milestone 3 depth-chart/injury UI checks remain deferred.
 
 **Last Updated:** 2026-09-23
 

@@ -50,6 +50,13 @@ def post_event(address, token, body, timeout):
         connection.close()
 
 
+def receiver_origin(address):
+    scheme, host, port = address
+    host = '[' + host + ']' if ':' in host else host
+    suffix = '' if port is None or port == (443 if scheme == 'https' else 80) else ':' + str(port)
+    return f'{scheme}://{host}{suffix}'
+
+
 def retry_delay(header, attempt):
     delay = min(2 ** (attempt - 1), 30)
     if header:
@@ -86,6 +93,7 @@ def verify_ack(status, content_type, body, event_id):
 def send_pending(path, dynasty_id, receiver, token, *, attempts=3, timeout=10):
     """Drain this dynasty's current pending batch; stop at the first failed event."""
     address = receiver_address(receiver)
+    destination = receiver_origin(address)
     if not isinstance(token, str) or len(token) < 32 or not token.isascii() or any(c.isspace() for c in token):
         raise ValueError('Sender token must be at least 32 non-whitespace ASCII characters')
     if type(attempts) is not int or not 1 <= attempts <= 5:
@@ -93,7 +101,7 @@ def send_pending(path, dynasty_id, receiver, token, *, attempts=3, timeout=10):
     if not math.isfinite(timeout) or not 0 < timeout <= 60:
         raise ValueError('Timeout must be greater than zero and at most 60 seconds')
     delivered = 0
-    for event in list_pending_events(path, dynasty_id):
+    for event in list_pending_events(path, dynasty_id, destination):
         # Send the persisted bytes unchanged on every attempt, including after restart.
         body = event.event_json.encode('utf-8')
         for attempt in range(1, attempts + 1):
@@ -105,7 +113,7 @@ def send_pending(path, dynasty_id, receiver, token, *, attempts=3, timeout=10):
             else:
                 if status in (200, 201):
                     verify_ack(status, content_type, response, event.event_id)
-                    mark_delivered(path, dynasty_id, event)
+                    mark_delivered(path, dynasty_id, event, destination)
                     delivered += 1
                     break
                 failure = f'Receiver returned HTTP {status}'

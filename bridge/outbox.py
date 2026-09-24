@@ -64,22 +64,25 @@ def queue_observation(path, dynasty_id: str, observation_id: int) -> QueuedEvent
         connection.close()
 
 
-def list_pending_events(path, dynasty_id: str) -> tuple[QueuedEvent, ...]:
+def list_pending_events(path, dynasty_id: str, receiver: str | None = None) -> tuple[QueuedEvent, ...]:
     connection = _connect(path, read_only=True)
     try:
         if connection.execute('SELECT 1 FROM dynasties WHERE dynasty_id=?', (dynasty_id,)).fetchone() is None:
             raise ValueError('Dynasty not found')
         # Return stored JSON exactly as queued, without rebuilding the envelope.
+        pending = 'q.delivered_at IS NULL' if receiver is None else '''NOT EXISTS (
+            SELECT 1 FROM sync_deliveries d WHERE d.event_id=q.event_id AND d.receiver=?)'''
+        parameters = (dynasty_id,) if receiver is None else (dynasty_id, receiver)
         rows = connection.execute('''SELECT q.event_id, q.observation_id, q.schema_version,
             q.event_json, q.queued_at, q.delivered_at FROM sync_outbox q
             JOIN observations o ON o.observation_id=q.observation_id
-            WHERE o.dynasty_id=? AND q.delivered_at IS NULL ORDER BY q.rowid''', (dynasty_id,)).fetchall()
+            WHERE o.dynasty_id=? AND ''' + pending + ' ORDER BY q.rowid', parameters).fetchall()
         return tuple(QueuedEvent(*row) for row in rows)
     finally:
         connection.close()
 
 
-def mark_delivered(path, dynasty_id: str, event: QueuedEvent) -> None:
+def mark_delivered(path, dynasty_id: str, event: QueuedEvent, receiver: str | None = None) -> None:
     """Record a verified acknowledgment without changing the queued message."""
     connection = _connect(path, read_only=False)
     try:
@@ -91,9 +94,14 @@ def mark_delivered(path, dynasty_id: str, event: QueuedEvent) -> None:
                 (event.event_id, dynasty_id)).fetchone()
             if row is None or row[0] != event.event_json:
                 raise ValueError('Queued event no longer matches the acknowledged message')
+            timestamp = datetime.now(timezone.utc).isoformat()
+            if receiver is not None:
+                connection.execute('''INSERT INTO sync_deliveries(event_id, receiver, delivered_at)
+                    VALUES (?, ?, ?) ON CONFLICT(event_id, receiver) DO NOTHING''',
+                    (event.event_id, receiver, timestamp))
             # Concurrent senders preserve the first successful delivery timestamp.
             connection.execute('''UPDATE sync_outbox SET delivered_at=?
                 WHERE event_id=? AND delivered_at IS NULL''',
-                (datetime.now(timezone.utc).isoformat(), event.event_id))
+                (timestamp, event.event_id))
     finally:
         connection.close()

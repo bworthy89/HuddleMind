@@ -7,7 +7,7 @@ from dataclasses import asdict
 from bridge.dynasty_details import DynastyDetails
 from datetime import datetime, timezone
 
-DATABASE_VERSION = 3
+DATABASE_VERSION = 4
 
 def validate_database_columns(connection: sqlite3.Connection) -> None:
     # Describe the columns required by database version 1.
@@ -166,8 +166,13 @@ def initialize_database(database_path: Path) -> None:
             create_outbox_schema(connection)
         validate_outbox_schema(connection)
 
+        from bridge.delivery_schema import create_schema as create_deliveries, validate_schema as validate_deliveries
+        if version < 4:
+            create_deliveries(connection)
+        validate_deliveries(connection)
+
         # Commit the schema changes and version assignment together.
-        connection.execute("PRAGMA user_version = 3")
+        connection.execute("PRAGMA user_version = 4")
         connection.commit()
     except Exception:
         # Undo initialization changes if any validation or database step fails.

@@ -36,7 +36,7 @@ class MigrationTests(unittest.TestCase):
 
     def test_legacy_upgrade_preserves_records(self):
         initialize_database(self.path)
-        self.execute("INSERT INTO dynasties VALUES ('id','Sample'); DROP TABLE sync_outbox; DROP TABLE recommendation_events; DROP TABLE recommendations; PRAGMA user_version=0;")
+        self.execute("INSERT INTO dynasties VALUES ('id','Sample'); DROP TABLE sync_deliveries; DROP TABLE sync_outbox; DROP TABLE recommendation_events; DROP TABLE recommendations; PRAGMA user_version=0;")
         initialize_database(self.path)
         connection = sqlite3.connect(self.path)
         try:
@@ -86,7 +86,7 @@ class MigrationTests(unittest.TestCase):
 
     def test_version_one_upgrade_preserves_full_observation(self):
         initialize_database(self.path)
-        self.execute("DROP TABLE sync_outbox; DROP TABLE recommendation_events; DROP TABLE recommendations;"
+        self.execute("DROP TABLE sync_deliveries; DROP TABLE sync_outbox; DROP TABLE recommendation_events; DROP TABLE recommendations;"
                      "INSERT INTO dynasties VALUES ('id','Sample');"
                      "INSERT INTO observations VALUES (1,'id','original time','hash','schema','{\"sample\":true}');"
                      "PRAGMA user_version=1;")
@@ -101,7 +101,7 @@ class MigrationTests(unittest.TestCase):
 
     def test_version_two_validation_failure_rolls_back_new_tables(self):
         initialize_database(self.path)
-        self.execute('DROP TABLE sync_outbox; DROP TABLE recommendation_events; DROP TABLE recommendations; PRAGMA user_version=1;')
+        self.execute('DROP TABLE sync_deliveries; DROP TABLE sync_outbox; DROP TABLE recommendation_events; DROP TABLE recommendations; PRAGMA user_version=1;')
         before = self.state()
         with patch('bridge.recommendation_schema.validate_schema', side_effect=ValueError('injected')):
             with self.assertRaisesRegex(ValueError, 'injected'):

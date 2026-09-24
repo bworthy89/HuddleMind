@@ -1,5 +1,29 @@
 # Sending queued observations
 
+## Configured hosted connection
+
+On the owner's Windows PC, run `.\bridge\send_hosted.ps1` from the repository
+root. It uses the hosted HTTPS endpoint and a Windows DPAPI-protected credential
+in ignored `local_data/hosted-token.xml`. Only the same Windows account on this
+PC can decrypt that credential. The helper restores the prior token environment
+variable on exit.
+
+Database version 4 adds `sync_deliveries`, keyed by event ID and canonical receiver
+origin. The sender uses those receipts, so locally delivered events can reach the
+hosted receiver using their original IDs and JSON. Hostname case, default ports,
+and trailing slash normalize to the same origin. Changing owner or rebuilding
+storage at an existing origin still requires a separate migration.
+
+Legacy `sync_outbox.delivered_at` values remain historical first-delivery times;
+the migration does not invent a destination for them. Legacy events may therefore
+retry once against their former receiver, which safely acknowledges duplicates.
+The no-destination `list_pending_events` call retains legacy semantics; destination
+status requires passing the receiver origin.
+
+The owner's database was backed up and upgraded without changing existing rows.
+One real observation reached the hosted receiver, and subsequent sends reported
+zero. Full suite: 204 passing tests.
+
 The sender transmits pending events from the local outbox to the receiving API.
 It uses their exact stored JSON and event IDs. It does not load game saves or
 create new observations.

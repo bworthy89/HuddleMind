@@ -6,8 +6,8 @@ at https://huddlemind-api.worthymedia.tech using the Nginx override. The image b
 on the VPS, the non-root receiver is healthy, and external HTTPS synthetic tests
 returned 201 for insertion, 200 for duplicate delivery, and 401 for invalid
 credentials. Repeating the same test after container restart confirmed persistence.
-No real dynasty observations have been uploaded. The deployment contains one
-clearly named synthetic verification snapshot.
+One real dynasty observation has been uploaded using version-4 destination-aware
+delivery. The deployment also contains one synthetic verification snapshot.
 
 ## Before deployment
 
@@ -58,9 +58,9 @@ not proof that an application-level restore has been tested.
 
 Validate authentication, a synthetic delivery and identical retry over HTTPS,
 receiver restart persistence, and failure responses before sending real history.
-The bridge outbox is currently tied to one destination: the user's observation
-was already delivered locally. Do not clear delivery markers to switch hosts;
-plan destination migration or queue a new observation for the hosted test.
+The version-4 bridge tracks acknowledgments separately by receiver origin. The
+hosted migration preserved the existing local acknowledgment and transmitted the
+same event ID and JSON. No delivery markers were cleared.
 
 ## Local verification
 
@@ -71,5 +71,5 @@ python -m unittest bridge.test_hosted_receiver -v
 
 Without the optional deployment dependency, the Waitress integration test skips.
 The full suite with it installed passed 200 tests. Hosted deployment and synthetic
-HTTPS acceptance are complete. Application backup/restore testing and destination
-migration for the previously delivered local event remain pending.
+HTTPS acceptance and destination migration are complete. Application backup/restore
+testing remains pending. The local bridge suite now passes 204 tests.
