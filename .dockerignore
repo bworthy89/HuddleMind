@@ -1,0 +1,7 @@
+**
+!bridge/
+!bridge/*.py
+bridge/test_*.py
+!deploy/
+!deploy/Dockerfile
+!deploy/requirements.txt

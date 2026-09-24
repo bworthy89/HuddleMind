@@ -1,0 +1,47 @@
+name: huddlemind
+services:
+  receiver:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    restart: unless-stopped
+    environment:
+      HUDDLEMIND_RECEIVER_TOKEN: ${HUDDLEMIND_RECEIVER_TOKEN:?Set a private receiver token}
+      HUDDLEMIND_OWNER_ID: ${HUDDLEMIND_OWNER_ID:?Set the owner ID}
+      HUDDLEMIND_DYNASTY_IDS: ${HUDDLEMIND_DYNASTY_IDS:?Set authorized dynasty UUIDs}
+      HUDDLEMIND_RECEIVER_DATABASE: /data/receiver.sqlite3
+    volumes:
+      - receiver-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 512m
+    cpus: 1
+    healthcheck:
+      test: [CMD, python, -c, "import os,urllib.request; r=urllib.request.Request('http://127.0.0.1:8080/health',headers={'Authorization':'Bearer '+os.environ['HUDDLEMIND_RECEIVER_TOKEN']}); urllib.request.urlopen(r,timeout=5).close()"]
+      interval: 30s
+      timeout: 6s
+      retries: 3
+    logging:
+      options: {max-size: 10m, max-file: '3'}
+  proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      HUDDLEMIND_DOMAIN: ${HUDDLEMIND_DOMAIN:?Set an API hostname}
+    ports: ['80:80', '443:443']
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      receiver:
+        condition: service_healthy
+    logging:
+      options: {max-size: 10m, max-file: '3'}
+volumes:
+  receiver-data:
+  caddy-data:
+  caddy-config:
