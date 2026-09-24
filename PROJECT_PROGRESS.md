@@ -3,7 +3,7 @@
 **Repository:** `bworthy89/HuddleMind`  
 **Current Phase:** Milestone 5 - Cloud Bridge (local sender and receiver)
 
-**Current Status:** The sender transmits exact queued messages, verifies receiver acknowledgments, and records delivery with bounded retries for temporary failures. The local receiver authenticates and validates events before committing them. All 192 tests pass. The user's queued event has not been transmitted. Background retry scheduling and hosted deployment remain unfinished. Milestone 3 depth-chart and injury UI acceptance checks remain deferred.
+**Current Status:** The user confirmed successful local delivery and a second sender run with no pending events. The sender verifies acknowledgments and retries temporary failures; the receiver validates and commits events before acknowledging them. All 195 tests pass, including receiver hardening for Unicode, database constraints, and real insert failure recovery. Hosted deployment is awaiting a provider choice; background retry scheduling remains unfinished. Milestone 3 depth-chart and injury UI acceptance checks remain deferred.
 
 **Last Updated:** 2026-09-23
 

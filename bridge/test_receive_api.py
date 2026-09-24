@@ -13,7 +13,7 @@ from unittest.mock import patch
 from uuid import uuid4
 
 from bridge.receive_api import create_server, MAX_BODY
-from bridge.receiver_store import initialize_receiver, store_event
+from bridge.receiver_store import APPLICATION_ID, initialize_receiver, store_event
 from bridge.validate_event import decode_event
 from bridge.test_dynasty_details import sample
 
@@ -165,6 +165,43 @@ class ReceiverTests(unittest.TestCase):
         self.assertEqual(store_event(self.path, 'owner-a', event), 'stored')
         self.assertEqual(store_event(self.path, 'owner-b', event), 'stored')
         self.assertEqual(len(self.rows()), 2)
+
+    def test_lone_surrogate_rejected_and_unicode_name_supported(self):
+        changed = deepcopy(self.event)
+        changed['payload']['roster']['team']['name'] = '\ud800'
+        self.assertEqual(self.post(changed)[0], 400)
+        self.assertEqual(self.rows(), [])
+        changed['payload']['roster']['team']['name'] = 'Montréal'
+        self.assertEqual(self.post(changed)[0], 201)
+
+    def test_missing_primary_key_rejected_at_startup(self):
+        path = self.path.parent / 'invalid-receiver.sqlite3'
+        connection = sqlite3.connect(path)
+        try:
+            connection.execute('''CREATE TABLE received_events (
+                owner_id TEXT NOT NULL, event_id TEXT NOT NULL, dynasty_id TEXT NOT NULL,
+                event_json TEXT NOT NULL, received_at TEXT NOT NULL)''')
+            connection.execute(f'PRAGMA application_id={APPLICATION_ID}')
+            connection.execute('PRAGMA user_version=1')
+            connection.commit()
+        finally:
+            connection.close()
+        with self.assertRaisesRegex(ValueError, 'structure'):
+            initialize_receiver(path)
+
+    def test_real_insert_failure_rolls_back_and_recovers(self):
+        connection = sqlite3.connect(self.path)
+        try:
+            connection.execute('''CREATE TRIGGER reject_insert BEFORE INSERT ON received_events
+                BEGIN SELECT RAISE(ABORT, 'synthetic failure'); END''')
+            connection.commit()
+            self.assertEqual(self.post()[0], 503)
+            self.assertEqual(self.rows(), [])
+            connection.execute('DROP TRIGGER reject_insert')
+            connection.commit()
+        finally:
+            connection.close()
+        self.assertEqual(self.post()[0], 201)
 
 
 if __name__ == '__main__':

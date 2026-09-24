@@ -22,7 +22,13 @@ def initialize_receiver(path):
             if tables:
                 if app_id != APPLICATION_ID or version != 1:
                     raise ValueError('Not a supported receiver database; use a separate path')
-                connection.execute('SELECT owner_id,event_id,dynasty_id,event_json,received_at FROM received_events LIMIT 0')
+                # Startup must verify the constraint that makes retries idempotent.
+                columns = connection.execute('PRAGMA table_info(received_events)').fetchall()
+                expected = [('owner_id', 'TEXT', 1, 1), ('event_id', 'TEXT', 1, 2),
+                            ('dynasty_id', 'TEXT', 1, 0), ('event_json', 'TEXT', 1, 0),
+                            ('received_at', 'TEXT', 1, 0)]
+                if [(c[1], c[2], c[3], c[5]) for c in columns] != expected:
+                    raise ValueError('Unexpected receiver table structure')
                 return
             if app_id != 0 or version != 0:
                 raise ValueError('Unsupported receiver database metadata')

@@ -36,8 +36,11 @@ def _shape(value, annotation, path):
             _shape(item, args[0], path)
     elif type(value) is not annotation:
         raise ValueError(f'Incorrect value type at {path}')
-    elif annotation is str and len(value) > 10000:
-        raise ValueError(f'Text too long at {path}')
+    elif annotation is str:
+        if len(value) > 10000:
+            raise ValueError(f'Text too long at {path}')
+        # JSON escapes can contain lone surrogates that cannot be stored as UTF-8.
+        value.encode('utf-8')
     elif annotation is int and not -(2**63) <= value < 2**63:
         raise ValueError(f'Integer out of range at {path}')
 

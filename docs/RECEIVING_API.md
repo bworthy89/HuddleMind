@@ -60,10 +60,14 @@ remain pending until that sender runs successfully.
 
 ## Validation
 
-Eleven receiver tests use synthetic snapshots, temporary databases, and actual
+Fourteen receiver tests use synthetic snapshots, temporary databases, and actual
 loopback HTTP connections. They cover authentication/authorization, validation,
 concurrent delivery, duplicate persistence across restart, conflicts, storage
-failure, configuration guards, and owner isolation. Full bridge suite: 179 tests.
+failure, configuration guards, and owner isolation. Startup also verifies the
+table's required columns and composite primary key. Regression tests cover lone
+Unicode surrogates and actual SQLite insert failure recovery. Full bridge suite:
+195 tests. The user confirmed successful local sender delivery followed by an
+empty pending batch on the next run.
 
 ```powershell
 python -m unittest bridge.test_receive_api -v
