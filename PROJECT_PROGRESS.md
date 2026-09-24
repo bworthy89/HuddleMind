@@ -7,6 +7,16 @@
 
 **Last Updated:** 2026-09-24
 
+Milestone 6 dynasty selection: all four tabs share an authenticated dashboard
+loader and remember the selected authorized dynasty in a secure, HttpOnly cookie.
+Selection is revalidated on every load; removed access falls back with a notice.
+Empty authorized dynasties remain selectable, and bridge health follows the same
+selection. Switching resets old client filters/details. Twelve web unit tests,
+production build, and HTTP checks cover cross-tab selection, missing snapshots,
+revoked IDs, unauthenticated/foreign-origin requests, and receiver failures.
+Two-dynasty mobile switching was verified with synthetic data. No production
+allowlist or game saves changed. Owner phone/secondary-PC acceptance remains open.
+
 Milestone 6 Schedule and Recruiting tabs: authenticated snapshot-backed routes
 now show current-season fixtures, team-relative results, next-week fixtures,
 and pending/completed/unknown filters. Recruiting includes board hours, name

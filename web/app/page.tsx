@@ -1,6 +1,5 @@
-import {cookies} from 'next/headers';
-import {redirect} from 'next/navigation';
-import {validSession,cookieName} from '../lib/auth.mjs';
+import {loadDashboard} from '../lib/dashboard';
+import DynastySelector from './dynasty-selector';
 import {summarize} from '../lib/overview.mjs';
 import SignOut from './sign-out';
 import BottomNav from './bottom-nav';
@@ -12,15 +11,10 @@ type Bridge={dynasty_id:string;status:string;last_seen_at:string|null;report:{ca
 type Dashboard={dynasties:{dynasty_id:string;snapshot:Snapshot|null;received_at:string|null}[];bridges:Bridge[]};
 function timestamp(value:string|null){return value?new Date(value).toLocaleString('en-US',{timeZone:'America/New_York',dateStyle:'medium',timeStyle:'short'})+' ET':'Not yet reported';}
 export default async function Overview(){
- if(!validSession((await cookies()).get(cookieName)?.value))redirect('/login');
- let data:Dashboard|null=null;
- try{
-   const response=await fetch((process.env.HUDDLEMIND_RECEIVER_URL||'http://receiver:8080')+'/v1/dashboard',{headers:{Authorization:'Bearer '+process.env.HUDDLEMIND_READ_TOKEN},cache:'no-store',signal:AbortSignal.timeout(10000)});
-   if(!response.ok)throw new Error();data=await response.json();
- }catch{}
- const entry=data?.dynasties[0],snapshot=entry?.snapshot,p=snapshot?.payload;
+ const state=await loadDashboard(),{data,entry,snapshot}=state,p=snapshot?.payload;
  const bridge=data?.bridges.find(b=>b.dynasty_id===entry?.dynasty_id),summary=p?summarize(p):null;
  return <div className="shell"><aside><div className="brand">Huddle<span>Mind</span></div><Link className="active" href="/">Overview</Link><Link href="/roster">Roster</Link><Link href="/schedule">Schedule</Link><Link href="/recruiting">Recruiting</Link><a href="/preview/">Design preview ↗</a></aside><div><header><div className="brand">Huddle<span>Mind</span></div><span className="dynasty">{p?.roster.team.name||'Your dynasty'}</span><SignOut/></header><main>
+ {state.available&&<DynastySelector options={state.options} selected={entry?.dynasty_id} changed={state.changed}/>}
  <a className="status" href="#bridge"><span className={bridge?.status==='online'?'dot':'dot muted'}/>{bridge?'Bridge '+bridge.status:'Bridge status unavailable'} <span>· View details</span></a>
  {!data?<section className="card"><h1>We couldn’t load your dynasty</h1><p>Your saved snapshots have not been removed. Refresh to try again.</p><a className="button" href="/app">Try again</a></section>:!p?<section className="card"><h1>Your headquarters is ready</h1><p>No snapshot has arrived yet. Start capture on your gaming PC and let the bridge deliver your first observation.</p></section>:<>
  <div className="eyebrow">Your dynasty, at a glance</div><h1>{p.roster.team.name}</h1><p>Coach {p.roster.coach.first_name} {p.roster.coach.last_name}</p>

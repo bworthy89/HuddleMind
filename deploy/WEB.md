@@ -16,7 +16,13 @@ byes. Recruiting shows saved board totals and target hours separately, supports
 name/position/stage filters and rank/hours/name sorting, and expands target details
 including scholarship status. Missing boards, empty boards, and zero hours have
 different displays. No commitment odds or star ratings are invented.
-Multi-dynasty selection remains pending.
+The dynasty selector appears on all four tabs and remembers the browser's choice
+for 30 days in a secure, HttpOnly preference cookie. It only accepts IDs already
+authorized by the receiver; selection never expands the allowlist. All tabs and
+bridge health resolve the same choice. Missing snapshots remain selectable;
+removed IDs fall back with a notice. Team names label choices, with IDs appended
+only when names collide. Adding another real dynasty still requires explicit
+bridge/receiver configuration; the selector does not create or capture saves.
 
 ## Authentication
 
