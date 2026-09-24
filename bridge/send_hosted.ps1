@@ -1,4 +1,4 @@
-param([string]$DynastyId = '08eb1fdc-de1b-405a-adc0-4dc684459747')
+param([string]$DynastyId = '08eb1fdc-de1b-405a-adc0-4dc684459747', [switch]$HealthOnly)
 $ErrorActionPreference = 'Stop'
 $repoPath = Split-Path -Parent $PSScriptRoot
 $credentialPath = Join-Path $repoPath 'local_data\hosted-token.xml'
@@ -11,7 +11,9 @@ $previousToken = $env:HUDDLEMIND_RECEIVER_TOKEN
 Push-Location $repoPath
 try {
     $env:HUDDLEMIND_RECEIVER_TOKEN = $credential.GetNetworkCredential().Password
-    & (Join-Path $repoPath '.venv\Scripts\python.exe') -m bridge.send_observations $DynastyId --receiver 'https://huddlemind-api.worthymedia.tech' --database (Join-Path $repoPath 'local_data\huddlemind.sqlite3')
+    $extra = @()
+    if ($HealthOnly) { $extra += '--health-only' }
+    & (Join-Path $repoPath '.venv\Scripts\python.exe') -m bridge.sync_hosted $DynastyId --receiver 'https://huddlemind-api.worthymedia.tech' --database (Join-Path $repoPath 'local_data\huddlemind.sqlite3') @extra
     if ($LASTEXITCODE -ne 0) { throw "Sender failed with exit code $LASTEXITCODE" }
 }
 finally {

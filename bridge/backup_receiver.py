@@ -24,6 +24,9 @@ def inspect_database(path):
                               'FROM received_events ORDER BY owner_id, event_id'):
             digest.update(json.dumps(row, ensure_ascii=True).encode('utf-8'))
             count += 1
+        if db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='bridge_health'").fetchone():
+            for row in db.execute('SELECT * FROM bridge_health ORDER BY owner_id, dynasty_id'):
+                digest.update(json.dumps(row, ensure_ascii=True).encode('utf-8'))
         return count, digest.hexdigest()
 
 

@@ -121,3 +121,36 @@ The status file can still describe the previous run until the new run finishes.
 For final acceptance, make a fresh in-game save, confirm a new captured/queued
 observation ID, then confirm successful delivery. This manual check remains
 pending; automated tests use synthetic files and database fixtures.
+
+## Bridge health
+
+The scheduled sender reports health every five minutes, including when no new
+save exists. `GET /v1/bridge-health` and `POST /v1/bridge-health` require the same
+bearer credential and dynasty allowlist as observation delivery. Health is scoped
+to the configured owner/dynasty (one bridge per dynasty in this version).
+
+Read it locally using the encrypted credential:
+
+```powershell
+.\bridge\send_hosted.ps1 -HealthOnly
+```
+
+`status` is `unknown` before the first heartbeat, `online` for 15 minutes after
+the receiver's own `last_seen_at` timestamp, then `offline`. Offline means no
+recent contact; it cannot distinguish a sleeping PC, network outage, or stopped
+task. `/health` still describes the API service, not the gaming PC.
+
+The latest report contains `capture_running`, `last_capture_at`,
+`last_delivery_at`, `pending_count`, `capture_error`, and `delivery_error`.
+Capture writes a local pulse every 30 seconds and on success/exit to the ignored
+database beside history (`huddlemind.health.sqlite3`). A pulse older than three
+minutes is considered stopped. Capture timestamps describe successful validated
+captures, including deduplicated startup checks. Delivery timestamps come from
+acknowledgment receipts for this receiver. Errors are fixed codes, not raw
+exceptions or file paths. Successful subsequent attempts clear them.
+
+Fields are the last reported state and may be stale when offline; an online
+sender does not imply a running capture watcher or a new save. Updates may take
+up to one sender interval. No notifications or dashboard are added here. Use
+the command to inspect status; graphical sync status belongs to Milestone 6.
+The receiver persists health across restarts, and backups verify those rows too.

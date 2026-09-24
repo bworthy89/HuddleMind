@@ -9,6 +9,7 @@ import sqlite3
 from bridge.receive_api import MAX_BODY
 from bridge.receiver_store import initialize_receiver, store_event, EventConflict
 from bridge.validate_event import decode_event, uuid_text
+from bridge.bridge_health import initialize_health, validate_report, store_health, read_health
 
 
 def create_app(path, token, owner_id, dynasty_ids):
@@ -20,6 +21,7 @@ def create_app(path, token, owner_id, dynasty_ids):
     if not allowed:
         raise ValueError('At least one authorized dynasty is required')
     initialize_receiver(path)
+    initialize_health(path)
 
     def application(environ, start_response):
         def respond(status, value):
@@ -30,14 +32,19 @@ def create_app(path, token, owner_id, dynasty_ids):
             return [body]
 
         route, method = environ.get('PATH_INFO'), environ.get('REQUEST_METHOD')
-        if route not in ('/health', '/v1/observations'):
+        if route not in ('/health', '/v1/observations', '/v1/bridge-health'):
             return respond(404, {'error': 'not_found'})
         supplied = environ.get('HTTP_AUTHORIZATION', '').encode('utf-8')
         if not hmac.compare_digest(supplied, ('Bearer ' + token).encode('ascii')):
             return respond(401, {'error': 'unauthorized'})
         if route == '/health' and method == 'GET':
             return respond(200, {'status': 'ok'})
-        if route != '/v1/observations' or method != 'POST':
+        if route == '/v1/bridge-health' and method == 'GET':
+            try:
+                return respond(200, {'bridges': read_health(path, owner_id, allowed)})
+            except sqlite3.Error:
+                return respond(503, {'error': 'storage_unavailable'})
+        if route not in ('/v1/observations', '/v1/bridge-health') or method != 'POST':
             return respond(405, {'error': 'method_not_allowed'})
         if environ.get('CONTENT_TYPE', '').split(';')[0].strip().lower() != 'application/json':
             return respond(415, {'error': 'expected_application_json'})
@@ -45,18 +52,21 @@ def create_app(path, token, owner_id, dynasty_ids):
         if not length.isascii() or not length.isdigit() or len(length) > 10:
             return respond(400, {'error': 'invalid_content_length'})
         size = int(length)
-        if not 0 < size <= MAX_BODY:
+        if not 0 < size <= (4096 if route == '/v1/bridge-health' else MAX_BODY):
             return respond(413, {'error': 'body_size_limit'})
         try:
             body = environ['wsgi.input'].read(size)
             if len(body) != size:
                 raise ValueError('Incomplete body')
-            event = decode_event(body)
+            event = validate_report(body) if route == '/v1/bridge-health' else decode_event(body)
         except (ValueError, OSError, RecursionError):
             return respond(400, {'error': 'invalid_event'})
         if event['dynasty_id'] not in allowed:
             return respond(403, {'error': 'dynasty_not_authorized'})
         try:
+            if route == '/v1/bridge-health':
+                store_health(path, owner_id, event)
+                return respond(200, {'status': 'received'})
             result = store_event(path, owner_id, event)
         except EventConflict:
             return respond(409, {'error': 'event_content_conflict', 'event_id': event['event_id']})

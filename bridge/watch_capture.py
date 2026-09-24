@@ -7,6 +7,7 @@ from pathlib import Path
 from bridge.dynasty_reader import FrozenSource
 from bridge.load_dynasty import load_dynasty
 from bridge.local_store import DATABASE_VERSION, connect_database, get_dynasty, save_observation
+from bridge.bridge_health import capture_status
 
 
 def signature(path):
@@ -93,9 +94,20 @@ def main():
         print('Watching selected save:', args.save, flush=True)
         print('Initial capture checks the current save too. Press Ctrl+C to stop.', flush=True)
         # Polling survives missed filesystem notifications and atomic file replacement.
-        while True:
-            watcher.poll(time.monotonic())
-            time.sleep(1)
+        heartbeat = 0
+        try:
+            while True:
+                was_finished = watcher.finished
+                watcher.poll(time.monotonic())
+                captured = not was_finished and watcher.finished and watcher.failures == 0
+                if captured or time.monotonic() >= heartbeat:
+                    capture_status(args.database, args.dynasty_id, success=captured,
+                                   error='capture_failed' if watcher.failures or watcher.missing else None)
+                    heartbeat = time.monotonic() + 30
+                time.sleep(1)
+        finally:
+            capture_status(args.database, args.dynasty_id, stopped=True,
+                           error='capture_failed' if watcher.failures or watcher.missing else None)
     except KeyboardInterrupt:
         print('Stopped capture watcher. Queued observations remain stored.')
     except (OSError, ValueError, sqlite3.Error) as error:
