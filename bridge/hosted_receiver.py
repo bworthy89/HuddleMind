@@ -12,7 +12,7 @@ from bridge.validate_event import decode_event, uuid_text
 from bridge.bridge_health import initialize_health, validate_report, store_health, read_health
 
 
-def create_app(path, token, owner_id, dynasty_ids):
+def create_app(path, token, owner_id, dynasty_ids, *, read_token=None):
     if not isinstance(token, str) or len(token) < 32 or not token.isascii() or any(c.isspace() for c in token):
         raise ValueError('Receiver token must be at least 32 non-whitespace ASCII characters')
     if not isinstance(owner_id, str) or not owner_id.strip():
@@ -22,6 +22,9 @@ def create_app(path, token, owner_id, dynasty_ids):
         raise ValueError('At least one authorized dynasty is required')
     initialize_receiver(path)
     initialize_health(path)
+    if read_token is not None and (len(read_token) < 32 or not read_token.isascii()
+                                  or any(c.isspace() for c in read_token) or read_token == token):
+        raise ValueError('Web reader requires a separate strong credential')
 
     def application(environ, start_response):
         def respond(status, value):
@@ -32,6 +35,17 @@ def create_app(path, token, owner_id, dynasty_ids):
             return [body]
 
         route, method = environ.get('PATH_INFO'), environ.get('REQUEST_METHOD')
+        if route == '/v1/dashboard':
+            supplied = environ.get('HTTP_AUTHORIZATION', '').encode('utf-8')
+            if read_token is None or not hmac.compare_digest(supplied, ('Bearer ' + read_token).encode('ascii')):
+                return respond(401, {'error': 'unauthorized'})
+            if method != 'GET':
+                return respond(405, {'error': 'method_not_allowed'})
+            from bridge.dashboard_api import dashboard
+            try:
+                return respond(200, dashboard(path, owner_id, allowed))
+            except (sqlite3.Error, ValueError):
+                return respond(503, {'error': 'storage_unavailable'})
         if route not in ('/health', '/v1/observations', '/v1/bridge-health'):
             return respond(404, {'error': 'not_found'})
         supplied = environ.get('HTTP_AUTHORIZATION', '').encode('utf-8')
@@ -83,7 +97,8 @@ def main():
     app = create_app(Path(os.environ.get('HUDDLEMIND_RECEIVER_DATABASE', '/data/receiver.sqlite3')),
                      os.environ.get('HUDDLEMIND_RECEIVER_TOKEN', ''),
                      os.environ.get('HUDDLEMIND_OWNER_ID', ''),
-                     os.environ.get('HUDDLEMIND_DYNASTY_IDS', '').split())
+                     os.environ.get('HUDDLEMIND_DYNASTY_IDS', '').split(),
+                     read_token=os.environ.get('HUDDLEMIND_READ_TOKEN') or None)
     serve(app, host='0.0.0.0', port=8080, threads=4,
           max_request_body_size=MAX_BODY, max_request_header_size=16384,
           channel_timeout=30, connection_limit=100, expose_tracebacks=False)

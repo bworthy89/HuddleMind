@@ -1,0 +1,28 @@
+services:
+  receiver:
+    environment:
+      HUDDLEMIND_READ_TOKEN: ${HUDDLEMIND_READ_TOKEN:?Set a separate read token}
+  web:
+    build:
+      context: ../web
+    restart: unless-stopped
+    ports: ['127.0.0.1:8766:3000']
+    environment:
+      HUDDLEMIND_RECEIVER_URL: http://receiver:8080
+      HUDDLEMIND_READ_TOKEN: ${HUDDLEMIND_READ_TOKEN:?Set a separate read token}
+      HUDDLEMIND_SESSION_SECRET: ${HUDDLEMIND_SESSION_SECRET:?Set a session secret}
+      HUDDLEMIND_SETUP_KEY: ${HUDDLEMIND_SETUP_KEY:?Set an enrollment key}
+      HUDDLEMIND_SETUP_EXPIRES: ${HUDDLEMIND_SETUP_EXPIRES:?Set enrollment expiry}
+      HUDDLEMIND_WEB_ORIGIN: https://huddlemind-api.worthymedia.tech
+      HUDDLEMIND_AUTH_FILE: /data/auth.json
+    volumes: [web-auth:/data]
+    read_only: true
+    tmpfs: [/tmp:size=32m]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 512m
+    cpus: 1
+    logging:
+      options: {max-size: 10m, max-file: '3'}
+volumes:
+  web-auth:
