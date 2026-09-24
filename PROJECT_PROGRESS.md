@@ -1,9 +1,9 @@
 # HuddleMind — Project Progress & Learning Tracker
 
 **Repository:** `bworthy89/HuddleMind`  
-**Current Phase:** Milestone 5 - Cloud Bridge (local receiving API)
+**Current Phase:** Milestone 5 - Cloud Bridge (local sender and receiver)
 
-**Current Status:** The local receiving API authenticates requests, authorizes configured dynasties, validates observation payloads, and commits events with duplicate/conflict handling in a separate SQLite database. All 179 tests pass. The queued local event passes receiver validation without being transmitted. Sender delivery, acknowledgment processing, retry scheduling, and hosted deployment remain unfinished. Milestone 3 depth-chart and injury UI acceptance checks remain deferred.
+**Current Status:** The sender transmits exact queued messages, verifies receiver acknowledgments, and records delivery with bounded retries for temporary failures. The local receiver authenticates and validates events before committing them. All 192 tests pass. The user's queued event has not been transmitted. Background retry scheduling and hosted deployment remain unfinished. Milestone 3 depth-chart and injury UI acceptance checks remain deferred.
 
 **Last Updated:** 2026-09-23
 

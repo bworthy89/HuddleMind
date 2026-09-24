@@ -11,9 +11,9 @@ The project has two major goals:
 
 ## Current Status
 
-**Phase:** Milestone 5 — Cloud Bridge (local receiving API)
+**Phase:** Milestone 5 — Cloud Bridge (local sender and receiver)
 
-**Status:** Dynasty snapshots persist in SQLite and can be queued as repeatable sync events. The authenticated [local receiving API](docs/RECEIVING_API.md) validates and stores events with duplicate/conflict handling. All 179 tests pass. Sender retries and hosted deployment are next. See [Local Memory](docs/LOCAL_MEMORY.md) for capture/history and recommendation history. Final depth-chart and injury UI checks remain deferred as recorded in [Milestone 3](docs/MILESTONE_3_CHECKPOINT.md).
+**Status:** Dynasty snapshots persist in SQLite and can be queued as repeatable sync events. The authenticated [local receiving API](docs/RECEIVING_API.md) validates and stores events with duplicate/conflict handling. The [sender](docs/SENDING_OBSERVATIONS.md) verifies acknowledgments and retries temporary failures. All 192 tests pass. Hosted deployment and background retry scheduling remain pending. See [Local Memory](docs/LOCAL_MEMORY.md) for capture/history and recommendation history. Final depth-chart and injury UI checks remain deferred as recorded in [Milestone 3](docs/MILESTONE_3_CHECKPOINT.md).
 
 Run `python -m bridge.show_dynasty "PATH_TO_SAVE" "PATH_TO_SCHEMA.gz"` from the project root. Add `--section depth`, `--section health`, `--section recruiting`, or `--section all`. Add `--export "local_data/dynasty-full.json"` to create a new complete export; existing files are protected.
 

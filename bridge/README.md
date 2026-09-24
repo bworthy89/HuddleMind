@@ -6,7 +6,15 @@ The bridge is the Windows-side component that connects College Football 27 to Hu
 
 The [local receiving API](../docs/RECEIVING_API.md) accepts authenticated observation
 events and stores them in a separate SQLite database. See its setup instructions
-for the token and authorized dynasty configuration. Sender delivery is still pending.
+for the token and authorized dynasty configuration. The
+[sender](../docs/SENDING_OBSERVATIONS.md) delivers queued events with verified
+acknowledgments and bounded retries:
+
+```powershell
+python -m bridge.send_observations "DYNASTY_ID"
+```
+
+Set `HUDDLEMIND_RECEIVER_TOKEN` to the running receiver's token first.
 
 Database upgrades and recommendation history are documented in
 [Local Memory](../docs/LOCAL_MEMORY.md). Use `python -m bridge.recommendations --help`

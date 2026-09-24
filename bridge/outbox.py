@@ -77,3 +77,23 @@ def list_pending_events(path, dynasty_id: str) -> tuple[QueuedEvent, ...]:
         return tuple(QueuedEvent(*row) for row in rows)
     finally:
         connection.close()
+
+
+def mark_delivered(path, dynasty_id: str, event: QueuedEvent) -> None:
+    """Record a verified acknowledgment without changing the queued message."""
+    connection = _connect(path, read_only=False)
+    try:
+        with connection:
+            connection.execute('BEGIN IMMEDIATE')
+            row = connection.execute('''SELECT q.event_json FROM sync_outbox q
+                JOIN observations o ON o.observation_id=q.observation_id
+                WHERE q.event_id=? AND o.dynasty_id=?''',
+                (event.event_id, dynasty_id)).fetchone()
+            if row is None or row[0] != event.event_json:
+                raise ValueError('Queued event no longer matches the acknowledged message')
+            # Concurrent senders preserve the first successful delivery timestamp.
+            connection.execute('''UPDATE sync_outbox SET delivered_at=?
+                WHERE event_id=? AND delivered_at IS NULL''',
+                (datetime.now(timezone.utc).isoformat(), event.event_id))
+    finally:
+        connection.close()

@@ -11,7 +11,7 @@ $env:HUDDLEMIND_RECEIVER_TOKEN = python -c "import secrets; print(secrets.token_
 python -m bridge.receive_api --owner-id "local-user" --dynasty-id "YOUR_DYNASTY_UUID"
 ```
 
-Keep the token available for the future sender. Generating a new token replaces
+Keep the token available for the sender. Generating a new token replaces
 the credential accepted by the next receiver process. Stop with Ctrl+C.
 Use `--port` to change port 8765, `--database` to change
 `local_data/receiver.sqlite3`, and repeat `--dynasty-id` to authorize other dynasties.
@@ -53,9 +53,10 @@ unique within the configured owner's scope. Object-key order and JSON whitespace
 do not affect duplicate detection; changed content never overwrites the original.
 Receipt time is stored separately from capture time and survives retries.
 
-The receiver does not update the bridge outbox. The next implementation is the
-sender: transmit exact queued JSON, validate the matching acknowledgment, then
-mark that event delivered. Until then, queued observations remain pending.
+The receiver does not update the bridge outbox. The implemented
+[sender](SENDING_OBSERVATIONS.md) transmits exact queued JSON, validates the
+matching acknowledgment, then marks that event delivered. Queued observations
+remain pending until that sender runs successfully.
 
 ## Validation
 

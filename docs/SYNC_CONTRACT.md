@@ -22,7 +22,9 @@ and failed inserts produce no partial queued event.
 
 Tested with temporary databases, concurrent writers, and a separate Python
 process. The local receiver now implements authentication and acknowledgments;
-sender delivery, acknowledgment processing, and retry timing are still future work.
+the sender now handles delivery, acknowledgment processing, and bounded retries.
+See [Sending observations](SENDING_OBSERVATIONS.md). Background scheduling and
+hosted deployment remain future work.
 
 The bridge sends normalized observations from SQLite. The local database remains
 usable offline. Raw save files and local filesystem paths are not request fields.
@@ -59,7 +61,7 @@ owner's scope. Identity is established by credentials, not by a caller-supplied
 owner field. Capture time is distinct from server receipt time and arrival order
 must not be assumed to represent game chronology.
 
-## Planned delivery behavior
+## Implemented command-driven delivery
 
 Persist the event ID and exact payload in a local outbox before attempting HTTP.
 Retries reuse both. Mark delivery complete only after a matching server
@@ -67,6 +69,8 @@ acknowledgment. Network failures, timeouts, throttling, and transient server err
 retain pending events with bounded retry delays. Validation/conflict errors need
 attention; authentication failures wait for credential recovery.
 
-Implementation order: event model and serialization, persistent outbox, local API
-with duplicate handling, sender/retry tests, then authenticated hosted deployment.
+The sender processes one pending batch and stops on the first failed event.
+Retries are bounded within each run; persistent scheduling remains future work.
+The event model, outbox, local API, and sender/retry tests are implemented.
+Authenticated hosted deployment is still pending.
 Supabase remains a backend candidate; this contract does not require a provider.
