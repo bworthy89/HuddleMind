@@ -32,33 +32,39 @@ def _connect(path, *, read_only):
     return connection
 
 
+def queue_on_connection(connection, dynasty_id, observation_id):
+    """Queue inside the caller's transaction; the caller commits or rolls back."""
+    observation = connection.execute('''SELECT observed_at, snapshot_json
+        FROM observations WHERE dynasty_id=? AND observation_id=?''',
+        (dynasty_id, observation_id)).fetchone()
+    if observation is None:
+        raise ValueError('Observation not found for this dynasty.')
+    existing = connection.execute('''SELECT event_id, observation_id, schema_version,
+        event_json, queued_at, delivered_at FROM sync_outbox
+        WHERE observation_id=? AND schema_version=?''',
+        (observation_id, EVENT_SCHEMA_VERSION)).fetchone()
+    if existing is not None:
+        # Even delivered entries retain their original message and status.
+        return QueuedEvent(*existing)
+    event = ObservationEvent(str(uuid4()), dynasty_id, observation[0], json.loads(observation[1]))
+    queued = QueuedEvent(event.event_id, observation_id, event.schema_version,
+                         serialize_observation_event(event),
+                         datetime.now(timezone.utc).isoformat(), None)
+    connection.execute('''INSERT INTO sync_outbox
+        (event_id, observation_id, schema_version, event_json, queued_at, delivered_at)
+        VALUES (?, ?, ?, ?, ?, ?)''',
+        (queued.event_id, queued.observation_id, queued.schema_version,
+         queued.event_json, queued.queued_at, queued.delivered_at))
+    return queued
+
+
 def queue_observation(path, dynasty_id: str, observation_id: int) -> QueuedEvent:
     connection = _connect(path, read_only=False)
     try:
         with connection:
             # Serialize competing writers before checking or creating the event.
             connection.execute('BEGIN IMMEDIATE')
-            observation = connection.execute('''SELECT observed_at, snapshot_json
-                FROM observations WHERE dynasty_id=? AND observation_id=?''',
-                (dynasty_id, observation_id)).fetchone()
-            if observation is None:
-                raise ValueError('Observation not found for this dynasty.')
-            existing = connection.execute('''SELECT event_id, observation_id, schema_version,
-                event_json, queued_at, delivered_at FROM sync_outbox
-                WHERE observation_id=? AND schema_version=?''',
-                (observation_id, EVENT_SCHEMA_VERSION)).fetchone()
-            if existing is not None:
-                # Even delivered entries retain their original message and status.
-                return QueuedEvent(*existing)
-            event = ObservationEvent(str(uuid4()), dynasty_id, observation[0], json.loads(observation[1]))
-            queued = QueuedEvent(event.event_id, observation_id, event.schema_version,
-                                 serialize_observation_event(event),
-                                 datetime.now(timezone.utc).isoformat(), None)
-            connection.execute('''INSERT INTO sync_outbox
-                (event_id, observation_id, schema_version, event_json, queued_at, delivered_at)
-                VALUES (?, ?, ?, ?, ?, ?)''',
-                (queued.event_id, queued.observation_id, queued.schema_version,
-                 queued.event_json, queued.queued_at, queued.delivered_at))
+            queued = queue_on_connection(connection, dynasty_id, observation_id)
         return queued
     finally:
         connection.close()

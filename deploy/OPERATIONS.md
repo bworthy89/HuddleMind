@@ -59,8 +59,8 @@ limit. The sender retains its bounded retries within each run; later runs retry
 remaining events. Already acknowledged events are skipped by receiver origin.
 Authentication or malformed-event failures also remain pending and require
 correction; subsequent scheduled attempts do not repair them automatically.
-Only already captured/queued observations are sent; this does not watch saves
-or capture new observations.
+Only already captured/queued observations are sent. Run the capture watcher
+below to add observations automatically while playing.
 
 The latest attempt replaces `local_data/hosted-delivery-status.json`. No payloads
 or credentials are logged. Task Scheduler's last result is zero on success and
@@ -78,3 +78,46 @@ Re-run the installer after moving the repository. Run it as the same user who
 saved the credential. Test coverage includes WAL-backed backups, restore
 contents, duplicate receipts, retention, invalid sources, and wrapper success
 and failure reporting.
+
+## Automatic capture while playing
+
+From the repository, run:
+
+```powershell
+.\bridge\watch_hosted.ps1
+```
+
+This launcher selects the owner's Tulane autosave, schema 833.0, and existing
+dynasty ID. `-Save`, `-Schema`, and `-DynastyId` override those defaults; keep the
+save associated with the intended dynasty ID. Keep the terminal open, and use
+Ctrl+C to stop. Capture does not yet start automatically at Windows logon.
+
+The implementation is `python -m bridge.watch_capture SAVE SCHEMA DYNASTY_ID`
+with optional `--database`. It polls the one selected path every second instead
+of relying on notifications. It checks the current save on startup, waits for
+three seconds without metadata changes, reads immutable bytes, validates the
+complete dynasty, and rechecks metadata and contents before storing anything.
+This detects ordinary writes and atomic replacements but does not establish a
+game-level transaction boundary. Successful parsing plus stable bytes is the
+current readiness criterion; freshly written in-game saves still need manual
+acceptance.
+
+The observation and outbox message commit together. Identical save/schema
+contents reuse the existing IDs and timestamps, including on restart. A failure
+retries up to five attempts with bounded backoff; after exhaustion the console
+reports that attention is needed and waits for the next file change or restart.
+Missing/inaccessible paths continue to be polled. Fixing a schema/configuration
+error may require restarting the watcher. No game save is written.
+
+The background sender delivers the queued observation on its next five-minute
+run. To test delivery immediately:
+
+```powershell
+Start-ScheduledTask -TaskName 'HuddleMind Hosted Delivery'
+Get-Content local_data/hosted-delivery-status.json
+```
+
+The status file can still describe the previous run until the new run finishes.
+For final acceptance, make a fresh in-game save, confirm a new captured/queued
+observation ID, then confirm successful delivery. This manual check remains
+pending; automated tests use synthetic files and database fixtures.

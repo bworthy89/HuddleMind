@@ -7,6 +7,16 @@
 
 **Last Updated:** 2026-09-23
 
+Automatic capture checkpoint: **220 automated tests pass**. `bridge/watch_capture.py`
+polls one selected save, waits three seconds for stable metadata, validates frozen
+bytes, rechecks source contents, and atomically stores the observation and outbox
+event. Five bounded attempts handle transient read/parse/storage failures; changes
+or restart rearm exhausted captures. `bridge/watch_hosted.ps1` provides the Tulane
+launcher. A read-only check of the current save reused observation 1 with zero
+pending hosted deliveries. A fresh in-game save through capture and scheduled
+delivery remains the final manual acceptance check. Capture runs in an open
+terminal; automatic startup at logon is not configured.
+
 Backup and delivery operations checkpoint: **211 automated tests pass**. The daily
 backup service completed successfully with two restored events, and two Windows
 scheduled delivery runs returned success. See `deploy/OPERATIONS.md`.

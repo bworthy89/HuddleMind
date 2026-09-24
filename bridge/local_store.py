@@ -243,6 +243,7 @@ def save_observation(
     database_path: Path,
     dynasty_id: str,
     details: DynastyDetails,
+    *, queue: bool = False,
 ) -> int:
     # Serialize the complete snapshot before opening a database connection.
     snapshot_json = json.dumps(
@@ -297,6 +298,10 @@ def save_observation(
         if row is None:
             raise RuntimeError("Observation was not stored.")
 
+        if queue:
+            # Commit the observation and its immutable event together, or neither.
+            from bridge.outbox import queue_on_connection
+            queue_on_connection(connection, dynasty_id, row[0])
         connection.commit()
         return row[0]
     except Exception:

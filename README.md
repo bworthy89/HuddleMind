@@ -11,13 +11,13 @@ The project has two major goals:
 
 ## Current Status
 
-**Phase:** Milestone 5 — Cloud Bridge (local sender and receiver)
+**Phase:** Milestone 5 — Cloud Bridge (hosted delivery and automatic capture)
 
-**Status:** Dynasty snapshots persist in SQLite and can be queued as repeatable sync events. The authenticated [local receiving API](docs/RECEIVING_API.md) validates and stores events with duplicate/conflict handling. The [sender](docs/SENDING_OBSERVATIONS.md) verifies acknowledgments and retries temporary failures. All 192 tests pass. Hosted deployment and background retry scheduling remain pending. See [Local Memory](docs/LOCAL_MEMORY.md) for capture/history and recommendation history. Final depth-chart and injury UI checks remain deferred as recorded in [Milestone 3](docs/MILESTONE_3_CHECKPOINT.md).
+**Status:** The HTTPS receiver is deployed, daily backups verify isolated restoration, and Windows retries queued delivery every five minutes. The capture watcher validates stable save bytes and atomically stores an observation and its sync event. All 220 tests pass; the existing Tulane save reused observation 1 with no pending hosted delivery. A fresh in-game save still needs final acceptance. See [operations](deploy/OPERATIONS.md) for launch, scheduling, and recovery instructions and [Local Memory](docs/LOCAL_MEMORY.md) for history. Final depth-chart and injury UI checks remain deferred as recorded in [Milestone 3](docs/MILESTONE_3_CHECKPOINT.md).
 
 Run `python -m bridge.show_dynasty "PATH_TO_SAVE" "PATH_TO_SCHEMA.gz"` from the project root. Add `--section depth`, `--section health`, `--section recruiting`, or `--section all`. Add `--export "local_data/dynasty-full.json"` to create a new complete export; existing files are protected.
 
-Save discovery and event watching are also implemented. Automatic parsing after watcher notifications, broader lifecycle validation, cloud integration, and the web app remain future work. The inspector notes below describe the earlier exploratory script; the current application uses the validated reader modules.
+Run `.\bridge\watch_hosted.ps1` to watch the configured Tulane autosave while playing. Keep its terminal open; Ctrl+C stops capture. This polls one selected save and leaves network delivery to the scheduled sender. Broader lifecycle validation, capture startup at logon, and the web app remain future work. The inspector notes below describe the earlier exploratory script; the current application uses the validated reader modules.
 
 See [`PROJECT_PROGRESS.md`](./PROJECT_PROGRESS.md) for the live roadmap and learning tracker.
 
