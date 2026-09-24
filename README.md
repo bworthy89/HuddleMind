@@ -11,9 +11,9 @@ The project has two major goals:
 
 ## Current Status
 
-**Phase:** Milestone 4 — Local Memory (initial implementation complete)
+**Phase:** Milestone 5 — Cloud Bridge (local receiving API)
 
-**Status:** Dynasty snapshots now persist in SQLite, with capture/history commands, transactional database upgrades, and recommendation history including choices and reported outcomes. All 146 synthetic tests pass. See [Local Memory](docs/LOCAL_MEMORY.md). The underlying dynasty reader covers roster, season, schedule/results, depth, health, and recruiting; final depth-chart and injury UI checks remain deferred as recorded in [Milestone 3](docs/MILESTONE_3_CHECKPOINT.md).
+**Status:** Dynasty snapshots persist in SQLite and can be queued as repeatable sync events. The authenticated [local receiving API](docs/RECEIVING_API.md) validates and stores events with duplicate/conflict handling. All 179 tests pass. Sender retries and hosted deployment are next. See [Local Memory](docs/LOCAL_MEMORY.md) for capture/history and recommendation history. Final depth-chart and injury UI checks remain deferred as recorded in [Milestone 3](docs/MILESTONE_3_CHECKPOINT.md).
 
 Run `python -m bridge.show_dynasty "PATH_TO_SAVE" "PATH_TO_SCHEMA.gz"` from the project root. Add `--section depth`, `--section health`, `--section recruiting`, or `--section all`. Add `--export "local_data/dynasty-full.json"` to create a new complete export; existing files are protected.
 

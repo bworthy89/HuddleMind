@@ -4,6 +4,10 @@ The bridge is the Windows-side component that connects College Football 27 to Hu
 
 ## Current application
 
+The [local receiving API](../docs/RECEIVING_API.md) accepts authenticated observation
+events and stores them in a separate SQLite database. See its setup instructions
+for the token and authorized dynasty configuration. Sender delivery is still pending.
+
 Database upgrades and recommendation history are documented in
 [Local Memory](../docs/LOCAL_MEMORY.md). Use `python -m bridge.recommendations --help`
 for the `init`, `add`, `list`, `show`, `choice`, and `outcome` commands.

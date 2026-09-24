@@ -21,8 +21,8 @@ dynasty. Missing observations, incompatible databases, serialization failures,
 and failed inserts produce no partial queued event.
 
 Tested with temporary databases, concurrent writers, and a separate Python
-process. HTTP delivery, acknowledgment processing, retry timing, and server
-authentication are still future work.
+process. The local receiver now implements authentication and acknowledgments;
+sender delivery, acknowledgment processing, and retry timing are still future work.
 
 The bridge sends normalized observations from SQLite. The local database remains
 usable offline. Raw save files and local filesystem paths are not request fields.
@@ -42,7 +42,11 @@ The payload retains source hashes and snapshot-scoped record IDs. Local SQLite
 observation numbers are not globally unique and are not server event identifiers.
 Unknown enum values and unavailable sections remain explicit.
 
-## Proposed endpoint behavior
+## Implemented local endpoint behavior
+
+See [Receiving API](RECEIVING_API.md) for startup, credentials, dynasty access,
+status codes, and limits. This is a loopback development server; hosted deployment
+and production account authentication remain future work.
 
 `POST /v1/observations` accepts the envelope and returns its `event_id` with
 `status: stored` after a durable commit. Repeating the same event with the same

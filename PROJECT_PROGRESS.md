@@ -1,9 +1,9 @@
 # HuddleMind — Project Progress & Learning Tracker
 
 **Repository:** `bworthy89/HuddleMind`  
-**Current Phase:** Milestone 5 - Cloud Bridge (event model and outbox schema)
+**Current Phase:** Milestone 5 - Cloud Bridge (local receiving API)
 
-**Current Status:** Persistent observation queueing is implemented with a CLI and read-only pending-event retrieval. Repeated and concurrent queue requests reuse the stored event ID, exact JSON, timestamp, and delivery state. All 168 synthetic tests pass. HTTP delivery, acknowledgments, authentication, retry scheduling, and hosted storage remain unfinished. Milestone 3 depth-chart and injury UI acceptance checks remain deferred.
+**Current Status:** The local receiving API authenticates requests, authorizes configured dynasties, validates observation payloads, and commits events with duplicate/conflict handling in a separate SQLite database. All 179 tests pass. The queued local event passes receiver validation without being transmitted. Sender delivery, acknowledgment processing, retry scheduling, and hosted deployment remain unfinished. Milestone 3 depth-chart and injury UI acceptance checks remain deferred.
 
 **Last Updated:** 2026-09-23
 
@@ -408,7 +408,9 @@ An initial test-list entry omitted its third value (offset 0), causing tuple-unp
 - Backed up and upgraded the real local database; existing dynasty, observation, recommendation, and event rows remained unchanged. No events were queued or sent.
 - Persistent queueing now uses one immediate transaction for ownership checking, duplicate lookup, and insertion. Existing entries are returned without rebuilding their event, including entries marked delivered.
 - Eleven additional tests cover concurrency, separate-process persistence, exact-message reuse, dynasty isolation, ordering, failed serialization/inserts, version guards, and CLI behavior. Full suite: 168 passing tests.
-- The owner database's first observation was queued locally; a repeated request preserved every event field. No network delivery was attempted. Next: a local receiving API and acknowledgment contract before building HTTP delivery/retries.
+- The owner database's first observation was queued locally; a repeated request preserved every event field. No network delivery was attempted.
+- The [local receiving API](docs/RECEIVING_API.md) now enforces bearer authentication and a configured dynasty allowlist. Validated events are committed in a separate receiver database before acknowledgment; retries preserve receipt time and conflicts never overwrite content.
+- Eleven receiver tests cover actual loopback HTTP requests, concurrent retries, restart persistence, conflicts, invalid payloads, access control, storage errors, and owner isolation. Full suite: 179 passing tests. The existing queued event passes validation without transmission or delivery-state changes. Next: sender acknowledgment handling and retries, then hosted deployment.
 
 ### Learning topics
 
